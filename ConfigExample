@@ -1,0 +1,15 @@
+command args ;
+
+name {
+	command args ;
+
+	name args {
+		block in block {
+			hello world ;
+			hello ;
+		}
+
+		yeet ;
+	}
+
+}
