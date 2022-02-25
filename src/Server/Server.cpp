@@ -1,11 +1,23 @@
-#include "TestServer.hpp"
+#include "Server.hpp"
 
-TestServer::TestServer() : SimpleServer(AF_INET, SOCK_STREAM, 0, 80, INADDR_ANY, 10)
+Server::Server(int domain, int service, int protocol, int port, u_long interface, int bklg)
 {
+	socket = new ListeningSocket(domain, service, protocol, port, interface, bklg);
 	launch();
 }
 
-void	TestServer::connectionAccepter()
+Server::Server()
+{
+	socket = new ListeningSocket(AF_INET, SOCK_STREAM,0,80,INADDR_ANY,10);
+	launch();
+}
+
+Server::~Server()
+{
+	//delete socket;
+}
+
+void	Server::connectionAccepter()
 {
 	struct sockaddr_in address = get_socket()->get_address();
 	int addrlen = sizeof(address);
@@ -17,13 +29,13 @@ void	TestServer::connectionAccepter()
 	read(new_socket, buffer, 30000);
 }
 
-void	TestServer::connectionHandler()
+void	Server::connectionHandler()
 {
 	//TODO: Add parsing and inputvalidation for the HTTP request here
 	std::cout << buffer << std::endl;
 }
 
-void	TestServer::connectionResponder()
+void	Server::connectionResponder()
 {
 	std::string response = "Webserv says hi\n";
 	
@@ -39,7 +51,7 @@ static void	sigintHandler(int signum)
 	exit(signum);
 }
 
-void	TestServer::launch()
+void	Server::launch()
 {
 	signal(SIGINT, sigintHandler);
 	while(true)
@@ -50,4 +62,9 @@ void	TestServer::launch()
 		connectionResponder();
 		std::cout << "===== DONE =====" << std::endl;
 	}
+}
+
+ListeningSocket	*Server::get_socket()
+{
+	return socket;
 }
