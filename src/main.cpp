@@ -18,7 +18,10 @@ int         main(int argc, char **argv) {
 
 	std::cout << File << std::endl;
 
-    (void)argc;
-    (void)argv;
+    if (argc != 2) {
+        std::cout << "ERROR: no argument" << std::endl;
+        return (1);
+    }
+    
     return (0);
 }

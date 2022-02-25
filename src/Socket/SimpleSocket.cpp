@@ -11,16 +11,15 @@ SimpleSocket::SimpleSocket(int domain, int service, int protocol, int port, u_lo
     //Establish socket and connection, and test
     sock = socket(domain, service, protocol);
     test_connection(sock);
-    connection = connect_to_network(sock, address);
-    test_connection(connection);
-
 }
 
+// Copy constructor
 SimpleSocket::SimpleSocket(const SimpleSocket &src)
 {
     *this = src;
 }
 
+// Assignment operator overload
 SimpleSocket    &SimpleSocket::operator=(const SimpleSocket &rhs)
 {
     this->address = rhs.address;
@@ -29,6 +28,7 @@ SimpleSocket    &SimpleSocket::operator=(const SimpleSocket &rhs)
     return (*this);
 }
 
+// Function to test sockets in connections
 void    SimpleSocket::test_connection(int item_to_test)
 {
     if (item_to_test < 0) {
@@ -51,4 +51,10 @@ int                 SimpleSocket::get_connection()
 int                 SimpleSocket::get_sock()
 {
     return this->sock;
+}
+
+// Setter function
+void                SimpleSocket::set_connection(int domain)
+{
+    connection = domain;
 }
