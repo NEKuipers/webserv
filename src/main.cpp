@@ -1,7 +1,7 @@
 
 #include "ConfigFile.hpp"
 #include "Parser.hpp"
-#include "ListeningSocket.hpp"
+#include "ServerSocket.hpp"
 #include "Server.hpp"
 
 #include "fstream"

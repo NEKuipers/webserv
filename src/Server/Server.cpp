@@ -2,13 +2,13 @@
 
 Server::Server(int domain, int service, int protocol, int port, u_long interface, int bklg)
 {
-	socket = new ListeningSocket(domain, service, protocol, port, interface, bklg);
+	socket = new ServerSocket(domain, service, protocol, port, interface, bklg);
 	launch();
 }
 
 Server::Server()
 {
-	socket = new ListeningSocket(AF_INET, SOCK_STREAM,0,80,INADDR_ANY,10);
+	socket = new ServerSocket(AF_INET, SOCK_STREAM,0,80,INADDR_ANY,10);
 	launch();
 }
 
@@ -64,7 +64,7 @@ void	Server::launch()
 	}
 }
 
-ListeningSocket	*Server::get_socket()
+ServerSocket	*Server::get_socket()
 {
 	return socket;
 }

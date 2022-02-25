@@ -1,6 +1,6 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
-# include "ListeningSocket.hpp"
+# include "ServerSocket.hpp"
 # include <csignal>
 # include <unistd.h>
 # include <cstdlib>
@@ -10,7 +10,7 @@ class Server
 {
 	private:
 		char				buffer[30000];
-		ListeningSocket 	*socket;
+		ServerSocket 		*socket;
 		int					new_socket;
 		void				connectionAccepter();
 		void				connectionHandler();
@@ -20,7 +20,7 @@ class Server
 		Server(int domain, int service, int protocol, int port, u_long interface, int bklg);
 		~Server();
 		void				launch();
-		ListeningSocket		*get_socket();
+		ServerSocket		*get_socket();
 
 };
 
