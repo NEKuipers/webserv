@@ -17,6 +17,4 @@ class ConnectingSocket: public SimpleSocket
 		int		connect_to_network(int sock, struct sockaddr_in address);
 };
 
-
-
 #endif

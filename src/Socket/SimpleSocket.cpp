@@ -23,7 +23,6 @@ SimpleSocket::SimpleSocket(const SimpleSocket &src)
 SimpleSocket    &SimpleSocket::operator=(const SimpleSocket &rhs)
 {
     this->address = rhs.address;
-    this->connection = rhs.connection;
     this->sock = rhs.sock;
     return (*this);
 }
@@ -43,18 +42,7 @@ struct sockaddr_in  SimpleSocket::get_address()
     return this->address;
 }
 
-int                 SimpleSocket::get_connection()
-{
-    return this->connection;
-}
-
 int                 SimpleSocket::get_sock()
 {
     return this->sock;
-}
-
-// Setter function
-void                SimpleSocket::set_connection(int domain)
-{
-    connection = domain;
 }

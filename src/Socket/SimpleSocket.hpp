@@ -11,7 +11,6 @@ class SimpleSocket
     private:
         // This struct is required to call bind() or connect()
         struct sockaddr_in  address;
-        int                 connection;
         int                 sock;
 
     public:
@@ -28,11 +27,9 @@ class SimpleSocket
 
         // Getter functions
         struct sockaddr_in  get_address();
-        int                 get_connection();
         int                 get_sock();
-        
-        // Setter functions
-        void                set_connection(int domain);
+
+
 };
 
 #endif
