@@ -19,6 +19,7 @@ void	TestServer::connectionAccepter()
 
 void	TestServer::connectionHandler()
 {
+	//TODO: Add parsing and inputvalidation for the HTTP request here
 	std::cout << buffer << std::endl;
 }
 
@@ -26,14 +27,23 @@ void	TestServer::connectionResponder()
 {
 	char *response;
 	
+	//TODO: Add the creation of requested response here
 	response = strdup("Webserv is working");
 	write(new_socket, response, strlen(response));
 	free(response);
 	close(new_socket);
 }
 
+
+static void	sigintHandler(int signum)
+{
+	std::cerr << "\b\bServer interrupted. Exiting." << std::endl;
+	exit(signum);
+}
+
 void	TestServer::launch()
 {
+	signal(SIGINT, sigintHandler);
 	while(true)
 	{
 		std::cout << "===== WAITING =====" << std::endl;

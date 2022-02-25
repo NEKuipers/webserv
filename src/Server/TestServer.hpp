@@ -1,6 +1,7 @@
 #ifndef TESTSERVER_HPP
 # define TESTSERVER_HPP
 # include "SimpleServer.hpp"
+# include <csignal>
 # include <unistd.h>
 
 class TestServer: public SimpleServer
