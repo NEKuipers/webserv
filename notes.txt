@@ -1,0 +1,12 @@
+WEBSERV
+
+Main
+Input is argv[1] filenaam die geopend wordt en geparset wordt. Kan parsen naar object(class) of struct.
+Input is config file.
+Config file bevat configuratie voor een of meerdere servers.
+Voor deze servers maak je in een loop sockets aan die luisteren op de port in de config.
+Maak 1 main object aan (de Server) die alle sockets incorporeert en een member functie heeft die oneindig loopt, tot signaal of cli deze beëindigt.
+
+'A webserver listens, on a port, for a request, sent via transport protocol, and returns a response, containing the requested resource.'
+
+Waar is de config file voor? Wat doen alle velden?
