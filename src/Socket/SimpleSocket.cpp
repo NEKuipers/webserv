@@ -30,8 +30,9 @@ SimpleSocket    &SimpleSocket::operator=(const SimpleSocket &rhs)
 // Function to test sockets in connections
 void    SimpleSocket::test_connection(int item_to_test)
 {
-    if (item_to_test < 0) {
-        throw ("Failed to connect...");
+    if (item_to_test < 0) 
+    {
+        throw ConnectionError();
         exit(EXIT_FAILURE);
     }
 }

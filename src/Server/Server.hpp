@@ -21,7 +21,6 @@ class Server
 		~Server();
 		void				launch();
 		ServerSocket		*get_socket();
-
 };
 
 #endif

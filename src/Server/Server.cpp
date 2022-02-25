@@ -21,10 +21,14 @@ void	Server::connectionAccepter()
 {
 	struct sockaddr_in address = get_socket()->get_address();
 	int addrlen = sizeof(address);
-	if ((new_socket = accept(get_socket()->get_sock(), (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
+	try 
 	{
-		throw ("Error in accepting connection");
-		exit(EXIT_FAILURE);
+		if ((new_socket = accept(get_socket()->get_sock(), (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
+			throw ConnectionError();
+	}
+	catch (std::exception &e)
+	{
+		std::cerr<<e.what()<<std::endl;
 	}
 	read(new_socket, buffer, 30000);
 }

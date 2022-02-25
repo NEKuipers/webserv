@@ -2,6 +2,7 @@
 # define SIMPLESOCKET_HPP
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include "ConnectionError.hpp"
 #include <iostream>
 #include <cstdlib>
 
