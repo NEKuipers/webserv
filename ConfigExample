@@ -1,15 +1,16 @@
-command args ;
+command args;
 
 name {
-	command args ;
+	command args;
 
 	name args {
 		block in block {
-			hello world ;
-			hello ;
+			hello world;
+			hello;
 		}
 
-		yeet ;
+		yeet;
 	}
 
+	weird syntax;name hello{yeet;}
 }
