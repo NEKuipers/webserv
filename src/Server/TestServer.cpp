@@ -11,7 +11,7 @@ void	TestServer::connectionAccepter()
 	int addrlen = sizeof(address);
 	if ((new_socket = accept(get_socket()->get_sock(), (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
 	{
-		perror("Error in accepting connection");
+		throw ("Error in accepting connection");
 		exit(EXIT_FAILURE);
 	}
 	read(new_socket, buffer, 30000);
@@ -25,12 +25,10 @@ void	TestServer::connectionHandler()
 
 void	TestServer::connectionResponder()
 {
-	char *response;
+	std::string response = "Webserv says hi\n";
 	
 	//TODO: Add the creation of requested response here
-	response = strdup("Webserv is working");
-	write(new_socket, response, strlen(response));
-	free(response);
+	write(new_socket, response.c_str(), response.size());
 	close(new_socket);
 }
 

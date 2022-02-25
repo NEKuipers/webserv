@@ -31,7 +31,7 @@ SimpleSocket    &SimpleSocket::operator=(const SimpleSocket &rhs)
 void    SimpleSocket::test_connection(int item_to_test)
 {
     if (item_to_test < 0) {
-        perror("Failed to connect...");
+        throw ("Failed to connect...");
         exit(EXIT_FAILURE);
     }
 }

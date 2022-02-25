@@ -3,6 +3,8 @@
 # include "SimpleServer.hpp"
 # include <csignal>
 # include <unistd.h>
+# include <cstdlib>
+# include <stdexcept>
 
 class TestServer: public SimpleServer
 {

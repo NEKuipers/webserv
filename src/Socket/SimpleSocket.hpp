@@ -3,8 +3,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <iostream>
-
-//created by following https://www.youtube.com/watch?v=YwHErWJIh6Y
+#include <cstdlib>
 
 class SimpleSocket
 {
