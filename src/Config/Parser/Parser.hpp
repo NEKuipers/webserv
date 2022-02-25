@@ -35,6 +35,8 @@ class Parser {
 		Token NextToken;
 		std::string NextString;
 
+		std::string UnparsedString;
+
 		// Class functions
 		void Step();
 };

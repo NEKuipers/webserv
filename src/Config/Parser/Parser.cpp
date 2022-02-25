@@ -1,7 +1,9 @@
 #include "Parser.hpp"
 #include "UnexpectedTokenException.hpp"
 
-Parser::Parser(std::istream& Stream) : Stream(Stream)
+#include <iostream>
+
+Parser::Parser(std::istream& Stream) : Stream(Stream), UnparsedString("")
 {
 	Step();
 }
@@ -26,19 +28,30 @@ std::string Parser::Read(Token Expected)
 
 void Parser::Step()
 {
-	// TODO: Parse "Hello;" as [Word, "Hello"] [Stop, ";"]
-
-	if (!(Stream >> NextString && NextString.length() > 0))
+	// [UnparsedString]: If we only returned a part of the string last time, this is the leftover
+	if (UnparsedString.length() == 0)
 	{
-		NextToken = EndOfFile;
-		return;
+		// We need the next section, we have nothing left over from the last step
+		if (!(Stream >> UnparsedString && UnparsedString.length() > 0))
+		{
+			NextToken = EndOfFile;
+			return;
+		}
 	}
 
-	switch (NextString.at(0))
+	size_t NumChars;
+	switch (UnparsedString.at(0))
 	{
-		case '{': NextToken = OpenParen; break;
-		case '}': NextToken = CloseParen; break;
-		case ';': NextToken = Stop; break;
-		default : NextToken = Word; break;
+		case '{': NextToken = OpenParen;	NumChars = 1; break;
+		case '}': NextToken = CloseParen;	NumChars = 1; break;
+		case ';': NextToken = Stop;			NumChars = 1; break;
+		default :
+			NextToken = Word;
+			NumChars = UnparsedString.find_first_of("{};");	// if no matches found, returns -1, due to it being unsigned, its the max number
+			break;
 	}
+
+	// Cut [NumChars] from [UnparsedString] into [NextString]
+	NextString = UnparsedString.substr(0, NumChars);
+	UnparsedString = NumChars < UnparsedString.length() ? UnparsedString.substr(NumChars) : "";
 }
