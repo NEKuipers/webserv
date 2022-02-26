@@ -24,7 +24,7 @@ void	Server::connectionAccepter()
 	try 
 	{
 		if ((new_socket = accept(get_socket()->get_sock(), (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
-			throw ConnectionError();
+			throw ConnectionErrorException();
 	}
 	catch (std::exception &e)
 	{
@@ -41,7 +41,7 @@ void	Server::connectionHandler()
 
 void	Server::connectionResponder()
 {
-	std::string response = "Webserv says hi\n";
+	std::string response = "Hoi pia\n";
 	
 	//TODO: Add the creation of requested response here
 	write(new_socket, response.c_str(), response.size());

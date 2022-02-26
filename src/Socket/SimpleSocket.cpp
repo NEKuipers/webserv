@@ -32,7 +32,7 @@ void    SimpleSocket::test_connection(int item_to_test)
 {
     if (item_to_test < 0) 
     {
-        throw ConnectionError();
+        throw ConnectionErrorException();
         exit(EXIT_FAILURE);
     }
 }
