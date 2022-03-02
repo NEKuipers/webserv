@@ -2,13 +2,15 @@
 
 Server::Server(int domain, int service, int protocol, int port, u_long interface, int bklg)
 {
-	socket = new ServerSocket(domain, service, protocol, port, interface, bklg);
+	ServerSocket *newsocket = new ServerSocket(domain, service, protocol, port, interface, bklg);
+	sockets.push_back(newsocket);
 	launch();
 }
 
 Server::Server()
 {
-	socket = new ServerSocket(AF_INET, SOCK_STREAM,0,80,INADDR_ANY,10);
+	ServerSocket *newsocket = new ServerSocket(AF_INET, SOCK_STREAM,0,80,INADDR_ANY,10);
+	sockets.push_back(newsocket);
 	launch();
 }
 
@@ -82,15 +84,15 @@ void	Server::launch()
 	while(true)
 	{
 		std::cout << "===== WAITING =====" << std::endl;
-		connectionAccepter(socket);
-		connectionHandler(socket);
-		connectionResponder(socket);
-		connectionCloser(socket);
+		connectionAccepter(sockets[0]);
+		connectionHandler(sockets[0]);
+		connectionResponder(sockets[0]);
+		connectionCloser(sockets[0]);
 		std::cout << "===== DONE =====" << std::endl;
 	}
 }
 
-ServerSocket	*Server::get_socket()
+std::vector<ServerSocket *>		Server::get_sockets()
 {
-	return socket;
+	return this->sockets;
 }

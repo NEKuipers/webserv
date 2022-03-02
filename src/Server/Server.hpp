@@ -11,8 +11,7 @@ class Server
 {
 	private:
 		char						buffer[30000];
-		ServerSocket 				*socket;
-		std::vector<ServerSocket>	sockets;
+		std::vector<ServerSocket *>	sockets;
 		
 		void						connectionAccepter(ServerSocket *conn_socket);
 		void						connectionHandler(ServerSocket *conn_socket);
@@ -28,7 +27,7 @@ class Server
 		void						launch();
 		ServerSocket				*get_socket();
 		void						add_socket(ServerSocket socket);
-		std::vector<ServerSocket>	get_sockets();
+		std::vector<ServerSocket *>	get_sockets();
 };
 
 #endif
