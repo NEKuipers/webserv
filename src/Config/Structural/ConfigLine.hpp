@@ -23,6 +23,7 @@ class ConfigLine {
 		// Public functions
 		friend std::ostream& operator<<(std::ostream& Stream, const ConfigLine& Line);
 		ConfigBlock* GetBlock() const;
+		const std::vector<std::string>& GetArguments() const;
 	private:
 		// Class variables
 		std::vector<std::string> Arguments;

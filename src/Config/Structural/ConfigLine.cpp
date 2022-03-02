@@ -35,6 +35,7 @@ ConfigLine& ConfigLine::operator = (const ConfigLine& From)
 
 
 ConfigBlock* ConfigLine::GetBlock() const { return Block; }
+const std::vector<std::string>& ConfigLine::GetArguments() const { return Arguments; }
 
 std::ostream& operator<<(std::ostream& Stream, const ConfigLine& Line)
 {
