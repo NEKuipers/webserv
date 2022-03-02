@@ -28,39 +28,46 @@ Server		&Server::operator=(const Server &rhs)
 
 Server::~Server(){}
 
-void	Server::connectionAccepter()
+void	Server::connectionAccepter(ServerSocket *conn_socket)
 {
-	struct sockaddr_in address = get_socket()->get_address();
+	int newsock;
+	struct sockaddr_in address = conn_socket->get_address();
 	int addrlen = sizeof(address);
 	try 
 	{
-		if ((sock_fd = accept(get_socket()->get_sock(), (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
+		if ((newsock = accept(conn_socket->get_sock(), (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
 			throw ConnectionErrorException();
 	}
 	catch (std::exception &e)
 	{
 		std::cerr<<e.what()<<std::endl;
 	}
-	read(sock_fd, buffer, 30000);
+	conn_socket->set_sock_fd(newsock);
+	read(conn_socket->get_sock_fd(), buffer, 30000);
 }
 
-void	Server::connectionHandler()
+void	Server::connectionHandler(ServerSocket *conn_socket)
 {
+	(void)conn_socket;
 	//TODO: Add parsing and inputvalidation for the HTTP request here
 	std::cout << buffer << std::endl;
 }
 
-void	Server::connectionResponder()
+void	Server::connectionResponder(ServerSocket *conn_socket)
 {
-	std::string response = "Hoi browser\n";
+	#include <ctime>
+	time_t now = time(0);
+	char *datetime = ctime(&now);
+	std::string response = "Test\n";
+	response.append(datetime);
 	
 	//TODO: Add the creation of requested response here
-	write(sock_fd, response.c_str(), response.size());
+	write(conn_socket->get_sock_fd(), response.c_str(), response.size());
 }
 
-void	Server::connectionCloser()
+void	Server::connectionCloser(ServerSocket *conn_socket)
 {
-	close(sock_fd);
+	close(conn_socket->get_sock_fd());
 }
 
 static void	sigintHandler(int signum)
@@ -75,10 +82,10 @@ void	Server::launch()
 	while(true)
 	{
 		std::cout << "===== WAITING =====" << std::endl;
-		connectionAccepter();
-		connectionHandler();
-		connectionResponder();
-		connectionCloser();
+		connectionAccepter(socket);
+		connectionHandler(socket);
+		connectionResponder(socket);
+		connectionCloser(socket);
 		std::cout << "===== DONE =====" << std::endl;
 	}
 }

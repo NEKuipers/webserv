@@ -14,3 +14,13 @@ int	ServerSocket::connect_to_network(int sock, struct sockaddr_in address)
 {
 	return bind(sock, (struct sockaddr *)&address, sizeof(address));
 }
+
+void	ServerSocket::set_sock_fd(int newsock)
+{
+	this->sock_fd = newsock;
+}
+
+int 	ServerSocket::get_sock_fd()
+{
+	return this->sock_fd;
+}

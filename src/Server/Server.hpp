@@ -14,11 +14,10 @@ class Server
 		ServerSocket 				*socket;
 		std::vector<ServerSocket>	sockets;
 		
-		int							sock_fd;
-		void						connectionAccepter();
-		void						connectionHandler();
-		void						connectionResponder();
-		void						connectionCloser();
+		void						connectionAccepter(ServerSocket *conn_socket);
+		void						connectionHandler(ServerSocket *conn_socket);
+		void						connectionResponder(ServerSocket *conn_socket);
+		void						connectionCloser(ServerSocket *conn_socket);
 	public:
 		Server();
 		Server(int domain, int service, int protocol, int port, u_long interface, int bklg);
