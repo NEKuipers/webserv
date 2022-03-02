@@ -3,13 +3,13 @@
 
 
 ConfigBlock::ConfigBlock() : Lines() {}
-ConfigBlock::ConfigBlock(Parser& Parser) : Lines() {
-	Parser.Read(OpenParen);
+ConfigBlock::ConfigBlock(Lexer& Lexer) : Lines() {
+	Lexer.Read(OpenParen);
 
-	while (Parser.Peek() == Word)
-		Lines.push_back(ConfigLine(Parser));
+	while (Lexer.Peek() == Word)
+		Lines.push_back(ConfigLine(Lexer));
 
-	Parser.Read(CloseParen);
+	Lexer.Read(CloseParen);
 }
 ConfigBlock::ConfigBlock(const ConfigBlock& From) : Lines()
 {

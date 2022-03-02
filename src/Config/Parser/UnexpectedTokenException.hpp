@@ -1,7 +1,7 @@
 #ifndef UNEXPECTEDTOKENEXCEPTION_HPP
 #define UNEXPECTEDTOKENEXCEPTION_HPP
 
-#include "Parser.hpp"
+#include "Lexer.hpp"
 #include <exception>
 
 struct UnexpectedTokenException : public std::exception

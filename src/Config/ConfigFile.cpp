@@ -6,10 +6,10 @@ ConfigFile::ConfigFile(const std::string& FilePath) : ConfigLines()
 {
 	std::fstream Stream(FilePath.c_str());
 
-	Parser Parser(Stream);
+	Lexer Lexer(Stream);
 
-	while (Parser.Peek() != EndOfFile)
-		ConfigLines.push_back(ConfigLine(Parser));
+	while (Lexer.Peek() != EndOfFile)
+		ConfigLines.push_back(ConfigLine(Lexer));
 }
 ConfigFile::ConfigFile(const ConfigFile& From)
 {

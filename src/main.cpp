@@ -1,6 +1,6 @@
 
 #include "ConfigFile.hpp"
-#include "Parser.hpp"
+#include "Lexer.hpp"
 
 #include "fstream"
 #include <iostream>

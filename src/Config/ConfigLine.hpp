@@ -3,7 +3,7 @@ class ConfigLine;	// For include loops
 #ifndef CONFIGLINE_HPP
 #define CONFIGLINE_HPP
 
-#include "Parser.hpp"
+#include "Lexer.hpp"
 #include "ConfigBlock.hpp"
 #include <vector>
 #include <string>
@@ -13,7 +13,7 @@ class ConfigLine;	// For include loops
 class ConfigLine {
 	public:
 		ConfigLine();
-		ConfigLine(Parser& Parser);
+		ConfigLine(Lexer& Lexer);
 		ConfigLine(const ConfigLine& From);
 
 		~ConfigLine();
