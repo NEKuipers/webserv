@@ -12,10 +12,21 @@ Server::Server()
 	launch();
 }
 
-Server::~Server()
+//Server::Server(Configuration config) {}
+
+
+Server::Server(const Server &src)
 {
-	//delete socket;
+    *this = src;
 }
+
+Server		&Server::operator=(const Server &rhs)
+{
+	this->sockets = rhs.sockets;
+	return (*this);
+}
+
+Server::~Server(){}
 
 void	Server::connectionAccepter()
 {
@@ -23,14 +34,14 @@ void	Server::connectionAccepter()
 	int addrlen = sizeof(address);
 	try 
 	{
-		if ((new_socket = accept(get_socket()->get_sock(), (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
+		if ((sock_fd = accept(get_socket()->get_sock(), (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
 			throw ConnectionErrorException();
 	}
 	catch (std::exception &e)
 	{
 		std::cerr<<e.what()<<std::endl;
 	}
-	read(new_socket, buffer, 30000);
+	read(sock_fd, buffer, 30000);
 }
 
 void	Server::connectionHandler()
@@ -41,13 +52,16 @@ void	Server::connectionHandler()
 
 void	Server::connectionResponder()
 {
-	std::string response = "Hoi pia\n";
+	std::string response = "Hoi browser\n";
 	
 	//TODO: Add the creation of requested response here
-	write(new_socket, response.c_str(), response.size());
-	close(new_socket);
+	write(sock_fd, response.c_str(), response.size());
 }
 
+void	Server::connectionCloser()
+{
+	close(sock_fd);
+}
 
 static void	sigintHandler(int signum)
 {
@@ -64,6 +78,7 @@ void	Server::launch()
 		connectionAccepter();
 		connectionHandler();
 		connectionResponder();
+		connectionCloser();
 		std::cout << "===== DONE =====" << std::endl;
 	}
 }

@@ -15,7 +15,7 @@ class SimpleSocket
 
     public:
         SimpleSocket(int domain, int service, int protocol, int port, u_long interface);
-        ~SimpleSocket(){};
+        virtual ~SimpleSocket(){}
         SimpleSocket(const SimpleSocket &src);
         SimpleSocket           &operator=(const SimpleSocket &rhs);
 
