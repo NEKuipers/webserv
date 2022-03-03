@@ -11,6 +11,8 @@ Server::Server()
 {
 	ServerSocket *newsocket = new ServerSocket(AF_INET, SOCK_STREAM,0,80,INADDR_ANY,10);
 	sockets.push_back(newsocket);
+	// ServerSocket *socket_2 = new ServerSocket(AF_INET, SOCK_STREAM, 0, 443, INADDR_ANY, 10);
+	// sockets.push_back(socket_2);
 	launch();
 }
 
