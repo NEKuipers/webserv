@@ -84,10 +84,13 @@ void	Server::launch()
 	while(true)
 	{
 		std::cout << "===== WAITING =====" << std::endl;
-		connectionAccepter(sockets[0]);
-		connectionHandler(sockets[0]);
-		connectionResponder(sockets[0]);
-		connectionCloser(sockets[0]);
+		for (size_t count = 0; count < sockets.size(); count++)
+		{
+			connectionAccepter(sockets[count]);
+			connectionHandler(sockets[count]);
+			connectionResponder(sockets[count]);
+			connectionCloser(sockets[count]);
+		}
 		std::cout << "===== DONE =====" << std::endl;
 	}
 }
