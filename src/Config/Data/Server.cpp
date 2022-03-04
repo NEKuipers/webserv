@@ -99,6 +99,9 @@ Server::~Server()
 Server& Server::operator = (const Server& From)
 {
     Locations = From.Locations;
+    IsDefaultServer = From.IsDefaultServer;
+    ServerNames = From.ServerNames;
+    ListenLocations = From.ListenLocations;
 
     // return the existing object so we can chain this operator
     return *this;
@@ -138,7 +141,7 @@ bool Server::GetIsDefaultServer() const { return IsDefaultServer; }
 std::ostream& operator<<(std::ostream& Stream, const Server& Server)
 {
     if (Server.GetIsDefaultServer())
-        Stream << "Default!" << std::endl;;
+        Stream << "Default server!" << std::endl;;
     
     if (Server.ServerNames.size() > 0)
     {

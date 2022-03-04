@@ -3,6 +3,7 @@
 
 #include <exception>
 #include <string>
+#include <ostream>
 
 struct LocationException : public std::exception
 {
@@ -13,6 +14,8 @@ struct LocationException : public std::exception
 	virtual ~LocationException() _NOEXCEPT;
 
 	const char* what () const throw ();
+
+	friend std::ostream& operator<<(std::ostream& Stream, const LocationException& Exception);
 };
 
 #endif
