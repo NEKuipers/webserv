@@ -3,10 +3,12 @@
 #include <vector>
 #include "Location.hpp"
 #include "ConfigLine.hpp"
+#include <netinet/in.h>
 
 class Server {
     public:
         static const std::string DESCRIPTOR;
+        static const in_port_t DEFAULT_PORT;
 
         Server();
         Server(const ConfigLine& Line);
@@ -17,10 +19,11 @@ class Server {
         Server& operator = (const Server& From);
 
         // Public functions
-        const Location& GetLocation(const std::string& Search);
-        bool RepliesTo(const std::string& ServerName);
-        bool GetIsDefaultServer();
+        const Location& GetLocation(const std::string& Search) const;
+        bool RepliesTo(const std::string& ServerName) const;
+        bool GetIsDefaultServer() const;
         
+        friend std::ostream& operator<<(std::ostream& Stream, const Server& Server);
     private:
         // Class variables
         std::vector<Location> Locations;
@@ -28,10 +31,7 @@ class Server {
         bool IsDefaultServer;   // In case no server names match, is this the default server?
         std::vector<std::string> ServerNames;
 
-        // TODO: Listen [ip]:[port]
-
-        // TODO (Maybe): Default values for Location
-
+        std::vector<std::pair<in_addr, in_port_t> > ListenLocations;
 
         // Class functions
         

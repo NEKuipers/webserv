@@ -39,3 +39,5 @@ std::ostream& operator<<(std::ostream& Stream, const ConfigFile& File)
 	}
 	return Stream;
 }
+
+const std::vector<ConfigLine>& ConfigFile::GetConfigLines() const { return ConfigLines; }

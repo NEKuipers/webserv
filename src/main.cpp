@@ -4,19 +4,30 @@
 
 #include "fstream"
 #include <iostream>
+#include "Server.hpp"
+
+#include "UnexpectedTokenException.hpp"
 
 int         main(int argc, char **argv) {
-	/*
-	std::fstream Stream("ConfigExample");
-	Parser p(Stream);
+	
+	
+	try {
+		ConfigFile File("TestFile");
 
-	while (p.Peek() != EndOfFile)
-		std::cout << "type: " << p.Peek() << " read: " << p.Read(p.Peek()) << std::endl;
-	*/
+		std::cout << "Read file: " << File << std::endl;
+		const std::vector<ConfigLine>& Lines = File.GetConfigLines();
+		
+		for (size_t i = 0; i < Lines.size(); i++)
+		{
+			Server s(Lines[i]);
 
-	ConfigFile File("ConfigExample");
+			std::cout << "Got server: " << s << std::endl;
+		}
+	} catch (UnexpectedTokenException E) {
+		std::cout << "Unexpected token: " << E.Actual << ", Expected: " << E.Expected << "!" << std::endl;
+	}
 
-	std::cout << File << std::endl;
+
 
     (void)argc;
     (void)argv;
