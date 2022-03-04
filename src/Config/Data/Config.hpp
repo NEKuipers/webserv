@@ -16,8 +16,12 @@ class Config {
 
         // Public functions
         friend std::ostream& operator<<(std::ostream& Stream, const Config& Config);
+
+        const std::vector<Server>& GetServers() const;
+        const Server& GetDefaultServer() const;
     private:
         std::vector<Server> Servers;
+        size_t DefaultServerIndex;
         // Class variables
         
         // Class functions
