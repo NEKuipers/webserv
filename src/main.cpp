@@ -25,7 +25,7 @@ int         main(int argc, char **argv) {
     // }
 	(void)argc;
 	(void)argv;
-	std::cout << "Starting..." <<std::endl;
+	std::cout << "Starting...." <<std::endl;
 	WebServer testserver = WebServer();
 
     return (0);
