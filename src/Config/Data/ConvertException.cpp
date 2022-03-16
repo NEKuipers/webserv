@@ -2,9 +2,9 @@
 
 ConvertException::ConvertException(const std::string& Message) : Message(Message) { }
 
-ConvertException::~ConvertException() _NOEXCEPT
+ConvertException::~ConvertException() _GLIBCXX_USE_NOEXCEPT
 {
-	
+
 }
 
 const char* ConvertException::what () const throw () {

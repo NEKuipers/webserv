@@ -1,13 +1,12 @@
 
 #include "ConfigFile.hpp"
-#include "Parser.hpp"
 #include "ServerSocket.hpp"
 #include "WebServer.hpp"
 #include "Lexer.hpp"
 
 #include "fstream"
 #include <iostream>
-#include "Server.hpp"
+#include "ServerConfig.hpp"
 
 #include "Config.hpp"
 #include "UnexpectedTokenException.hpp"
@@ -31,17 +30,19 @@ int         main(int argc, char **argv) {
 	(void)argc;
 	(void)argv;
 	std::cout << "Starting...." <<std::endl;
-	WebServer testserver = WebServer();
-	
+
 	try {
 		Config Conf(ConfigFile("TestFile"));
 
 		std::cout << Conf << std::endl;
+
+		std::cout << "Starting...." <<std::endl;
+		WebServer testserver = WebServer();
+
 	} catch (UnexpectedTokenException E) {
 		std::cout << E << std::endl;
 	}
-
-
-
+	WebServer testserver = WebServer();
+	
     return (0);
 }

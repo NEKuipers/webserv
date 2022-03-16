@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "ServerConfig.hpp"
 #include "ConvertException.hpp"
 #include "LocationException.hpp"
 
@@ -8,28 +8,29 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <stdlib.h>	// Apparently to use std::strtoul i need to include this?
 
-const std::string Server::DESCRIPTOR = "server";
-const in_port_t Server::DEFAULT_PORT = htons(80);
+const std::string ServerConfig::DESCRIPTOR = "server";
+const in_port_t ServerConfig::DEFAULT_PORT = htons(80);
 
-Server::Server() {}
-Server::Server(const Server& From)
+ServerConfig::ServerConfig() {}
+ServerConfig::ServerConfig(const ServerConfig& From)
 {
     this->operator=(From);
 }
 
-Server::Server(const ConfigLine& Line) : Locations(), IsDefaultServer(false), ServerNames()
+ServerConfig::ServerConfig(const ConfigLine& Line) : Locations(), IsDefaultServer(false), ServerNames()
 {
     const std::vector<std::string>& Args = Line.GetArguments();
 
     if (Args.size() != 1)
-        throw ConvertException("Converting from Line to Server failed! Args.size() != 1");
+        throw ConvertException("Converting from Line to ServerConfig failed! Args.size() != 1");
     if (Args[0] != DESCRIPTOR)
-        throw ConvertException("Converting from Line to Server failed! Args[0] != DESCRIPTOR");
+        throw ConvertException("Converting from Line to ServerConfig failed! Args[0] != DESCRIPTOR");
 
     ConfigBlock* Block = Line.GetBlock();
     if (Block == NULL)
-        throw ConvertException("Converting from Line to Location failed! Must contain a block!");
+        throw ConvertException("Converting from Line to ServerConfig failed! Must contain a block!");
 
     const std::vector<ConfigLine>& Lines = Block->GetLines();
     for (size_t LineID = 0; LineID < Lines.size(); LineID++)
@@ -38,13 +39,13 @@ Server::Server(const ConfigLine& Line) : Locations(), IsDefaultServer(false), Se
 
         const std::vector<std::string>& LineArgs = Lines[LineID].GetArguments();
         if (LineArgs.size() <= 0)
-            throw ConvertException("Converting from Line to Location failed! Block contained empty line? Should be impossible!");
-        
+            throw ConvertException("Converting from Line to ServerConfig failed! Block contained empty line? Should be impossible!");
+
 
         // TODO: This if/else if/else if/else thing is going to be huge!
         //  Find a neat way to do it properly
-        if (LineArgs[0] == Location::DESCRIPTOR)
-            Locations.push_back(Location(Lines[LineID]));
+        if (LineArgs[0] == LocationConfig::DESCRIPTOR)
+            Locations.push_back(LocationConfig(Lines[LineID]));
         else if (LineArgs[0] == "server_name")
             ServerNames.insert(ServerNames.end(), LineArgs.begin() + 1, LineArgs.end());
         else if (LineArgs[0] == "listen")
@@ -63,10 +64,10 @@ Server::Server(const ConfigLine& Line) : Locations(), IsDefaultServer(false), Se
 
                     // Do error checking
                     if (Port != PortUL) // Out of bounds checking
-                        throw ConvertException("Converting from Line to Location failed! Port too big!");
+                        throw ConvertException("Converting from Line to ServerConfig failed! Port too big!");
                     // Check if the string contained more than just a number
                     if (End != &AddrStr.c_str()[AddrStr.length()])
-                        throw ConvertException("Converting from Line to Location failed! Port contained more than just a number!");
+                        throw ConvertException("Converting from Line to ServerConfig failed! Port contained more than just a number!");
 
                     AddrStr = AddrStr.substr(0, split);
                     Port = htons(Port);
@@ -74,7 +75,7 @@ Server::Server(const ConfigLine& Line) : Locations(), IsDefaultServer(false), Se
 
                 in_addr Addr;
                 if (inet_aton(AddrStr.c_str(), &Addr) == 0)
-                    throw ConvertException("Converting from Line to Location failed! Malformed location Adress!");
+                    throw ConvertException("Converting from Line to ServerConfig failed! Malformed location Adress!");
 
                 ListenLocations.push_back(std::make_pair(Addr, Port));
             }
@@ -82,21 +83,21 @@ Server::Server(const ConfigLine& Line) : Locations(), IsDefaultServer(false), Se
         else if (LineArgs[0] == "default_server")
         {
             if (LineArgs.size() != 1)
-                 throw ConvertException("Converting from Line to Location failed! default_server should not have arguments!");
+                 throw ConvertException("Converting from Line to ServerConfig failed! default_server should not have arguments!");
             IsDefaultServer = true;
         }
         else
-            throw ConvertException("Converting from Line to Location failed! Unknown line type!");
+            throw ConvertException("Converting from Line to ServerConfig failed! Unknown line type!");
     }
-    
+
 }
 
-Server::~Server()
+ServerConfig::~ServerConfig()
 {
-    
+
 }
 
-Server& Server::operator = (const Server& From)
+ServerConfig& ServerConfig::operator = (const ServerConfig& From)
 {
     Locations = From.Locations;
     IsDefaultServer = From.IsDefaultServer;
@@ -107,7 +108,7 @@ Server& Server::operator = (const Server& From)
     return *this;
 }
 
-const Location& Server::GetLocation(const std::string& Search) const
+const LocationConfig& ServerConfig::GetLocation(const std::string& Search) const
 {
     int Best = 0;
     size_t BestID = ~(size_t)0;
@@ -128,7 +129,7 @@ const Location& Server::GetLocation(const std::string& Search) const
     return Locations[BestID];
 }
 
-bool Server::RepliesTo(const std::string& ServerName) const
+bool ServerConfig::RepliesTo(const std::string& ServerName) const
 {
     for (size_t i = 0; i < ServerNames.size(); i++)
         if (ServerNames[i] == ServerName)
@@ -136,13 +137,13 @@ bool Server::RepliesTo(const std::string& ServerName) const
     return false;
 }
 
-bool Server::GetIsDefaultServer() const { return IsDefaultServer; }
+bool ServerConfig::GetIsDefaultServer() const { return IsDefaultServer; }
 
-std::ostream& operator<<(std::ostream& Stream, const Server& Server)
+std::ostream& operator<<(std::ostream& Stream, const ServerConfig& Server)
 {
     if (Server.GetIsDefaultServer())
         Stream << "Default server!" << std::endl;;
-    
+
     if (Server.ServerNames.size() > 0)
     {
         Stream << "Known as:" << std::endl;

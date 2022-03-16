@@ -5,20 +5,20 @@
 #include <vector>
 
 // For a location block
-class Location {
+class LocationConfig {
     public:
         static const std::string DESCRIPTOR;
 
-        Location();
-        Location(const ConfigLine& Line);
-        Location(const Location& From);
+        LocationConfig();
+        LocationConfig(const ConfigLine& Line);
+        LocationConfig(const LocationConfig& From);
 
-        virtual ~Location();
+        virtual ~LocationConfig();
 
-        virtual Location& operator = (const Location& From);
+        virtual LocationConfig& operator = (const LocationConfig& From);
 
         // Public functions
-        
+
         // Returns: 0 (No match), 1 or more: (Weight to this match, use location with highest weight for a request)
         // Note: MatchAgainst should be a normalized URL
         int GetMatchWeight(const std::string& MatchAgainst) const;
@@ -29,5 +29,5 @@ class Location {
         std::string Match;
 
         // Class functions
-        
+
 };

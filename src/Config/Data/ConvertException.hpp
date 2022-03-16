@@ -10,7 +10,7 @@ struct ConvertException : public std::exception
 
 	ConvertException(const std::string& Message);
 
-	virtual ~ConvertException() _NOEXCEPT;
+	virtual ~ConvertException() _GLIBCXX_USE_NOEXCEPT;
 
 	const char* what () const throw ();
 };

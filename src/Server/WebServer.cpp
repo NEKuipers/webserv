@@ -1,4 +1,5 @@
 #include "WebServer.hpp"
+#include <ctime>
 
 WebServer::WebServer(int domain, int service, int protocol, int port, u_long interface, int bklg)
 {
@@ -35,7 +36,7 @@ void	WebServer::connectionAccepter(ServerSocket *conn_socket)
 	int newsock;
 	struct sockaddr_in address = conn_socket->get_address();
 	int addrlen = sizeof(address);
-	try 
+	try
 	{
 		if ((newsock = accept(conn_socket->get_sock(), (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
 			throw ConnectionErrorException();
@@ -62,7 +63,7 @@ void	WebServer::connectionResponder(ServerSocket *conn_socket)
 	time_t now = time(0);
 	char *datetime = ctime(&now);
 	response.append(datetime);
-	
+
 	//TODO: Add the creation of requested response here
 	write(conn_socket->get_sock_fd(), response.c_str(), response.size());
 }
@@ -111,7 +112,7 @@ std::vector<ServerSocket *>		WebServer::get_sockets()
 fd_set							WebServer::get_socket_fd_set()
 {
 	fd_set	socket_fd_set;
-	
+
 	FD_ZERO(&socket_fd_set);
 	for (std::vector<ServerSocket *>::iterator it = this->sockets.begin(); it != this->sockets.end(); it++)
 	{
