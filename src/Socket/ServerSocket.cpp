@@ -3,6 +3,7 @@
 // Constructor
 ServerSocket::ServerSocket(int domain, int service, int protocol, int port, u_long interface, int bklg) : SimpleSocket(domain, service, protocol, port, interface)
 {
+	this->sock_fd = this->get_sock();
 	backlog = bklg;
 	connect_to_network(get_sock(), get_address());
 	test_connection(get_sock());

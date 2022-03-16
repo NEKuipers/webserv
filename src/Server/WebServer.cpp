@@ -1,38 +1,36 @@
-#include "Server.hpp"
+#include "WebServer.hpp"
 
-Server::Server(int domain, int service, int protocol, int port, u_long interface, int bklg)
+WebServer::WebServer(int domain, int service, int protocol, int port, u_long interface, int bklg)
 {
 	ServerSocket *newsocket = new ServerSocket(domain, service, protocol, port, interface, bklg);
 	sockets.push_back(newsocket);
 	launch();
 }
 
-Server::Server()
+WebServer::WebServer()
 {
 	ServerSocket *newsocket = new ServerSocket(AF_INET, SOCK_STREAM,0,80,INADDR_ANY,10);
 	sockets.push_back(newsocket);
-	// ServerSocket *socket_2 = new ServerSocket(AF_INET, SOCK_STREAM, 0, 443, INADDR_ANY, 10);
-	// sockets.push_back(socket_2);
 	launch();
 }
 
-//Server::Server(Configuration config) {}
+//WebServer::WebServer(Configuration config) {}
 
 
-Server::Server(const Server &src)
+WebServer::WebServer(const WebServer &src)
 {
     *this = src;
 }
 
-Server		&Server::operator=(const Server &rhs)
+WebServer		&WebServer::operator=(const WebServer &rhs)
 {
 	this->sockets = rhs.sockets;
 	return (*this);
 }
 
-Server::~Server(){}
+WebServer::~WebServer(){}
 
-void	Server::connectionAccepter(ServerSocket *conn_socket)
+void	WebServer::connectionAccepter(ServerSocket *conn_socket)
 {
 	int newsock;
 	struct sockaddr_in address = conn_socket->get_address();
@@ -50,14 +48,14 @@ void	Server::connectionAccepter(ServerSocket *conn_socket)
 	read(conn_socket->get_sock_fd(), buffer, 30000);
 }
 
-void	Server::connectionHandler(ServerSocket *conn_socket)
+void	WebServer::connectionHandler(ServerSocket *conn_socket)
 {
 	(void)conn_socket;
 	//TODO: Add parsing and inputvalidation for the HTTP request here
 	std::cout << buffer << std::endl;
 }
 
-void	Server::connectionResponder(ServerSocket *conn_socket)
+void	WebServer::connectionResponder(ServerSocket *conn_socket)
 {
 	#include <ctime>
 	time_t now = time(0);
@@ -69,7 +67,7 @@ void	Server::connectionResponder(ServerSocket *conn_socket)
 	write(conn_socket->get_sock_fd(), response.c_str(), response.size());
 }
 
-void	Server::connectionCloser(ServerSocket *conn_socket)
+void	WebServer::connectionCloser(ServerSocket *conn_socket)
 {
 	close(conn_socket->get_sock_fd());
 }
@@ -80,12 +78,19 @@ static void	sigintHandler(int signum)
 	exit(signum);
 }
 
-void	Server::launch()
+void	WebServer::launch()
 {
+	fd_set 	read_fds;
+	fd_set 	write_fds;
+	int		max_fd;
+
+	FD_ZERO(&write_fds);
+	read_fds = this->get_socket_fd_set();
+	max_fd = this->get_highest_fd();
 	signal(SIGINT, sigintHandler);
 	while(true)
 	{
-		std::cout << "===== WAITING =====" << std::endl;
+		select(max_fd + 1, &read_fds, &write_fds, NULL, NULL);
 		for (size_t count = 0; count < sockets.size(); count++)
 		{
 			connectionAccepter(sockets[count]);
@@ -93,11 +98,27 @@ void	Server::launch()
 			connectionResponder(sockets[count]);
 			connectionCloser(sockets[count]);
 		}
-		std::cout << "===== DONE =====" << std::endl;
 	}
 }
 
-std::vector<ServerSocket *>		Server::get_sockets()
+std::vector<ServerSocket *>		WebServer::get_sockets()
 {
 	return this->sockets;
+}
+
+fd_set							WebServer::get_socket_fd_set()
+{
+	fd_set	socket_fd_set;
+	
+	FD_ZERO(&socket_fd_set);
+	for (std::vector<ServerSocket *>::iterator it = this->sockets.begin(); it != this->sockets.end(); it++)
+	{
+		FD_SET((*it)->get_sock_fd(), &socket_fd_set);
+	}
+	return (socket_fd_set);
+}
+
+int							WebServer::get_highest_fd()
+{
+	return ((*(this->sockets.end() - 1))->get_sock_fd());
 }

@@ -2,7 +2,7 @@
 #include "ConfigFile.hpp"
 #include "Parser.hpp"
 #include "ServerSocket.hpp"
-#include "Server.hpp"
+#include "WebServer.hpp"
 
 #include "fstream"
 #include <iostream>
@@ -26,7 +26,7 @@ int         main(int argc, char **argv) {
 	(void)argc;
 	(void)argv;
 	std::cout << "Starting..." <<std::endl;
-	Server testserver = Server();
+	WebServer testserver = WebServer();
 
     return (0);
 }
