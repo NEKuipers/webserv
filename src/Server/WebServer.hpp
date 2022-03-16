@@ -1,6 +1,7 @@
 #ifndef WEBSERVER_HPP
 # define WEBSERVER_HPP
 # include "ServerSocket.hpp"
+# include "Request.hpp"
 # include <csignal>
 # include <unistd.h>
 # include <cstdlib>
