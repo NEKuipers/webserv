@@ -4,14 +4,14 @@
 
 #include "fstream"
 #include <iostream>
-#include "Server.hpp"
+#include "ServerConfig.hpp"
 
 #include "Config.hpp"
 #include "UnexpectedTokenException.hpp"
 
 int         main(int argc, char **argv) {
-	
-	
+
+
 	try {
 		Config Conf(ConfigFile("TestFile"));
 

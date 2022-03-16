@@ -2,9 +2,9 @@
 
 LocationException::LocationException(const std::string& Search) : Search(Search) { }
 
-LocationException::~LocationException() _NOEXCEPT
+LocationException::~LocationException() _GLIBCXX_USE_NOEXCEPT
 {
-	
+
 }
 
 const char* LocationException::what () const throw () {

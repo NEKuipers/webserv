@@ -1,11 +1,11 @@
 #pragma once
 
 #include <vector>
-#include "Server.hpp"
+#include "ServerConfig.hpp"
 #include "ConfigFile.hpp"
 
 class Config {
-    public: 
+    public:
         Config();
         Config(const ConfigFile& File);
         Config(const Config& From);
@@ -17,13 +17,13 @@ class Config {
         // Public functions
         friend std::ostream& operator<<(std::ostream& Stream, const Config& Config);
 
-        const std::vector<Server>& GetServers() const;
-        const Server& GetDefaultServer() const;
+        const std::vector<ServerConfig>& GetServers() const;
+        const ServerConfig& GetDefaultServer() const;
     private:
-        std::vector<Server> Servers;
+        std::vector<ServerConfig> Servers;
         size_t DefaultServerIndex;
         // Class variables
-        
+
         // Class functions
-        
+
 };

@@ -6,9 +6,9 @@ Config::Config() {}
 Config::Config(const ConfigFile& File)
 {
     const std::vector<ConfigLine>& Lines = File.GetConfigLines();
-    
+
     for (size_t i = 0; i < Lines.size(); i++)
-        Servers.push_back(Server(Lines[i]));
+        Servers.push_back(ServerConfig(Lines[i]));
 
     // Some error checking
     DefaultServerIndex = -1;
@@ -29,7 +29,7 @@ Config::Config(const Config& From)
 
 Config::~Config()
 {
-    
+
 }
 
 Config& Config::operator = (const Config& From)
@@ -41,8 +41,8 @@ Config& Config::operator = (const Config& From)
     return *this;
 }
 
-const std::vector<Server>& Config::GetServers() const { return Servers; }
-const Server& Config::GetDefaultServer() const { return Servers[DefaultServerIndex]; }
+const std::vector<ServerConfig>& Config::GetServers() const { return Servers; }
+const ServerConfig& Config::GetDefaultServer() const { return Servers[DefaultServerIndex]; }
 
 std::ostream& operator<<(std::ostream& Stream, const Config& Config)
 {
