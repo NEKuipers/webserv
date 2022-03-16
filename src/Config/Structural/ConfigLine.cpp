@@ -2,16 +2,16 @@
 #include "ConfigBlock.hpp"
 
 ConfigLine::ConfigLine() : Arguments(), Block() {}
-ConfigLine::ConfigLine(Parser& Parser) : Arguments(), Block() {
+ConfigLine::ConfigLine(Lexer& Lexer) : Arguments(), Block() {
 	std::string Current;
 
-	while (Parser.Peek() == Word)
-		Arguments.push_back(Parser.Read(Word));
+	while (Lexer.Peek() == Word)
+		Arguments.push_back(Lexer.Read(Word));
 
-	if (Parser.Peek() == OpenParen)
-		Block = new ConfigBlock(Parser);
+	if (Lexer.Peek() == OpenParen)
+		Block = new ConfigBlock(Lexer);
 	else
-		Parser.Read(Stop);
+		Lexer.Read(Stop);
 }
 ConfigLine::ConfigLine(const ConfigLine& From) : Arguments(), Block()
 {
@@ -35,6 +35,7 @@ ConfigLine& ConfigLine::operator = (const ConfigLine& From)
 
 
 ConfigBlock* ConfigLine::GetBlock() const { return Block; }
+const std::vector<std::string>& ConfigLine::GetArguments() const { return Arguments; }
 
 std::ostream& operator<<(std::ostream& Stream, const ConfigLine& Line)
 {

@@ -1,22 +1,22 @@
-#include "Parser.hpp"
+#include "Lexer.hpp"
 #include "UnexpectedTokenException.hpp"
 
 #include <iostream>
 
-Parser::Parser(std::istream& Stream) : Stream(Stream), UnparsedString("")
+Lexer::Lexer(std::istream& Stream) : Stream(Stream), UnparsedString("")
 {
 	Step();
 }
 
-Parser::~Parser() { }
+Lexer::~Lexer() { }
 
 
-Token Parser::Peek()
+Token Lexer::Peek()
 {
 	return NextToken;
 }
 
-std::string Parser::Read(Token Expected)
+std::string Lexer::Read(Token Expected)
 {
 	if (NextToken != Expected)
 		throw UnexpectedTokenException(Expected, NextToken);
@@ -26,7 +26,7 @@ std::string Parser::Read(Token Expected)
 	return Value;
 }
 
-void Parser::Step()
+void Lexer::Step()
 {
 	// [UnparsedString]: If we only returned a part of the string last time, this is the leftover
 	if (UnparsedString.length() == 0)
