@@ -88,6 +88,7 @@ void	WebServer::launch()
 	read_fds = this->get_socket_fd_set();
 	max_fd = this->get_highest_fd();
 	signal(SIGINT, sigintHandler);
+	std::cout << "Server is running!"<<std::endl;
 	while(true)
 	{
 		select(max_fd + 1, &read_fds, &write_fds, NULL, NULL);
