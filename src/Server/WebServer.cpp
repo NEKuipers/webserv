@@ -57,10 +57,10 @@ void	WebServer::connectionHandler(ServerSocket *conn_socket)
 
 void	WebServer::connectionResponder(ServerSocket *conn_socket)
 {
-	#include <ctime>
+	std::string response = "Test\n";
+	//code below only for testing and keeping track of timestamp
 	time_t now = time(0);
 	char *datetime = ctime(&now);
-	std::string response = "Test\n";
 	response.append(datetime);
 	
 	//TODO: Add the creation of requested response here
@@ -80,17 +80,18 @@ static void	sigintHandler(int signum)
 
 void	WebServer::launch()
 {
-	fd_set 	read_fds;
-	fd_set 	write_fds;
+	fd_set 	read_fds, write_fds, save_read_fds, save_write_fds; //we need backups because select() alters fds in the set
 	int		max_fd;
 
-	FD_ZERO(&write_fds);
-	read_fds = this->get_socket_fd_set();
+	FD_ZERO(&save_write_fds);
+	save_read_fds = this->get_socket_fd_set();
 	max_fd = this->get_highest_fd();
 	signal(SIGINT, sigintHandler);
 	std::cout << "Server is running!"<<std::endl;
 	while(true)
 	{
+		read_fds = save_read_fds;
+		write_fds = save_write_fds;
 		select(max_fd + 1, &read_fds, &write_fds, NULL, NULL);
 		for (size_t count = 0; count < sockets.size(); count++)
 		{

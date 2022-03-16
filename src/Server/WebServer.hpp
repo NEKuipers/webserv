@@ -6,6 +6,7 @@
 # include <cstdlib>
 # include <stdexcept>
 # include <vector>
+# include <ctime>
 # include <sys/select.h>
 
 class WebServer
