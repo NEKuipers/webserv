@@ -2,7 +2,7 @@
 
 ConvertException::ConvertException(const std::string& Message) : Message(Message) { }
 
-ConvertException::~ConvertException() _GLIBCXX_USE_NOEXCEPT
+ConvertException::~ConvertException() _NOEXCEPT
 {
 
 }

@@ -11,7 +11,7 @@ struct LocationException : public std::exception
 
 	LocationException(const std::string& Search);
 
-	virtual ~LocationException() _GLIBCXX_USE_NOEXCEPT;
+	virtual ~LocationException() _NOEXCEPT;
 
 	const char* what () const throw ();
 
