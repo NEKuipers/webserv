@@ -54,7 +54,8 @@ void	WebServer::connectionHandler(ServerSocket *conn_socket)
 	(void)conn_socket;
 	// std::cout << "======START OF REQUEST======="<<std::endl;
 	//TODO: Add parsing and inputvalidation for the HTTP request here
-	Request request(buffer);
+	Request new_request(buffer);
+	std::cout << buffer << std::endl;
 	// std::cout << "======END OF REQUEST======"<<std::endl;
 }
 

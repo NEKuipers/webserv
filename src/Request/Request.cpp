@@ -31,6 +31,37 @@ void    Request::parse_requestline(std::vector<std::string> lines)
     //NEEDS VALIDATION 
 }
 
+int    Request::parse_header_fields(std::vector<std::string> lines)
+{
+    size_t i;
+
+    for (i = 1; lines.size(); i++)
+    {
+        struct header_field new_field;
+        size_t pos;
+
+		if (lines[i] == "\r" || lines[i].length() == 0)
+			return (i);
+		if ((pos = lines[i].find(':')) == std::string::npos) 
+			throw ParseRequestException();
+		new_field.header_key = lines[i].substr(0, pos);
+		lines[i].erase(0, pos + 1);
+		
+		if (lines[i][0] == ' ')
+			lines[i].erase(0, 1);
+
+		if (lines[i].find('\r') != std::string::npos)
+			new_field.header_value = lines[i].substr(0, lines[i].find('\r'));
+		else if (lines[i].find('\n') != std::string::npos)
+			new_field.header_value = lines[i].substr(0, lines[i].find('\n'));
+		else
+			new_field.header_value = lines[i].substr(0, lines[i].length());
+
+        this->header_fields.push_back(new_field);
+        //NEEDS VALIDATION
+    }
+    return (i);
+}
 
 Request::Request(const std::string &request_content)
 {
@@ -39,9 +70,7 @@ Request::Request(const std::string &request_content)
     if (lines.size() < 1)
         throw ParseRequestException();
     parse_requestline(lines);
-    // std::cout << "Method is " << req_line.method <<std::endl;
-    // std::cout << "Target is " << req_line.target <<std::endl;
-    // std::cout << "Httpversion is " << req_line.http_version <<std::endl;
+    parse_header_fields(lines);
 }
 
 Request::Request(const Request &src)
