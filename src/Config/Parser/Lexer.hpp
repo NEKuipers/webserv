@@ -1,4 +1,4 @@
-class Parser;	// For include loops
+class Lexer;	// For include loops
 
 #ifndef PARSER_HPP
 #define PARSER_HPP
@@ -15,20 +15,21 @@ enum Token
 	EndOfFile
 };
 
-class Parser {
+// TODO: Nice error messages using Stream.tellg();
+class Lexer {
 	public:
-		Parser(std::istream& Stream);
+		Lexer(std::istream& Stream);
 
-		~Parser();
+		~Lexer();
 
 		// Public functions
 		Token Peek();
 		std::string Read(Token Expected);
 	private:
 		// No default constructors or copying
-		Parser();
-		Parser& operator = (const Parser& From);
-		Parser(const Parser& From);
+		Lexer();
+		Lexer& operator = (const Lexer& From);
+		Lexer(const Lexer& From);
 
 		// Class variables
 		std::istream& Stream;

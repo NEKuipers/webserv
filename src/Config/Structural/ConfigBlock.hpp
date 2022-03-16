@@ -5,13 +5,13 @@ class ConfigBlock;	// For include loops
 
 #include <vector>
 #include "ConfigLine.hpp"
-#include "Parser.hpp"
+#include "Lexer.hpp"
 
 // ConfigBlock: A block containing multiple lines
 class ConfigBlock {
 	public:
 		ConfigBlock();
-		ConfigBlock(Parser& Parser);
+		ConfigBlock(Lexer& Lexer);
 		ConfigBlock(const ConfigBlock& From);
 
 		~ConfigBlock();

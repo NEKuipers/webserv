@@ -1,0 +1,25 @@
+server {
+    server_name www.test1.com;
+
+    default_server;
+
+    listen 127.0.0.1;
+    listen 127.0.0.1:80 127.0.0.1:8000;
+    listen 127.0.0.1:25565;
+
+    location \ {
+        TODO;
+    }
+}
+
+server {
+    server_name www.test2.com;
+
+    listen 127.0.0.1;
+    listen 127.0.0.1:80 127.0.0.1:8000;
+    listen 127.0.0.1:25565;
+
+    location \ {
+        TODO;
+    }
+}
