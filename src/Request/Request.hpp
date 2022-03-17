@@ -1,4 +1,3 @@
-//This class needs to function as an object to parse the contents of incoming http requests into
 #ifndef REQUEST_HPP
 # define REQUEST_HPP
 # include <iostream>
@@ -36,9 +35,9 @@ class Request
         struct request_line                 get_request_line();
         std::vector<struct header_field>    get_header_fields();
         std::string                         get_plain_request();
+        friend std::ostream                 &operator<<(std::ostream &Stream, const Request &request);
 
 };
 
-// std::ostream &operator<<(std::ostream &out, const Request &req);
 
 #endif

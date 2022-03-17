@@ -102,3 +102,16 @@ std::string                         Request::get_plain_request()
 {
     return this->plain_request;
 }
+
+std::ostream                                &operator<<(std::ostream &Stream, const Request &request)
+{
+    Stream << "Request method is " << request.req_line.method << std::endl;
+    Stream << "Requested file is " << request.req_line.target << std::endl;
+    Stream << "HTTP version is " << request.req_line.http_version << std::endl;
+    Stream << "Other header fields: " <<std::endl;
+    for (size_t i = 0; i < request.header_fields.size(); i++)
+    {
+        Stream << "["<<request.header_fields[i].header_key << "] : [" << request.header_fields[i].header_value << "]" << std::endl;
+    }
+    return Stream;
+}
