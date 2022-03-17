@@ -3,12 +3,10 @@
 #include "ServerSocket.hpp"
 #include "WebServer.hpp"
 #include "Lexer.hpp"
+#include "Config.hpp"
 
 #include "fstream"
 #include <iostream>
-#include "ServerConfig.hpp"
-
-#include "Config.hpp"
 #include "UnexpectedTokenException.hpp"
 
 int         main(int argc, char **argv) 
@@ -22,12 +20,14 @@ int         main(int argc, char **argv)
 	(void)argv;
 	
 	try {
-		Config Conf(ConfigFile("TestFile"));
+		Config Conf(ConfigFile("Settings.conf"));
 
-		std::cout << Conf << std::endl;
+		//std::cout << Conf << std::endl;
 
 		std::cout << "Starting...." <<std::endl;
 		WebServer testserver = WebServer();
+
+		//Response = Conf.GetResponse(Request);
 
 	} catch (UnexpectedTokenException E) {
 		std::cout << E << std::endl;

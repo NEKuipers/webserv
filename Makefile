@@ -32,7 +32,7 @@ $(NAME): $(OBJECTS) Makefile Settings.mk | $(OBJ_DIR)
 $(OBJECTS): Makefile Settings.mk | $(SRC_DIR) $(OBJ_DIR)
 	@echo "Making $@"
 	@mkdir -p $(shell dirname $@)
-	@$(CXX) $(CFLAGS) -c -o $@ $(@:$(OBJ_DIR)%.o=$(SRC_DIR)%.cpp)
+	$(CXX) $(CFLAGS) -c -o $@ $(@:$(OBJ_DIR)%.o=$(SRC_DIR)%.cpp)
 
 $(OBJ_DIR) $(SRC_DIR) $(PREREQ_DIR):
 	@echo "Making $@"
