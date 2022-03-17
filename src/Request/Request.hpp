@@ -23,6 +23,7 @@ class Request
     private:
         struct request_line                 req_line;
         std::vector<struct header_field>    header_fields;
+        std::vector<std::string>            body;
         std::string                         plain_request;
         std::vector<std::string>            content_to_lines(std::string req);
         void                                parse_requestline(std::vector<std::string> lines);

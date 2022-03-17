@@ -70,7 +70,12 @@ Request::Request(const std::string &request_content)
     if (lines.size() < 1)
         throw ParseRequestException();
     parse_requestline(lines);
-    parse_header_fields(lines);
+    size_t i = parse_header_fields(lines);
+    while (lines[i] == "\r" || lines[i].length() == 0)
+        i++;
+    std::vector<std::string>::iterator start = lines.begin() + i;
+    if (start < lines.end())
+        body = std::vector<std::string>(start, lines.end());
 }
 
 Request::Request(const Request &src)
@@ -123,6 +128,12 @@ std::ostream                                &operator<<(std::ostream &Stream, co
     for (size_t i = 0; i < request.header_fields.size(); i++)
     {
         Stream << "["<<request.header_fields[i].header_key << "] : [" << request.header_fields[i].header_value << "]" << std::endl;
+    }
+    if (request.body.size() > 1) {
+        Stream << "Body: " <<std::endl;
+        for (size_t i = 0; i < request.body.size(); i++) {
+            Stream << request.body[i] << std::endl;
+        }
     }
     return Stream;
 }

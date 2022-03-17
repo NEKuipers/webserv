@@ -46,17 +46,30 @@ void	WebServer::connectionAccepter(ServerSocket *conn_socket)
 		std::cerr<<e.what()<<std::endl;
 	}
 	conn_socket->set_sock_fd(newsock);
-	read(conn_socket->get_sock_fd(), buffer, 30000);
 }
 
-void	WebServer::connectionHandler(ServerSocket *conn_socket)
+int		WebServer::connectionHandler(ServerSocket *conn_socket)
 {
-	(void)conn_socket;
-	// std::cout << "======START OF REQUEST======="<<std::endl;
-	//TODO: Add parsing and inputvalidation for the HTTP request here
-	Request new_request(buffer);
-	std::cout << new_request << std::endl;
-	// std::cout << "======END OF REQUEST======"<<std::endl;
+	char	buffer[BUFFER_SIZE];
+	bzero(buffer, BUFFER_SIZE);
+
+	int ret = 0;
+
+	ret = read(conn_socket->get_sock_fd(), buffer, 30000);
+	if (ret > 0) 
+	{
+		// std::cout << "======START OF REQUEST======="<<std::endl;
+		Request new_request(buffer);
+		std::cout << new_request << std::endl;
+		// std::cout << "======END OF REQUEST======"<<std::endl;
+	}
+	else
+	{
+		//TODO better errorhandling
+		std::cerr << "Error: could not read from socket" << std::endl;
+		return (1);
+	}
+	return (0);
 }
 
 void	WebServer::connectionResponder(ServerSocket *conn_socket)
@@ -82,7 +95,7 @@ static void	sigintHandler(int signum)
 	exit(signum);
 }
 
-void	WebServer::launch()
+int	WebServer::launch()
 {
 	fd_set 	read_fds, write_fds, save_read_fds, save_write_fds; //we need backups because select() alters fds in the set
 	int		max_fd;
@@ -100,11 +113,13 @@ void	WebServer::launch()
 		for (size_t count = 0; count < sockets.size(); count++)
 		{
 			connectionAccepter(sockets[count]);
-			connectionHandler(sockets[count]);
+			if (connectionHandler(sockets[count]) != 0)
+				return (1);
 			connectionResponder(sockets[count]);
 			connectionCloser(sockets[count]);
 		}
 	}
+	return (0);
 }
 
 std::vector<ServerSocket *>		WebServer::get_sockets()
