@@ -1,5 +1,7 @@
 #include "WebServer.hpp"
 #include <ctime>
+#include <iostream>
+#include <fstream>
 
 WebServer::WebServer(int domain, int service, int protocol, int port, u_long interface, int bklg)
 {
@@ -58,10 +60,10 @@ int		WebServer::connectionHandler(ServerSocket *conn_socket)
 	ret = read(conn_socket->get_sock_fd(), buffer, 30000);
 	if (ret > 0) 
 	{
-		// std::cout << "======START OF REQUEST======="<<std::endl;
+		std::cout << "======START OF REQUEST======="<<std::endl;
 		Request new_request(buffer);
 		std::cout << new_request << std::endl;
-		// std::cout << "======END OF REQUEST======"<<std::endl;
+		std::cout << "======END OF REQUEST======"<<std::endl;
 	}
 	else
 	{
@@ -69,19 +71,19 @@ int		WebServer::connectionHandler(ServerSocket *conn_socket)
 		std::cerr << "Error: could not read from socket" << std::endl;
 		return (1);
 	}
-	return (0);
-}
 
-void	WebServer::connectionResponder(ServerSocket *conn_socket)
-{
-	std::string response = "Test\n";
-	//code below only for testing and keeping track of timestamp
+	//response
+	// std::ifstream resp("resources/index.html");
+	// std::string response((std::istreambuf_iterator<char>(resp)), std::istreambuf_iterator<char>());
+
+	std::string response = "<!DOCTYPE html><head><title>Webserv Testpage</title></head><body><p>Hello World!\n It is ";
 	time_t now = time(0);
 	char *datetime = ctime(&now);
 	response.append(datetime);
-
+	response.append("<p></body></html>");
 	//TODO: Add the creation of requested response here
 	write(conn_socket->get_sock_fd(), response.c_str(), response.size());
+	return (0);
 }
 
 void	WebServer::connectionCloser(ServerSocket *conn_socket)
@@ -115,7 +117,6 @@ int	WebServer::launch()
 			connectionAccepter(sockets[count]);
 			if (connectionHandler(sockets[count]) != 0)
 				return (1);
-			connectionResponder(sockets[count]);
 			connectionCloser(sockets[count]);
 		}
 	}

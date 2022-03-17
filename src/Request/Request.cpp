@@ -1,6 +1,8 @@
 #include "Request.hpp"
 #include "ParseRequestException.hpp"
 
+//TODO: Fix exception throwing
+
 std::vector<std::string> Request::content_to_lines(std::string req)
 {
     std::vector<std::string> lines;
@@ -42,7 +44,7 @@ int    Request::parse_header_fields(std::vector<std::string> lines)
 		if (lines[i] == "\r" || lines[i].length() == 0)
 			return (i);
 		if ((pos = lines[i].find(':')) == std::string::npos) 
-			throw ParseRequestException();
+			throw ParseRequestException("Incorrect formatting found in header.");
 		new_field.header_key = lines[i].substr(0, pos);
 		lines[i].erase(0, pos + 1);
 		if (lines[i][0] == ' ')
@@ -91,7 +93,7 @@ Request::Request(const std::string &request_content)
     plain_request = request_content;
     std::vector<std::string> lines = content_to_lines(plain_request);
     if (lines.size() < 1)
-        throw ParseRequestException();
+        throw ParseRequestException("Empty request.");
     parse_requestline(lines);
     size_t i = parse_header_fields(lines);
     while (lines[i] == "\r" || lines[i].length() == 0)
@@ -100,7 +102,7 @@ Request::Request(const std::string &request_content)
     if (start < lines.end())
         body = std::vector<std::string>(start, lines.end());
     if (validate_request())
-        throw ParseRequestException();
+        throw ParseRequestException("Invalid header content.");
 }
 
 Request::Request(const Request &src)

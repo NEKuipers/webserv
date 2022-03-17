@@ -18,7 +18,6 @@ class WebServer
 		
 		void						connectionAccepter(ServerSocket *conn_socket);
 		int							connectionHandler(ServerSocket *conn_socket);
-		void						connectionResponder(ServerSocket *conn_socket);
 		void						connectionCloser(ServerSocket *conn_socket);
 	public:
 		WebServer();

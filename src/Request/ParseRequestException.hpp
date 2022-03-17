@@ -6,8 +6,12 @@
 
 struct ParseRequestException : public std::exception
 {
-	ParseRequestException();
+	const std::string Message;
+
+	ParseRequestException(const std::string& Message);
+
 	virtual ~ParseRequestException() _NOEXCEPT;
+
 	const char* what () const throw ();
 };
 
