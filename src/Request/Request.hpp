@@ -2,6 +2,7 @@
 # define REQUEST_HPP
 # include <iostream>
 # include <vector>
+# include <cstring>
 
 class Request
 {
@@ -25,7 +26,7 @@ class Request
         std::string                         plain_request;
         std::vector<std::string>            content_to_lines(std::string req);
         void                                parse_requestline(std::vector<std::string> lines);
-        int                                parse_header_fields(std::vector<std::string> lines);
+        int                                 parse_header_fields(std::vector<std::string> lines);
 
     public:
         Request(const std::string &request_content);
@@ -36,6 +37,7 @@ class Request
         std::vector<struct header_field>    get_header_fields();
         std::string                         get_plain_request();
         friend std::ostream                 &operator<<(std::ostream &Stream, const Request &request);
+        std::string                         get_header_value(std::string key);
 
 };
 

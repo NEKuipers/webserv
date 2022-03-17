@@ -103,6 +103,17 @@ std::string                         Request::get_plain_request()
     return this->plain_request;
 }
 
+std::string                         Request::get_header_value(std::string key)
+{
+    for (size_t i = 0; i < header_fields.size(); i++)
+    {
+        if (strcmp(header_fields[i].header_key.c_str(), key.c_str()) == 0)
+            return (header_fields[i].header_value);
+    }
+    return NULL;
+}
+
+
 std::ostream                                &operator<<(std::ostream &Stream, const Request &request)
 {
     Stream << "Request method is " << request.req_line.method << std::endl;
