@@ -28,6 +28,7 @@ class Request
         std::vector<std::string>            content_to_lines(std::string req);
         void                                parse_requestline(std::vector<std::string> lines);
         int                                 parse_header_fields(std::vector<std::string> lines);
+        int                                 validate_request();
 
     public:
         Request(const std::string &request_content);

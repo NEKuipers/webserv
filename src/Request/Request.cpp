@@ -28,17 +28,16 @@ void    Request::parse_requestline(std::vector<std::string> lines)
 		this->req_line.http_version = lines[0].substr(0, lines[0].find('\n'));
 	else
 		this->req_line.http_version = lines[0].substr(0, lines[0].find(' '));
-    //NEEDS VALIDATION 
 }
 
 int    Request::parse_header_fields(std::vector<std::string> lines)
 {
     size_t i;
+    size_t pos;
 
     for (i = 1; lines.size(); i++)
     {
         struct header_field new_field;
-        size_t pos;
 
 		if (lines[i] == "\r" || lines[i].length() == 0)
 			return (i);
@@ -46,21 +45,45 @@ int    Request::parse_header_fields(std::vector<std::string> lines)
 			throw ParseRequestException();
 		new_field.header_key = lines[i].substr(0, pos);
 		lines[i].erase(0, pos + 1);
-		
 		if (lines[i][0] == ' ')
 			lines[i].erase(0, 1);
-
 		if (lines[i].find('\r') != std::string::npos)
 			new_field.header_value = lines[i].substr(0, lines[i].find('\r'));
 		else if (lines[i].find('\n') != std::string::npos)
 			new_field.header_value = lines[i].substr(0, lines[i].find('\n'));
 		else
 			new_field.header_value = lines[i].substr(0, lines[i].length());
-
         this->header_fields.push_back(new_field);
-        //NEEDS VALIDATION
     }
     return (i);
+}
+
+static int validate_http_version(std::string http_version)
+{
+    std::string number = "0123456789";
+
+	if (http_version.length() != 8)
+		return (1);
+	if (http_version[0] == 'H'
+			&& http_version[1] == 'T' && http_version[2] == 'T'
+			&& http_version[3] == 'P' && http_version[4] == '/'
+			&& number.find(http_version[5]) != std::string::npos
+			&& http_version[6] == '.'
+			&& number.find(http_version[7]) != std::string::npos)
+		return (0);
+	return (1);
+}
+
+int     Request::validate_request()
+{
+    std::string methods[]={"GET", "POST", "DELETE"};
+    if (std::find(std::begin(methods), std::end(methods), req_line.method) == std::end(methods))
+        return (1);
+    if (req_line.target[0] != '/')
+        return (1);
+    if (validate_http_version(req_line.http_version))
+        return (1);
+    return (0);
 }
 
 Request::Request(const std::string &request_content)
@@ -76,6 +99,8 @@ Request::Request(const std::string &request_content)
     std::vector<std::string>::iterator start = lines.begin() + i;
     if (start < lines.end())
         body = std::vector<std::string>(start, lines.end());
+    if (validate_request())
+        throw ParseRequestException();
 }
 
 Request::Request(const Request &src)

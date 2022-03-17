@@ -32,7 +32,6 @@ int         main(int argc, char **argv)
 	} catch (UnexpectedTokenException E) {
 		std::cout << E << std::endl;
 	}
-	WebServer testserver = WebServer();
 	
     return (0);
 }
