@@ -49,6 +49,7 @@ int         main(int argc, char **argv)
 		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test.com", "File2", 0, "GET"));
 		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test.com", "File2", 128, "GET"));
 		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test.com", "File3", 128, "GET"));
+		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test.com", "File1", 128, "GET"));	// This will go to the error page
 		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test.com", "File4", ~0, "GET"));	// Max content-length, too big for anything to accept it, will try to redirect to ErrorPage, but will be too big for even the error page... Not sure how im going to handle that...
 
 		return 0;

@@ -92,3 +92,23 @@ ConfigResponse* ConfigurationState::Error(const ConfigRequest& Request) const
 		return Redirect(Request, ErrorUri);
 	return NULL;
 }
+
+static void ReplaceAll(std::string& Str, const std::string& Find, const std::string& Replace)
+{
+	while (true) {
+		size_t Found = Str.find(Find, 0);
+		if (Found == std::string::npos)
+			break;
+
+		Str.replace(Found, Find.length(), Replace);
+	}
+}
+
+std::string ConfigurationState::InterperetEnvVariable(const std::string& String, const ConfigRequest& Request) const
+{
+	std::string Copy = String;
+
+	ReplaceAll(Copy, "$uri", Request.GetUri());
+
+	return Copy;
+}

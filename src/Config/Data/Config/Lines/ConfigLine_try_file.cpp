@@ -49,10 +49,9 @@ ConfigResponse* ConfigLine_try_file::GetBaseResponse(const ConfigRequest& Reques
 
 	for (std::vector<std::string>::const_iterator It = Files.begin(); It != Files.end(); It++)
 	{
-		std::string File = *It;
-		// TODO: We also need to parse env strings, eg: replace $uri with Request.Uri
-
+		std::string File = Configuration.InterperetEnvVariable(*It, Request);
 		File = Configuration.Root + "/" + File;	// Isn't there a utility function that combines paths?
+		// TODO: The file path can be pretty much anything, considering it is being parsed with env strings you can basically access any file, limit it to only access files inside the Configuration.Root directory
 
 		// TODO: I dont like allocating just to see if it is successfull, but FileResponse takes in a pointer, since you can't copy a stream, and this is OLD cpp, so doing some move magic isn't an option either
 		std::ifstream* Stream = new std::ifstream(File);
