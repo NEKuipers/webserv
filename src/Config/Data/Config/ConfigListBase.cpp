@@ -1,11 +1,8 @@
 #include "ConfigListBase.hpp"
 #include "PrefixStreambuf.hpp"
 
-ConfigListBase::ConfigListBase() {}
-ConfigListBase::ConfigListBase(const ConfigurationState& Configuration) : ConfigBase(Configuration)
-{
-
-}
+ConfigListBase::ConfigListBase() : ConfigBase() { }
+ConfigListBase::ConfigListBase(const ConfigurationState& Configuration) : ConfigBase(Configuration) { }
 
 ConfigListBase::~ConfigListBase()
 {
@@ -41,8 +38,13 @@ ConfigResponse* ConfigListBase::GetBaseResponse(const ConfigRequest& Request) co
 	}
 
 	if (ErrorIfNoResult)
-		return Configuration.Error();
+		return Configuration.Error(Request);
 	return NULL;
+}
+
+bool ConfigListBase::ChecksConfiguration() const
+{
+	return false;
 }
 
 std::ostream& operator<<(std::ostream& Stream, const ConfigListBase& ConfigListBase)

@@ -1,7 +1,9 @@
 #include "ConfigurationState.hpp"
 #include "ConvertException.hpp"
+#include "ConfigBase.hpp"
 
-ConfigurationState::ConfigurationState() : Root(""), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE) {}
+ConfigurationState::ConfigurationState() : Root(""), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), RedirectBase(NULL)  { }
+ConfigurationState::ConfigurationState(ConfigBase* RedirectBase) : Root(""), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), RedirectBase(RedirectBase) {}
 
 ConfigurationState::ConfigurationState(const ConfigurationState& From)
 {
@@ -18,6 +20,7 @@ ConfigurationState& ConfigurationState::operator = (const ConfigurationState& Fr
 	Root = From.Root;
 	ErrorUri = From.ErrorUri;
 	MaxBodySize = From.MaxBodySize;
+	RedirectBase = From.RedirectBase;
 
 	// return the existing object so we can chain this operator
 	return *this;
@@ -68,15 +71,24 @@ bool ConfigurationState::EatLine(const ConfigLine& Line)
 	return false;
 }
 
-ConfigResponse* ConfigurationState::Redirect(std::string Uri) const
+ConfigResponse* ConfigurationState::Redirect(const ConfigRequest& Request, std::string Uri) const
 {
-	(void)Uri;
-	// TODO: Redirects (Save Config as ConfigBase* Base, And call Base->GetResponse() with a new request with the new Uri)
+	if (!RedirectBase)
+		return NULL;
 
-	return NULL;
+	ConfigRequest* NewRequest = Request.RedirectUri(Uri);
+	if (!NewRequest)
+		return NULL;
+	
+	ConfigResponse* Response = RedirectBase->GetResponse(*NewRequest);
+	delete NewRequest;
+
+	return Response;
 }
 
-ConfigResponse* ConfigurationState::Error() const
+ConfigResponse* ConfigurationState::Error(const ConfigRequest& Request) const
 {
-	return Redirect(ErrorUri);
+	if (ErrorUri != "")
+		return Redirect(Request, ErrorUri);
+	return NULL;
 }

@@ -14,7 +14,7 @@ enum EnterResult
 };
 
 class ConfigListBase : public ConfigBase {
-	public: 
+	public:
 		ConfigListBase();
 		ConfigListBase(const ConfigurationState& Configuration);
 
@@ -24,8 +24,8 @@ class ConfigListBase : public ConfigBase {
 		friend std::ostream& operator<<(std::ostream& Stream, const ConfigListBase& ConfigListBase);
 		virtual void Print(std::ostream& Stream) const;
 	protected:
-
 		ConfigResponse* GetBaseResponse(const ConfigRequest& Request) const;
+		virtual bool ChecksConfiguration() const;
 
 		virtual EnterResult Enters(const ConfigRequest& Request) const = 0;
 

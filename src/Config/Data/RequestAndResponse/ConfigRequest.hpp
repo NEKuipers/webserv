@@ -4,6 +4,7 @@ class ConfigRequest;	// For include loops
 #define CONFIGREQUEST_HPP
 
 #include <ostream>
+#include <vector>
 
 class ConfigRequest {
 	public: 
@@ -17,6 +18,8 @@ class ConfigRequest {
 
 		// Public functions
 		friend std::ostream& operator<<(std::ostream& Stream, const ConfigRequest& ConfigRequest);
+
+		ConfigRequest* RedirectUri(std::string Uri) const;
 		
 		in_addr_t GetAddr() const;
 		in_port_t GetPort() const;
@@ -26,6 +29,8 @@ class ConfigRequest {
 		size_t GetContentLength() const;
 		const std::string& GetMethod() const;
 	private:
+		ConfigRequest(const ConfigRequest& From, const std::string& Uri);
+
 		// Class variables
 		in_addr_t Addr;
 		in_port_t Port;
@@ -36,6 +41,7 @@ class ConfigRequest {
 		std::string Method;
 		// Class functions
 		
+		std::vector<std::string> PreviousUris;	// To detect redirect loops
 };
 
 #endif

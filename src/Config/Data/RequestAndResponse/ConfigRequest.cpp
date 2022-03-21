@@ -10,9 +10,15 @@ ConfigRequest::ConfigRequest(const ConfigRequest& From)
 	this->operator=(From);
 }
 ConfigRequest::ConfigRequest(in_addr_t Addr, in_port_t Port, const std::string& ServerName, const std::string& Uri, size_t ContentLength, const std::string& Method) 
-	: Addr(Addr), Port(Port), ServerName(ServerName), Uri(Uri),ContentLength(ContentLength), Method(Method)
+	: Addr(Addr), Port(Port), ServerName(ServerName), Uri(Uri),ContentLength(ContentLength), Method(Method), PreviousUris()
 {
 
+}
+
+ConfigRequest::ConfigRequest(const ConfigRequest& From, const std::string& NewUri) 
+	: Addr(From.Addr), Port(From.Port), ServerName(From.ServerName), Uri(NewUri), ContentLength(From.ContentLength), Method(From.Method), PreviousUris(From.PreviousUris)
+{
+	PreviousUris.push_back(NewUri);
 }
 
 ConfigRequest::~ConfigRequest()
@@ -53,3 +59,12 @@ const std::string& ConfigRequest::GetServerName() const { return ServerName; }
 const std::string& ConfigRequest::GetUri() const { return Uri; }
 size_t ConfigRequest::GetContentLength() const { return ContentLength; }
 const std::string& ConfigRequest::GetMethod() const { return Method; }
+
+ConfigRequest* ConfigRequest::RedirectUri(std::string NewUri) const
+{
+	// Make sure we are not in a loop
+	for (std::vector<std::string>::const_iterator It = PreviousUris.begin(); It != PreviousUris.end(); It++)
+		if (*It == NewUri)
+			return NULL;
+	return new ConfigRequest(*this, NewUri);
+}

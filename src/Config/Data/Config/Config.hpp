@@ -15,7 +15,7 @@ class Config : public ConfigListBase {
 		friend std::ostream& operator<<(std::ostream& Stream, const Config& Config);
 	protected:
 		virtual EnterResult Enters(const ConfigRequest& Request) const;
-
+		
 		// Public functions
 	private:
 		// Class variables

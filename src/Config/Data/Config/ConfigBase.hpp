@@ -1,4 +1,7 @@
-#pragma once
+class ConfigBase;	// For include loops
+
+#ifndef ConfigBase_HPP
+#define ConfigBase_HPP
 
 #include "ConfigurationState.hpp"
 #include "ConfigRequest.hpp"
@@ -20,7 +23,7 @@ class ConfigBase {
 		friend std::ostream& operator<<(std::ostream& Stream, const ConfigBase& ConfigBase);
 		virtual void Print(std::ostream& Stream) const = 0;	// Apparently this is how you do virtual logging?
 	protected:
-
+		virtual bool ChecksConfiguration() const;
 		virtual ConfigResponse* GetBaseResponse(const ConfigRequest& Request) const = 0;
 		ConfigurationState Configuration;
 	private:
@@ -29,7 +32,6 @@ class ConfigBase {
 		// Class functions
 		
 };
-
 
 // Config lines:
 //V	listen host:port
@@ -54,3 +56,6 @@ class ConfigBase {
 // return [code] [text];				Returns code with text
 // directory [what];					Sets directory listing on/off/file
 // error_page [new_uri]					If we did not find a response, redirect to new_uri
+
+
+#endif

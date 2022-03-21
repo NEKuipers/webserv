@@ -5,11 +5,15 @@
 #include "ConfigRequest.hpp"
 #include "ConfigResponse.hpp"
 
+//#include "ConfigBase.hpp"
+class ConfigBase;
+
 // This class has all the configurations you could do, max body size, directory listing, root, etc etc
 class ConfigurationState {
 	public:
 		static const int DEFAULT_MAX_BODY_SIZE = 1048576;	// 1 mb
 		ConfigurationState();
+		ConfigurationState(ConfigBase* RedirectBase);
 		ConfigurationState(const ConfigurationState& From);
 
 		~ConfigurationState();
@@ -20,8 +24,8 @@ class ConfigurationState {
 
 		bool EatLine(const ConfigLine& Line);
 
-		ConfigResponse* Redirect(std::string Uri) const;
-		ConfigResponse* Error() const;
+		ConfigResponse* Redirect(const ConfigRequest& Request, std::string NewUri) const;
+		ConfigResponse* Error(const ConfigRequest& Request) const;
 
 		// Public functions
 		// Todo: directory, accepted methods
@@ -29,6 +33,8 @@ class ConfigurationState {
 		std::string ErrorUri;
 		size_t MaxBodySize;
 	private:
+
+		ConfigBase* RedirectBase;
 		// Class variables
 		
 		// Class functions

@@ -44,7 +44,8 @@ void ConfigLine_try_file::Print(std::ostream& Stream) const
 
 ConfigResponse* ConfigLine_try_file::GetBaseResponse(const ConfigRequest& Request) const
 {
-	(void)Request;
+	if (Request.GetMethod() != "GET")
+		return NULL;
 
 	for (std::vector<std::string>::const_iterator It = Files.begin(); It != Files.end(); It++)
 	{
@@ -65,7 +66,7 @@ ConfigResponse* ConfigLine_try_file::GetBaseResponse(const ConfigRequest& Reques
 ConfigLine_try_file* ConfigLine_try_file::TryParse(const ConfigLine& Line, const ConfigurationState& Configuration)
 {
 	std::vector<std::string> Args = Line.GetArguments();
-	if (Args.at(0) != "try_files")
+	if (Args.at(0) != "try_files" && Args.at(0) != "try_file")
 		return NULL;
 	
 	// Remove the first arg, the rest are files as arguments
