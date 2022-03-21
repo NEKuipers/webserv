@@ -1,7 +1,7 @@
 #include "ConfigurationState.hpp"
 #include "ConvertException.hpp"
 
-ConfigurationState::ConfigurationState() : Root(""), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), HasReadData(false) {}
+ConfigurationState::ConfigurationState() : Root(""), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE) {}
 
 ConfigurationState::ConfigurationState(const ConfigurationState& From)
 {
@@ -18,14 +18,23 @@ ConfigurationState& ConfigurationState::operator = (const ConfigurationState& Fr
 	Root = From.Root;
 	ErrorUri = From.ErrorUri;
 	MaxBodySize = From.MaxBodySize;
-	HasReadData = From.HasReadData;
 
 	// return the existing object so we can chain this operator
 	return *this;
 }
 
+bool ConfigurationState::IsValidWithRequest(const ConfigRequest& Request) const
+{
+	if (Request.GetContentLength() > MaxBodySize)
+		return false;
+	// TODO: Check accepted methods
+
+	return true;
+}
+
 bool ConfigurationState::EatLine(const ConfigLine& Line)
 {
+	// TODO: No if/elseif/elseif stuff, its ugly!
 	std::vector<std::string> Args = Line.GetArguments();
 	if (Args.at(0) == "root")
 	{
@@ -47,9 +56,6 @@ bool ConfigurationState::EatLine(const ConfigLine& Line)
 	{
 		if (Args.size() > 2)
 			throw ConvertException("Cannot read 'client_max_body_size' line, too manny arguments!");
-		
-		if (HasReadData)
-			throw ConvertException("Cannot read 'client_max_body_size' line, Data has already been read!");	// Makes no sense to try a file
 
 		char* End;
 		MaxBodySize = std::strtoul(Args.at(1).c_str(), &End, 10);
@@ -60,4 +66,17 @@ bool ConfigurationState::EatLine(const ConfigLine& Line)
 	}
 
 	return false;
+}
+
+ConfigResponse* ConfigurationState::Redirect(std::string Uri) const
+{
+	(void)Uri;
+	// TODO: Redirects (Save Config as ConfigBase* Base, And call Base->GetResponse() with a new request with the new Uri)
+
+	return NULL;
+}
+
+ConfigResponse* ConfigurationState::Error() const
+{
+	return Redirect(ErrorUri);
 }

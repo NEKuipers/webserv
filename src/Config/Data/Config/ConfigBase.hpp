@@ -1,25 +1,29 @@
 #pragma once
 
 #include "ConfigurationState.hpp"
+#include "ConfigRequest.hpp"
+#include "ConfigResponse.hpp"
 
-class Request;
-class Response;
-
-class RequestResponder {
+class ConfigBase {
 	public:
-		RequestResponder(const ConfigurationState& Configuration);
+		ConfigBase();
+		ConfigBase(const ConfigBase& From);
+		ConfigBase(const ConfigurationState& Configuration);
 
-		~RequestResponder();
+		ConfigBase& operator = (const ConfigBase& From);
 
+		virtual ~ConfigBase();
 
 		// Public functions
-		virtual const Response* GetResponse(const Request& Request) const = 0;
-	private:
+		ConfigResponse* GetResponse(const ConfigRequest& Request) const;	// Basically checks the Configuration if its valid with this request, if it is valid, returns GetBaseResponse(), otherwise returns null
+
+		friend std::ostream& operator<<(std::ostream& Stream, const ConfigBase& ConfigBase);
+		virtual void Print(std::ostream& Stream) const = 0;	// Apparently this is how you do virtual logging?
+	protected:
+
+		virtual ConfigResponse* GetBaseResponse(const ConfigRequest& Request) const = 0;
 		ConfigurationState Configuration;
 	private:
-		// No copying
-		RequestResponder(const RequestResponder& From);
-		RequestResponder& operator = (const RequestResponder& From);
 		// Class variables
 		
 		// Class functions

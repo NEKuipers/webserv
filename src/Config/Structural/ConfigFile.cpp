@@ -1,10 +1,13 @@
 #include "ConfigFile.hpp"
 #include <fstream>
+#include "ConvertException.hpp"
 
 ConfigFile::ConfigFile() {}
 ConfigFile::ConfigFile(const std::string& FilePath) : ConfigLines()
 {
 	std::fstream Stream(FilePath.c_str());
+	if (!Stream.good())
+		throw ConvertException("Failed to convert filepath '" + FilePath + "' into stream!");
 
 	Lexer Lexer(Stream);
 
