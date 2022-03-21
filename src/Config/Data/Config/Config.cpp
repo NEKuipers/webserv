@@ -1,5 +1,6 @@
 #include "Config.hpp"
 #include "ConfigLine_try_file.hpp"
+#include "ConfigLine_redirect.hpp"
 #include "ConvertException.hpp"
 
 static bool AddToChildren(std::vector<ConfigBase*>& Children, ConfigBase* ConfigBase)
@@ -19,7 +20,8 @@ Config::Config(const ConfigFile& File)
 		const ConfigLine& Line = *It;
 		if (Line.IsComment()
 		 || Configuration.EatLine(Line)
-		 || AddToChildren(Children, ConfigLine_try_file::TryParse(Line, Configuration)))
+		 || AddToChildren(Children, ConfigLine_try_file::TryParse(Line, Configuration))
+		 || AddToChildren(Children, ConfigLine_redirect::TryParse(Line, Configuration)))
 			continue;
 		
 		throw ConvertException("Could not determine the meaning of line: '" + Line.GetArguments()[0] + "'");
