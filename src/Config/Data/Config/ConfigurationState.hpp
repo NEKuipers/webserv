@@ -28,7 +28,7 @@ class ConfigurationState {
 		ConfigResponse* Error(const ConfigRequest& Request) const;
 
 		// Public functions
-		// Todo: directory, accepted methods
+		// TODO: directory, accepted methods
 		std::string Root;	// std::filesystem::path (I can't use fancy features, codam says i must use only the oldest of old stuff)
 		std::string ErrorUri;
 		size_t MaxBodySize;

@@ -44,6 +44,7 @@ void ConfigLine_try_file::Print(std::ostream& Stream) const
 
 ConfigResponse* ConfigLine_try_file::GetBaseResponse(const ConfigRequest& Request) const
 {
+	// TODO: Instead of checking here, inside the constructor change the configuration so it only accepts GET requests
 	if (Request.GetMethod() != "GET")
 		return NULL;
 

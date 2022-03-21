@@ -6,7 +6,8 @@ ConfigListBase::ConfigListBase(const ConfigurationState& Configuration) : Config
 
 ConfigListBase::~ConfigListBase()
 {
-	// TODO: Implement destructor
+	for (std::vector<ConfigBase*>::const_iterator It = Children.begin(); It != Children.end(); It++)
+		delete *It;
 }
 
 ConfigResponse* ConfigListBase::GetBaseResponse(const ConfigRequest& Request) const

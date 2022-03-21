@@ -21,7 +21,7 @@ ConfigFile::ConfigFile(const ConfigFile& From)
 
 ConfigFile::~ConfigFile()
 {
-	// TODO: Implement destructor
+	
 }
 
 ConfigFile& ConfigFile::operator = (const ConfigFile& From)

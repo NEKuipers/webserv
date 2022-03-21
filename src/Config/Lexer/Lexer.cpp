@@ -55,3 +55,16 @@ void Lexer::Step()
 	NextString = UnparsedString.substr(0, NumChars);
 	UnparsedString = NumChars < UnparsedString.length() ? UnparsedString.substr(NumChars) : "";
 }
+
+std::string Lexer::TokenToString(Token Token)
+{
+	switch (Token)
+	{
+		case EndOfFile: return "EOF";
+		case OpenParen: return "OpenParen";
+		case CloseParen: return "CloseParen";
+		case Stop: return "Stop";
+		case Word: return "Word";
+		default: return "Unknown token: " + std::to_string(Token);
+	}
+}

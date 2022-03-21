@@ -22,7 +22,7 @@ Config::Config(const ConfigFile& File)
 		 || AddToChildren(Children, ConfigLine_try_file::TryParse(Line, Configuration)))
 			continue;
 		
-		throw ConvertException("Could not determine meaing of line: '" + Line.GetArguments()[0] + "'");
+		throw ConvertException("Could not determine the meaning of line: '" + Line.GetArguments()[0] + "'");
 	}
 }
 
@@ -34,7 +34,7 @@ std::ostream& operator<<(std::ostream& Stream, const Config& Config)
 
 Config::~Config()
 {
-	// TODO: Implement destructor
+	
 }
 
 EnterResult Config::Enters(const ConfigRequest& Request) const

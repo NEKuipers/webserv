@@ -10,6 +10,6 @@ const char* UnexpectedTokenException::what () const throw () {
 std::ostream& operator<<(std::ostream& Stream, const UnexpectedTokenException& Exception)
 {
 	// TODO: Log location of token
-	Stream << "Unexpected token: " << Exception.Actual << ", Expected: " << Exception.Expected << "!" << std::endl;
+	Stream << "Unexpected token: " << Lexer::TokenToString(Exception.Actual) << ", Expected: " << Lexer::TokenToString(Exception.Expected) << "!" << std::endl;
 	return Stream;
 }

@@ -25,6 +25,8 @@ class Lexer {
 		// Public functions
 		Token Peek();
 		std::string Read(Token Expected);
+
+		static std::string TokenToString(Token Token);
 	private:
 		// No default constructors or copying
 		Lexer();

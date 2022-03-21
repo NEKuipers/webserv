@@ -17,13 +17,14 @@
 static void PrintResponse(const Config& Conf, const ConfigRequest& Request)
 {
 	ConfigResponse* Response = Conf.GetResponse(Request);
-	if (Response)
+	if (!Response)
 	{
-		Response->Print(std::cout);
-		std::cout << std::endl;
-	}
-	else
 		std::cout << "No Response!" << std::endl;
+		return;
+	}
+	
+	Response->Print(std::cout);
+	std::cout << std::endl;
 	delete Response;	// Cleanup
 }
 
