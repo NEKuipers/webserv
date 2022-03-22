@@ -13,23 +13,9 @@
 ConfigLine_server::ConfigLine_server() {}
 ConfigLine_server::ConfigLine_server(const ConfigBlock* Block, const ConfigurationState &Configuration_) : ConfigListBase(Configuration_)
 {
-	// TODO: Re-order location blocks in order of longest match length
+	ReadBlock("ConfigLine_server", BaseLines, Block->GetLines());
 	
-	const std::vector<ConfigLine>& Lines = Block->GetLines();
-
-	// TODO: Find a clean way to merge this loop and the loop in the Config constructor, while keeping contexts available
-	for (std::vector<ConfigLine>::const_iterator It = Lines.begin(); It != Lines.end(); It++)
-	{
-		const ConfigLine& Line = *It;
-		if (Configuration.EatLine(Line)
-		 || AddToChildren(ConfigLine_try_file::TryParse(Line, Configuration))
-		 || AddToChildren(ConfigLine_redirect::TryParse(Line, Configuration))
-		 || AddToChildren(ConfigLine_server  ::TryParse(Line, Configuration))
-		 || EatLine(Line))
-			continue;
-		
-		throw ConvertException("ConfigLine", "Server", "Could not determine the meaning of line: '" + Line.GetArguments()[0] + "' in Server context");
-	}
+	// TODO: Re-order location blocks in order of longest match length
 }
 
 ConfigLine_server::~ConfigLine_server()

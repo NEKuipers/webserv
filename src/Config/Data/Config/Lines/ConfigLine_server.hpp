@@ -23,6 +23,7 @@ class ConfigLine_server : public ConfigListBase {
 		static ConfigLine_server* TryParse(const ConfigLine& Line, const ConfigurationState& Configuration);
 	protected:
 		virtual EnterResult Enters(const ConfigRequest& Request) const;
+		virtual bool EatLine(const ConfigLine& Line);
 	private:
 		// No copying
 		ConfigLine_server(const ConfigLine_server& From);
@@ -33,7 +34,6 @@ class ConfigLine_server : public ConfigListBase {
 		std::vector<std::pair<in_addr_t, in_port_t> > Listens;
 		
 		// Class functions
-		bool EatLine(const ConfigLine& Line);
 };
 
 #endif

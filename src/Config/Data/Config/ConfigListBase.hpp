@@ -13,8 +13,12 @@ enum EnterResult
 	EnterResult_EnterAndError
 };
 
+
 class ConfigListBase : public ConfigBase {
 	public:
+		typedef ConfigBase* (*TryParseLineFunc)(const ConfigLine &Line, const ConfigurationState &Configuration);
+		static TryParseLineFunc BaseLines[];	// NOTE: For every different context i would want another array
+
 		ConfigListBase();
 		ConfigListBase(const ConfigurationState& Configuration);
 
@@ -24,13 +28,15 @@ class ConfigListBase : public ConfigBase {
 		friend std::ostream& operator<<(std::ostream& Stream, const ConfigListBase& ConfigListBase);
 		virtual void Print(std::ostream& Stream) const;
 	protected:
-		bool AddToChildren(ConfigBase* ConfigBase);
+		void ReadBlock(const std::string& CreateClass, const TryParseLineFunc* NullTerminatedParseFuncs, const std::vector<ConfigLine>& Lines);
+		virtual bool EatLine(const ConfigLine& Line);
 
 		ConfigResponse* GetBaseResponse(const ConfigRequest& Request) const;
 		virtual bool ChecksConfiguration() const;
 
 		virtual EnterResult Enters(const ConfigRequest& Request) const = 0;
 
+		bool AddToChildren(ConfigBase* ConfigBase);
 		std::vector<ConfigBase*> Children;
 	private:
 		// We dont do copying
