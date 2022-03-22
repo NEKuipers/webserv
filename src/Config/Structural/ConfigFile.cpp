@@ -7,7 +7,7 @@ ConfigFile::ConfigFile(const std::string& FilePath) : ConfigLines()
 {
 	std::fstream Stream(FilePath.c_str());
 	if (!Stream.good())
-		throw ConvertException("Failed to convert filepath '" + FilePath + "' into stream!");
+		throw ConvertException("FilePath " + FilePath, "Stream", "Stream was not good!");
 
 	Lexer Lexer(Stream);
 

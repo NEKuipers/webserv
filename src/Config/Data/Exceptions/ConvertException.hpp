@@ -6,9 +6,11 @@
 
 struct ConvertException : public std::exception
 {
-	const std::string Message;
+	const std::string From;
+	const std::string To;
+	const std::string Reason;
 
-	ConvertException(const std::string& Message);
+	ConvertException(const std::string& From, const std::string& To, const std::string& Reason);
 
 	virtual ~ConvertException() _NOEXCEPT;
 

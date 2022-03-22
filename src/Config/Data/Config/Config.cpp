@@ -1,15 +1,8 @@
 #include "Config.hpp"
 #include "ConfigLine_try_file.hpp"
 #include "ConfigLine_redirect.hpp"
+#include "ConfigLine_server.hpp"
 #include "ConvertException.hpp"
-
-static bool AddToChildren(std::vector<ConfigBase*>& Children, ConfigBase* ConfigBase)
-{
-	if (!ConfigBase)
-		return false;
-	Children.push_back(ConfigBase);
-	return true;
-}
 
 Config::Config(const ConfigFile& File)
 {
@@ -19,11 +12,12 @@ Config::Config(const ConfigFile& File)
 	{
 		const ConfigLine& Line = *It;
 		if (Configuration.EatLine(Line)
-		 || AddToChildren(Children, ConfigLine_try_file::TryParse(Line, Configuration))
-		 || AddToChildren(Children, ConfigLine_redirect::TryParse(Line, Configuration)))
+		 || AddToChildren(ConfigLine_try_file::TryParse(Line, Configuration))
+		 || AddToChildren(ConfigLine_redirect::TryParse(Line, Configuration))
+		 || AddToChildren(ConfigLine_server  ::TryParse(Line, Configuration)))
 			continue;
 		
-		throw ConvertException("Could not determine the meaning of line: '" + Line.GetArguments()[0] + "'");
+		throw ConvertException("ConfigLine", "Config", "Could not determine the meaning of line: '" + Line.GetArguments()[0] + "' in Config context");
 	}
 }
 

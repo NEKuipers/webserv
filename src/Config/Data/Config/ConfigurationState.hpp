@@ -33,7 +33,7 @@ class ConfigurationState {
 		std::string ErrorUri;
 		size_t MaxBodySize;
 
-		std::string InterperetEnvVariable(const std::string& String, const ConfigRequest& Request) const;	// Ill probably want to use some state to change the env stuff, so its here even tho it does not use anything of the state for now
+		std::string InterperetEnvVariable(const std::string& String, const ConfigRequest* Request) const;	// Ill probably want to use some state to change the env stuff, so its here even tho it does not use anything of the state for now
 	private:
 
 		ConfigBase* RedirectBase;

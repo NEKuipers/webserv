@@ -43,6 +43,14 @@ ConfigResponse* ConfigListBase::GetBaseResponse(const ConfigRequest& Request) co
 	return NULL;
 }
 
+bool ConfigListBase::AddToChildren(ConfigBase* ConfigBase)
+{
+	if (!ConfigBase)
+		return false;
+	Children.push_back(ConfigBase);
+	return true;
+}
+
 bool ConfigListBase::ChecksConfiguration() const
 {
 	return false;

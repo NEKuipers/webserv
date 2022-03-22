@@ -6,11 +6,9 @@
 class Config : public ConfigListBase {
 	public: 
 		Config(const ConfigFile& File);
-		Config(const Config& From);
 
 		~Config();
 
-		Config& operator = (const Config& From);
 
 		friend std::ostream& operator<<(std::ostream& Stream, const Config& Config);
 	protected:
@@ -18,6 +16,10 @@ class Config : public ConfigListBase {
 		
 		// Public functions
 	private:
+		// No copying
+		Config(const Config& From);
+		Config& operator = (const Config& From);
+
 		// Class variables
 		
 		// Class functions

@@ -47,12 +47,18 @@ int         main(int argc, char **argv)
 		inet_aton("127.0.0.1", &Addr);
 
 		// Note: Currently it does not use the URI, so the "File1" stuff is pretty pointless now
-		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(27162), "test.com", "File1", 0, "GET"));
-		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test.com", "File2", 0, "GET"));
-		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test.com", "File2", 128, "GET"));
-		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test.com", "File3", 128, "GET"));
-		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test.com", "File1", 128, "GET"));	// This will go to the error page
-		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test.com", "File4", ~0, "GET"));	// Max content-length, too big for anything to accept it, will try to redirect to ErrorPage, but will be too big for even the error page... Not sure how im going to handle that...
+		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(27162), "test1.com", "File1", 0, "GET"));
+		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test1.com", "File2", 0, "GET"));
+		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test1.com", "File2", 128, "GET"));
+		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test1.com", "File3", 128, "GET"));
+		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test1.com", "File1", 128, "GET"));	// This will go to the error page
+		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test1.com", "File4", ~0, "GET"));	// Max content-length, too big for anything to accept it, will try to redirect to ErrorPage, but will be too big for even the error page... Not sure how im going to handle that...
+
+		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(27162), "test2.com", "File1", 0, "GET"));
+		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test2.com", "File2", 0, "GET"));
+		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(80), "unknown.com", "File1", 0, "GET"));	// This one should return default80/File1
+		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "unknown.com", "File1", 0, "GET"));	// And this one default/File1
+
 
 		return 0;
 

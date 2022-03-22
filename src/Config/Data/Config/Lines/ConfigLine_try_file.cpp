@@ -50,7 +50,7 @@ ConfigResponse* ConfigLine_try_file::GetBaseResponse(const ConfigRequest& Reques
 
 	for (std::vector<std::string>::const_iterator It = Files.begin(); It != Files.end(); It++)
 	{
-		std::string File = Configuration.InterperetEnvVariable(*It, Request);
+		std::string File = Configuration.InterperetEnvVariable(*It, &Request);
 		File = Configuration.Root + "/" + File;	// Isn't there a utility function that combines paths?
 		// TODO: The file path can be pretty much anything, considering it is being parsed with env strings you can basically access any file, limit it to only access files inside the Configuration.Root directory
 

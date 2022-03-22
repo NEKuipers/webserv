@@ -22,7 +22,8 @@ class ConfigBase {
 
 		friend std::ostream& operator<<(std::ostream& Stream, const ConfigBase& ConfigBase);
 		virtual void Print(std::ostream& Stream) const = 0;	// Apparently this is how you do virtual logging?
-	protected:
+
+	protected:		
 		virtual bool ChecksConfiguration() const;
 		virtual ConfigResponse* GetBaseResponse(const ConfigRequest& Request) const = 0;
 		ConfigurationState Configuration;

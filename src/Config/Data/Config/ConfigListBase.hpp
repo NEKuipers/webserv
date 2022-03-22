@@ -24,6 +24,8 @@ class ConfigListBase : public ConfigBase {
 		friend std::ostream& operator<<(std::ostream& Stream, const ConfigListBase& ConfigListBase);
 		virtual void Print(std::ostream& Stream) const;
 	protected:
+		bool AddToChildren(ConfigBase* ConfigBase);
+
 		ConfigResponse* GetBaseResponse(const ConfigRequest& Request) const;
 		virtual bool ChecksConfiguration() const;
 

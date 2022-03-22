@@ -1,6 +1,6 @@
 #include "ConvertException.hpp"
 
-ConvertException::ConvertException(const std::string& Message) : Message(Message) { }
+ConvertException::ConvertException(const std::string& From, const std::string& To, const std::string& Reason) : From(From), To(To), Reason(Reason) { }
 
 ConvertException::~ConvertException() _NOEXCEPT
 {
@@ -8,10 +8,10 @@ ConvertException::~ConvertException() _NOEXCEPT
 }
 
 const char* ConvertException::what () const throw () {
-	return Message.c_str();
+	return Reason.c_str();
 }
 
 std::ostream& operator<<(std::ostream& Stream, const ConvertException& Exception)
 {
-	return Stream << Exception.Message;
+	return Stream << "Could not convert '" + Exception.From + "' into '" + Exception.To + "': " + Exception.Reason;	// Why can't i replace the + with <<?
 }
