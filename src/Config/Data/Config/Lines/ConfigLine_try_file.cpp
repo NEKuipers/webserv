@@ -4,6 +4,8 @@
 #include <iostream>
 #include "FileResponse.hpp"
 
+#include <stdlib.h>	// realpath
+
 ConfigLine_try_file::ConfigLine_try_file() : Files() { }
 ConfigLine_try_file::ConfigLine_try_file(const ConfigLine_try_file& From) : Files()
 {
@@ -52,13 +54,23 @@ ConfigResponse* ConfigLine_try_file::GetBaseResponse(const ConfigRequest& Reques
 	{
 		std::string File = Configuration.InterperetEnvVariable(*It, &Request);
 		File = Configuration.Root + "/" + File;	// Isn't there a utility function that combines paths?
-		// TODO: The file path can be pretty much anything, considering it is being parsed with env strings you can basically access any file, limit it to only access files inside the Configuration.Root directory
+		
+		// Check if the File is inside the Root directory, Small problem: If you symlink outside, it still fails, why is checked? Well, you dont want someone asking for file "../../Makefile" or whatever other file
+		char ActualPath[PATH_MAX+1];	// Not sure how i feel about allocating 1025 bytes on the stack, also can't be static, thread safety ya know?
+		char* ptr = realpath(File.c_str(), ActualPath);
+		if (!ptr)
+			continue;	// The file does not exist
 
-		// TODO: I dont like allocating just to see if it is successfull, but FileResponse takes in a pointer, since you can't copy a stream, and this is OLD cpp, so doing some move magic isn't an option either
-		std::ifstream* Stream = new std::ifstream(File);
+		if (strncmp(ActualPath, Configuration.Root.c_str(), Configuration.Root.length()))
+		{
+			std::cerr << Request << ": Asked for '" << File << "', But was not inside the root directory: '" << Configuration.Root << "'!" << std::endl;
+			continue;	// The File path did NOT start with root, this is not what we want!
+		}
+
+		std::ifstream* Stream = new std::ifstream(ActualPath);
 		if (Stream->is_open())
 			return new FileResponse(File, Stream);
-		delete Stream;
+		delete Stream;	// Well, realpath said the file exists, but we can't open it? Well, whatever, just continue
 	}
 	return NULL;
 }

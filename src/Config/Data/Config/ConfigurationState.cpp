@@ -2,6 +2,8 @@
 #include "ConvertException.hpp"
 #include "ConfigBase.hpp"
 
+#include <stdlib.h>	// realpath
+
 ConfigurationState::ConfigurationState() : Root(""), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), RedirectBase(NULL)  { }
 ConfigurationState::ConfigurationState(ConfigBase* RedirectBase) : Root(""), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), RedirectBase(RedirectBase) {}
 
@@ -45,6 +47,15 @@ bool ConfigurationState::EatLine(const ConfigLine& Line)
 			throw ConvertException("ConfigLine", "root", "too many arguments, Expected 2, but got " + std::to_string(Args.size()));
 
 		Root = InterperetEnvVariable(Args.size() > 1 ? Args.at(1) : "", NULL);
+
+		// Now convert it to the real path
+		char ActualPath[PATH_MAX+1];
+		char* ptr = realpath(Root.c_str(), ActualPath);
+		if (!ptr)
+			throw ConvertException("ConfigLine", "root", "Root does not exist!");
+
+		Root = std::string(ActualPath);
+
 		return true;
 	}
 	else if (Args.at(0) == "error_uri")

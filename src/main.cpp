@@ -16,8 +16,9 @@
 
 static void PrintResponse(const Config& Conf, const ConfigRequest& Request)
 {
-	std::cout << Request << " => ";
 	ConfigResponse* Response = Conf.GetResponse(Request);
+
+	std::cout << Request << " => ";
 	if (!Response)
 	{
 		std::cout << "No Response!" << std::endl;
@@ -61,6 +62,7 @@ int         main(int argc, char **argv)
 		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test2.com", "forbidden/secrets", 0, "GET"));
 		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(80), "unknown.com", "File1", 0, "GET"));	// This one should return default80/File1
 		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "unknown.com", "File1", 0, "GET"));	// And this one default/File1
+		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test1.com", "../../Makefile", 0, "GET"));	// Yeah, no
 
 
 		return 0;
