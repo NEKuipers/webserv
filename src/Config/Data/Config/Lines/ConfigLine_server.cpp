@@ -11,9 +11,9 @@
 #include <arpa/inet.h>
 
 ConfigLine_server::ConfigLine_server() {}
-ConfigLine_server::ConfigLine_server(const ConfigBlock* Block, const ConfigurationState &Configuration_) : ConfigListBase(Configuration_)
+ConfigLine_server::ConfigLine_server(const ConfigBlock& Block, const ConfigurationState &Configuration_) : ConfigListBase(Configuration_)
 {
-	ReadBlock("ConfigLine_server", BaseLines, Block->GetLines());
+	ReadBlock("ConfigLine_server", BaseLines, Block.GetLines());
 	
 	// TODO: Re-order location blocks in order of longest match length
 }
@@ -70,7 +70,7 @@ ConfigLine_server* ConfigLine_server::TryParse(const ConfigLine& Line, const Con
 	if (Block == NULL)
 		throw ConvertException("ConfigLine", "ConfigLine_server", "Missing block!");
 	
-	return new ConfigLine_server(Block, Configuration);
+	return new ConfigLine_server(*Block, Configuration);
 }
 
 EnterResult ConfigLine_server::Enters(const ConfigRequest& Request) const

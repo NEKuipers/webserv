@@ -12,7 +12,7 @@ class ConfigLine_server : public ConfigListBase {
 		static const in_port_t DEFAULT_PORT = htons(80);
 
 		ConfigLine_server();
-		ConfigLine_server(const ConfigBlock* Block, const ConfigurationState &Configuration);
+		ConfigLine_server(const ConfigBlock& Block, const ConfigurationState &Configuration);
 
 		virtual ~ConfigLine_server();
 

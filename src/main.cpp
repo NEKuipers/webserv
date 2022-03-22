@@ -56,6 +56,9 @@ int         main(int argc, char **argv)
 
 		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(27162), "test2.com", "File1", 0, "GET"));
 		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test2.com", "File2", 0, "GET"));
+		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test2.com", "test/File2", 0, "GET"));
+		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test2.com", "test/File1", 0, "GET"));
+		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test2.com", "forbidden/secrets", 0, "GET"));
 		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(80), "unknown.com", "File1", 0, "GET"));	// This one should return default80/File1
 		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "unknown.com", "File1", 0, "GET"));	// And this one default/File1
 
