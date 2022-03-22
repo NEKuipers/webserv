@@ -4,8 +4,8 @@
 
 #include <stdlib.h>	// realpath
 
-ConfigurationState::ConfigurationState() : Root(""), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), RedirectBase(NULL)  { }
-ConfigurationState::ConfigurationState(ConfigBase* RedirectBase) : Root(""), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), RedirectBase(RedirectBase) {}
+ConfigurationState::ConfigurationState() : AcceptedMethods(), Root(""), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), RedirectBase(NULL) { }
+ConfigurationState::ConfigurationState(ConfigBase* RedirectBase) : AcceptedMethods(), Root(""), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), RedirectBase(RedirectBase) {}
 
 ConfigurationState::ConfigurationState(const ConfigurationState& From)
 {
@@ -23,16 +23,30 @@ ConfigurationState& ConfigurationState::operator = (const ConfigurationState& Fr
 	ErrorUri = From.ErrorUri;
 	MaxBodySize = From.MaxBodySize;
 	RedirectBase = From.RedirectBase;
+	AcceptedMethods = From.AcceptedMethods;
 
 	// return the existing object so we can chain this operator
 	return *this;
+}
+
+bool ConfigurationState::AcceptsMethod(const std::string& Method) const
+{
+	if (AcceptedMethods.size() == 0)
+		return true;
+
+	for (std::vector<std::string>::const_iterator It = AcceptedMethods.begin(); It != AcceptedMethods.end(); It++)
+		if (*It == Method)
+			return true;
+
+	return false;
 }
 
 bool ConfigurationState::IsValidWithRequest(const ConfigRequest& Request) const
 {
 	if (Request.GetContentLength() > MaxBodySize)
 		return false;
-	// TODO: Check accepted methods
+	if (!AcceptsMethod(Request.GetMethod()))
+		return false;
 
 	return true;
 }
@@ -76,6 +90,12 @@ bool ConfigurationState::EatLine(const ConfigLine& Line)
 		// Check if the string contained more than just a number
 		if (End != &Args.at(1).c_str()[Args.at(1).length()])
 			throw ConvertException("ConfigLine", "client_max_body_size", "size contained more than just a number");
+		return true;
+	}
+	else if (Args.at(0) == "accepted_methods")
+	{
+		AcceptedMethods.clear();
+		AcceptedMethods.insert(AcceptedMethods.end(), Args.begin() + 1, Args.end());
 		return true;
 	}
 

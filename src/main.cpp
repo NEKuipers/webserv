@@ -9,6 +9,7 @@
 #include <iostream>
 #include "UnexpectedTokenException.hpp"
 #include "ConvertException.hpp"
+#include "MethodException.hpp"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -64,6 +65,8 @@ int         main(int argc, char **argv)
 		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "unknown.com", "File1", 0, "GET"));	// And this one default/File1
 		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test1.com", "../../Makefile", 0, "GET"));	// Yeah, no
 
+		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(80), "test2.com", "post/File1", 128, "POST"));	// Well...
+
 
 		return 0;
 
@@ -76,6 +79,9 @@ int         main(int argc, char **argv)
 		std::cout << E << std::endl;
 		return 1;
 	} catch (ConvertException E) {
+		std::cout << E << std::endl;
+		return 1;
+	} catch (MethodException E) {
 		std::cout << E << std::endl;
 		return 1;
 	}

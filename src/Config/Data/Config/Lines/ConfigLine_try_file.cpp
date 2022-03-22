@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include "FileResponse.hpp"
+#include "MethodException.hpp"
 
 #include <stdlib.h>	// realpath
 
@@ -11,7 +12,15 @@ ConfigLine_try_file::ConfigLine_try_file(const ConfigLine_try_file& From) : File
 {
 	this->operator=(From);
 }
-ConfigLine_try_file::ConfigLine_try_file(const std::vector<std::string>& Files, const ConfigurationState& Configuration) : ConfigBase(Configuration), Files(Files) { }
+ConfigLine_try_file::ConfigLine_try_file(const std::vector<std::string>& Files, const ConfigurationState& _Configuration) : ConfigBase(_Configuration), Files(Files)
+{
+	if (!Configuration.AcceptsMethod("GET"))
+		throw MethodException("try_file", "GET");
+
+	// We only accept GET requests
+	Configuration.AcceptedMethods.clear();
+	Configuration.AcceptedMethods.push_back("GET");
+}
 
 ConfigLine_try_file::~ConfigLine_try_file()
 {
@@ -46,10 +55,6 @@ void ConfigLine_try_file::Print(std::ostream& Stream) const
 
 ConfigResponse* ConfigLine_try_file::GetBaseResponse(const ConfigRequest& Request) const
 {
-	// TODO: Instead of checking here, inside the constructor change the configuration so it only accepts GET requests
-	if (Request.GetMethod() != "GET")
-		return NULL;
-
 	for (std::vector<std::string>::const_iterator It = Files.begin(); It != Files.end(); It++)
 	{
 		std::string File = Configuration.InterperetEnvVariable(*It, &Request);

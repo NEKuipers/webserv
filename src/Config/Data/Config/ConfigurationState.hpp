@@ -4,6 +4,7 @@
 #include "ConfigLine.hpp"
 #include "ConfigRequest.hpp"
 #include "ConfigResponse.hpp"
+#include <vector>
 
 //#include "ConfigBase.hpp"
 class ConfigBase;
@@ -20,6 +21,7 @@ class ConfigurationState {
 
 		ConfigurationState& operator = (const ConfigurationState& From);
 
+		bool AcceptsMethod(const std::string& Method) const;
 		bool IsValidWithRequest(const ConfigRequest& Request) const;
 
 		bool EatLine(const ConfigLine& Line);
@@ -28,14 +30,15 @@ class ConfigurationState {
 		ConfigResponse* Error(const ConfigRequest& Request) const;
 
 		// Public functions
-		// TODO: directory, accepted methods
+		// TODO: directory
+		std::vector<std::string> AcceptedMethods;
+
 		std::string Root;	// std::filesystem::path (I can't use fancy features, codam says i must use only the oldest of old stuff)
 		std::string ErrorUri;
 		size_t MaxBodySize;
 
 		std::string InterperetEnvVariable(const std::string& String, const ConfigRequest* Request) const;	// Ill probably want to use some state to change the env stuff, so its here even tho it does not use anything of the state for now
 	private:
-
 		ConfigBase* RedirectBase;
 		// Class variables
 		
