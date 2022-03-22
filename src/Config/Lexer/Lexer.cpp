@@ -45,9 +45,14 @@ void Lexer::Step()
 		case '{': NextToken = OpenParen;	NumChars = 1; break;
 		case '}': NextToken = CloseParen;	NumChars = 1; break;
 		case ';': NextToken = Stop;			NumChars = 1; break;
+		case '#':
+			// This is a comment, read untill next \n, clear unparsed string, and return the next step
+			std::getline(Stream, UnparsedString);
+			UnparsedString = "";
+			return Step();
 		default :
 			NextToken = Word;
-			NumChars = UnparsedString.find_first_of("{};");	// if no matches found, returns -1, due to it being unsigned, its the max number
+			NumChars = UnparsedString.find_first_of("{};#");	// if no matches found, returns -1, due to it being unsigned, its the max number
 			break;
 	}
 

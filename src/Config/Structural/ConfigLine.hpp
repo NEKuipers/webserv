@@ -24,8 +24,6 @@ class ConfigLine {
 		friend std::ostream& operator<<(std::ostream& Stream, const ConfigLine& Line);
 		ConfigBlock* GetBlock() const;
 		const std::vector<std::string>& GetArguments() const;
-
-		bool IsComment() const;
 	private:
 		// Class variables
 		std::vector<std::string> Arguments;

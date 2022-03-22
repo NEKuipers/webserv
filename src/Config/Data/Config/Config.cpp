@@ -18,8 +18,7 @@ Config::Config(const ConfigFile& File)
 	for (std::vector<ConfigLine>::const_iterator It = Lines.begin(); It != Lines.end(); It++)
 	{
 		const ConfigLine& Line = *It;
-		if (Line.IsComment()
-		 || Configuration.EatLine(Line)
+		if (Configuration.EatLine(Line)
 		 || AddToChildren(Children, ConfigLine_try_file::TryParse(Line, Configuration))
 		 || AddToChildren(Children, ConfigLine_redirect::TryParse(Line, Configuration)))
 			continue;

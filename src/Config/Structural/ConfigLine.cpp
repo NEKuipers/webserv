@@ -37,11 +37,6 @@ ConfigLine& ConfigLine::operator = (const ConfigLine& From)
 ConfigBlock* ConfigLine::GetBlock() const { return Block; }
 const std::vector<std::string>& ConfigLine::GetArguments() const { return Arguments; }
 
-bool ConfigLine::IsComment() const
-{
-	return Arguments[0].at(0) == '#';
-}
-
 std::ostream& operator<<(std::ostream& Stream, const ConfigLine& Line)
 {
 	for (size_t i = 0; i < Line.Arguments.size(); i++)
