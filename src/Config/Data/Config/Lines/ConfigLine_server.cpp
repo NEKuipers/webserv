@@ -91,7 +91,7 @@ bool ConfigLine_server::MatchesIP(const ConfigRequest& Request) const
 EnterResult ConfigLine_server::Enters(const ConfigRequest& Request) const
 {
 	(void)Request;
-	
+
 	// Due to overloaded GetIteratorResponse we know already that we should enter
 	/*
 	if (ServerNames.size() > 0)
@@ -174,8 +174,10 @@ ConfigResponse* ConfigLine_server::GetIteratorResponse(std::vector<ConfigBase*>:
 		
 		if (Curr->MatchesServerName(Request))
 		{
-			// Matching/wildcard IP and matching server name? take it!
-			return Curr->GetBaseResponse(Request);
+			if (IpMatch)
+				return Curr->GetBaseResponse(Request);	// Well, IP matches, and server name matches, there is no way we have a server that has a higher priority
+			else
+				Default = Curr;	// wildcard IP and matching server name? set new default
 		}
 	}
 
