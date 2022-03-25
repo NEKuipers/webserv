@@ -45,11 +45,11 @@ ConfigResponse* ConfigListBase::GetBaseResponse(const ConfigRequest& Request) co
 			throw "Unknown EnterResult was returned!";	
 	}
 
-	for (std::vector<ConfigBase*>::const_iterator It = Children.begin(); It != Children.end(); It++)
+	for (std::vector<ConfigBase*>::const_iterator It = Children.begin(); It != Children.end();) // It++)
 	{
 		const ConfigBase* Child = *It;
 
-		ConfigResponse* Response = Child->GetResponse(Request);
+		ConfigResponse* Response = Child->GetIteratorResponse(It, Children.end(), Request); //Child->GetResponse(Request);
 		if (Response)
 			return Response;
 	}

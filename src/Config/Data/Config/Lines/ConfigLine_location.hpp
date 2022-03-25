@@ -18,6 +18,8 @@ class ConfigLine_location : public ConfigListBase {
 		void Print(std::ostream& Stream) const;
 
 		static ConfigLine_location* TryParse(const ConfigLine& Line, const ConfigurationState& Configuration);
+
+		virtual ConfigResponse* GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request) const;
 	protected:
 		virtual EnterResult Enters(const ConfigRequest& Request) const;
 	private:

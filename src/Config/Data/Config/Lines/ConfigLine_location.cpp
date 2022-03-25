@@ -53,3 +53,29 @@ EnterResult ConfigLine_location::Enters(const ConfigRequest& Request) const
 
 	return EnterResult_EnterAndError;
 }
+
+ConfigResponse* ConfigLine_location::GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request) const
+{
+	const ConfigLine_location* Best = NULL;
+
+	while (It != ItEnd)
+	{
+		const ConfigLine_location* Curr = dynamic_cast<const ConfigLine_location*>(*It);
+		if (!Curr)
+			break;
+		It++;
+
+		EnterResult Enters = Curr->Enters(Request);
+		if (Enters == EnterResult_No)
+			continue;
+		if (Curr->ChecksConfiguration() && !Curr->Configuration.IsValidWithRequest(Request))
+			continue;
+		
+		if (Best == NULL || Best->Location.length() < Curr->Location.length())
+			Best = Curr;
+	}
+
+	if (!Best)
+		return NULL;
+	return Best->GetBaseResponse(Request);
+}
