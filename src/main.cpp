@@ -64,10 +64,14 @@ int         main(int argc, char **argv)
 		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(80), "unknown.com", "File1", 0, "GET"));	// This one should return default80/File1
 		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "unknown.com", "File1", 0, "GET"));	// And this one default/File1
 		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test1.com", "../../Makefile", 0, "GET"));	// Yeah, no
+		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test2.com", "test/../forbidden/secrets", 0, "GET"));	// Also no, even though the root has not changed
 
 		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(80), "test2.com", "post/File1", 128, "POST"));	// Well...
 
 		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "unknown.com", "add.cgi", 0, "GET"));
+
+		// Mhhh, yeah, still some problems here, not sure how i can prevent this though
+		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "test2.com", "test/../File2", 0, "GET"));	// Gets supposedly overridden File2
 
 
 		return 0;

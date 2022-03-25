@@ -14,12 +14,17 @@ ConfigLine_try_cgi::ConfigLine_try_cgi(const ConfigLine_try_cgi& From) : cgis()
 }
 ConfigLine_try_cgi::ConfigLine_try_cgi(const std::vector<std::string>& cgis, const ConfigurationState& _Configuration) : ConfigBase(_Configuration), cgis(cgis)
 {
-	if (!Configuration.AcceptsMethod("GET"))
-		throw MethodException("try_cgi", "GET");
+	bool AcceptsGet = Configuration.AcceptsMethod("GET");
+	bool AcceptsPost = Configuration.AcceptsMethod("POST");
+	if (!AcceptsGet && !AcceptsPost)
+		throw MethodException("try_cgi", "GET/POST");
 
-	// We only accept GET requests
+	// We only accept those 2 requests
 	Configuration.AcceptedMethods.clear();
-	Configuration.AcceptedMethods.push_back("GET");
+	if (AcceptsGet)
+		Configuration.AcceptedMethods.push_back("GET");
+	if (AcceptsPost)
+		Configuration.AcceptedMethods.push_back("POST");
 }
 
 ConfigLine_try_cgi::~ConfigLine_try_cgi()
@@ -60,19 +65,10 @@ ConfigResponse* ConfigLine_try_cgi::GetBaseResponse(const ConfigRequest& Request
 		std::string cgi = Configuration.InterperetEnvVariable(*It, &Request);
 		cgi = Configuration.Root + "/" + cgi;	// Isn't there a utility function that combines paths?
 		
-		// Check if the cgi is inside the Root directory, Small problem: If you symlink outside, it still fails, why is checked? Well, you dont want someone asking for cgi "../../Makecgi" or whatever other cgi
-		char ActualPath[PATH_MAX+1];	// Not sure how i feel about allocating 1025 bytes on the stack, also can't be static, thread safety ya know?
-		char* ptr = realpath(cgi.c_str(), ActualPath);
-		if (!ptr)
-			continue;	// The cgi does not exist
+		if (!Configuration.IsFileValid(cgi, Request))
+			continue;
 
-		if (strncmp(ActualPath, Configuration.Root.c_str(), Configuration.Root.length()))
-		{
-			std::cerr << Request << ": Asked for '" << cgi << "', But was not inside the root directory: '" << Configuration.Root << "'!" << std::endl;
-			continue;	// The cgi path did NOT start with root, this is not what we want!
-		}
-
-		return new CgiResponse(ActualPath);
+		return new CgiResponse(cgi);
 	}
 	return NULL;
 }
