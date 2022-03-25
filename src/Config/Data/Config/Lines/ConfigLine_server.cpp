@@ -153,10 +153,17 @@ bool ConfigLine_server::EatLine(const ConfigLine& Line)
 ConfigResponse* ConfigLine_server::GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request) const
 {
 	const ConfigLine_server* Default = NULL;
+	bool DefaultIpMatch = false;
 
 	// Basically:
-	//	The first one that matches the IP is the default
+	//	The first one that matches the server_name is the default, otherwise the first one that matches the ip, and otherwise the first wildcard ip
 	//	If there is one that matches both the IP AND server name, instantly return that
+
+	// So the priority is:
+	//	IP && NAME
+	//	NAME
+	//	IP
+	//	Wildcard IP
 
 	while (It != ItEnd)
 	{
@@ -165,19 +172,25 @@ ConfigResponse* ConfigLine_server::GetIteratorResponse(std::vector<ConfigBase*>:
 			break;
 		It++;
 
-		bool IpMatch = MatchesIP(Request);
+		bool IpMatch = Curr->MatchesIP(Request);
 		if (!IpMatch && Curr->Listens.size() > 0)
 			continue;	// Ip does not match, but a ip was specified, this server does not respond.
 		
-		if (Default == NULL)	// && IpMatch)
+		if (Default == NULL || (IpMatch && !DefaultIpMatch))
+		{
 			Default = Curr;	// Set the default, first server that matches ip
+			DefaultIpMatch = IpMatch;
+		}
 		
 		if (Curr->MatchesServerName(Request))
 		{
 			if (IpMatch)
 				return Curr->GetBaseResponse(Request);	// Well, IP matches, and server name matches, there is no way we have a server that has a higher priority
 			else
+			{
 				Default = Curr;	// wildcard IP and matching server name? set new default
+				DefaultIpMatch = true;	// only matching server name has more priority than only matching ip
+			}
 		}
 	}
 
