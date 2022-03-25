@@ -2,6 +2,7 @@
 #include "PrefixStreambuf.hpp"
 
 #include "ConfigLine_try_file.hpp"
+#include "ConfigLine_try_cgi.hpp"
 #include "ConfigLine_redirect.hpp"
 #include "ConfigLine_server.hpp"
 #include "ConfigLine_location.hpp"
@@ -14,6 +15,7 @@ ConfigListBase::TryParseLineFunc ConfigListBase::BaseLines[] = {
 	(ConfigListBase::TryParseLineFunc) ConfigLine_redirect::TryParse,
 	(ConfigListBase::TryParseLineFunc) ConfigLine_server  ::TryParse,
 	(ConfigListBase::TryParseLineFunc) ConfigLine_location::TryParse,
+	(ConfigListBase::TryParseLineFunc) ConfigLine_try_cgi ::TryParse,
 	NULL
 };
 

@@ -67,6 +67,8 @@ int         main(int argc, char **argv)
 
 		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(80), "test2.com", "post/File1", 128, "POST"));	// Well...
 
+		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(82712), "unknown.com", "add.cgi", 0, "GET"));
+
 
 		return 0;
 
