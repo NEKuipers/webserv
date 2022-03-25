@@ -21,6 +21,8 @@ class ConfigLine_server : public ConfigListBase {
 		void Print(std::ostream& Stream) const;
 		
 		static ConfigLine_server* TryParse(const ConfigLine& Line, const ConfigurationState& Configuration);
+
+		virtual ConfigResponse* GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request) const;
 	protected:
 		virtual EnterResult Enters(const ConfigRequest& Request) const;
 		virtual bool EatLine(const ConfigLine& Line);
@@ -34,6 +36,9 @@ class ConfigLine_server : public ConfigListBase {
 		std::vector<std::pair<in_addr_t, in_port_t> > Listens;
 		
 		// Class functions
+
+		bool MatchesIP(const ConfigRequest& Request) const;
+		bool MatchesServerName(const ConfigRequest& Request) const;
 };
 
 #endif

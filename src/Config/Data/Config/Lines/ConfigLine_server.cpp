@@ -73,32 +73,38 @@ ConfigLine_server* ConfigLine_server::TryParse(const ConfigLine& Line, const Con
 	return new ConfigLine_server(*Block, Configuration);
 }
 
+bool ConfigLine_server::MatchesServerName(const ConfigRequest& Request) const
+{
+	for (std::vector<std::string>::const_iterator It = ServerNames.begin(); It != ServerNames.end(); It++)
+		if (Request.GetServerName() == *It)
+			return true;
+	return false;
+}
+bool ConfigLine_server::MatchesIP(const ConfigRequest& Request) const
+{
+	for (std::vector<std::pair<in_addr_t, in_port_t> >::const_iterator It = Listens.begin(); It != Listens.end(); It++)
+		if (Request.GetAddr() == It->first && Request.GetPort() == It->second)
+			return true;
+	return false;
+}
+
 EnterResult ConfigLine_server::Enters(const ConfigRequest& Request) const
 {
+	(void)Request;
+	
+	// Due to overloaded GetIteratorResponse we know already that we should enter
+	/*
 	if (ServerNames.size() > 0)
 	{
-		bool HasMatch = false;
-		for (std::vector<std::string>::const_iterator It = ServerNames.begin(); It != ServerNames.end(); It++)
-			if (Request.GetServerName() == *It)
-			{
-				HasMatch = true;
-				break;
-			}
-		if (!HasMatch)
+		if (!MatchesServerName(Request))
 			return EnterResult_No;
 	}
 	if (Listens.size() > 0)
 	{
-		bool HasMatch = false;
-		for (std::vector<std::pair<in_addr_t, in_port_t> >::const_iterator It = Listens.begin(); It != Listens.end(); It++)
-			if (Request.GetAddr() == It->first && Request.GetPort() == It->second)
-			{
-				HasMatch = true;
-				break;
-			}
-		if (!HasMatch)
+		if (!MatchesIP(Request))
 			return EnterResult_No;
 	}
+	*/
 
 	return EnterResult_EnterAndError;
 }
@@ -142,4 +148,38 @@ bool ConfigLine_server::EatLine(const ConfigLine& Line)
 	else
 		return false;
 	return true;
+}
+
+ConfigResponse* ConfigLine_server::GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request) const
+{
+	const ConfigLine_server* Default = NULL;
+
+	// Basically:
+	//	The first one that matches the IP is the default
+	//	If there is one that matches both the IP AND server name, instantly return that
+
+	while (It != ItEnd)
+	{
+		const ConfigLine_server* Curr = dynamic_cast<const ConfigLine_server*>(*It);
+		if (!Curr)
+			break;
+		It++;
+
+		bool IpMatch = MatchesIP(Request);
+		if (!IpMatch && Curr->Listens.size() > 0)
+			continue;	// Ip does not match, but a ip was specified, this server does not respond.
+		
+		if (Default == NULL)	// && IpMatch)
+			Default = Curr;	// Set the default, first server that matches ip
+		
+		if (Curr->MatchesServerName(Request))
+		{
+			// Matching/wildcard IP and matching server name? take it!
+			return Curr->GetBaseResponse(Request);
+		}
+	}
+
+	if (!Default)
+		return NULL;
+	return Default->GetBaseResponse(Request);
 }
