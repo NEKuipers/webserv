@@ -96,7 +96,7 @@ Request::Request(const std::string &request_content)
         throw ParseRequestException("Empty request.");
     parse_requestline(lines);
     size_t i = parse_header_fields(lines);
-    while (lines[i] == "\r" || lines[i].length() == 0)
+    while (i < lines.size() && (lines[i] == "\r" || lines[i].length() == 0))
         i++;
     std::vector<std::string>::iterator start = lines.begin() + i;
     if (start < lines.end())
