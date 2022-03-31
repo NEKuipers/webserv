@@ -62,7 +62,7 @@ ConfigResponse* ConfigLine_try_file::GetBaseResponse(const ConfigRequest& Reques
 		if (!Configuration.IsFileValid(File, Request))
 			continue;
 
-		std::ifstream* Stream = new std::ifstream(File);
+		std::ifstream* Stream = new std::ifstream(File.c_str());	// Annoyingly, linux does not have a string contructor
 		if (Stream->is_open())
 			return new FileResponse(File, Stream);
 		delete Stream;	// Well, realpath said the file exists, but we can't open it? Well, whatever, just continue
@@ -75,7 +75,7 @@ ConfigLine_try_file* ConfigLine_try_file::TryParse(const ConfigLine& Line, const
 	std::vector<std::string> Args = Line.GetArguments();
 	if (Args.at(0) != "try_files" && Args.at(0) != "try_file")
 		return NULL;
-	
+
 	// Remove the first arg, the rest are files as arguments
 	std::vector<std::string> New;
 	New.insert(New.begin(), Args.begin() + 1, Args.end());

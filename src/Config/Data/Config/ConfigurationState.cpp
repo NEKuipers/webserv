@@ -4,6 +4,8 @@
 
 #include <stdlib.h>	// realpath
 #include <iostream>
+#include "ToString.hpp"
+#include <cstring>	// Linux strncmp
 
 ConfigurationState::ConfigurationState() : AcceptedMethods(), Root(""), ExpectedRootExtension(""), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), RedirectBase(NULL) { }
 ConfigurationState::ConfigurationState(ConfigBase* RedirectBase) : AcceptedMethods(), Root(""), ExpectedRootExtension(""), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), RedirectBase(RedirectBase) {}
@@ -15,7 +17,7 @@ ConfigurationState::ConfigurationState(const ConfigurationState& From)
 
 ConfigurationState::~ConfigurationState()
 {
-	
+
 }
 
 ConfigurationState& ConfigurationState::operator = (const ConfigurationState& From)
@@ -60,24 +62,24 @@ bool ConfigurationState::EatLine(const ConfigLine& Line)
 	if (Args.at(0) == "root")
 	{
 		if (Args.size() > 2)
-			throw ConvertException("ConfigLine", "root", "too many arguments, Expected 2, but got " + std::to_string(Args.size()));
+			throw ConvertException("ConfigLine", "root", "too many arguments, Expected 2, but got " + to_string(Args.size()));
 
 		Root = InterperetEnvVariable(Args.size() > 1 ? Args.at(1) : "", NULL);
 
 		// Now convert it to the real path
-		char ActualPath[PATH_MAX+1];
-		char* ptr = realpath(Root.c_str(), ActualPath);
+		char* ptr = realpath(Root.c_str(), NULL);
 		if (!ptr)
 			throw ConvertException("ConfigLine", "root", "Root does not exist!");
 
-		Root = std::string(ActualPath);
+		Root = std::string(ptr);
+		free(ptr);
 
 		return true;
 	}
 	else if (Args.at(0) == "expected_root")
 	{
 		if (Args.size() > 2)
-			throw ConvertException("ConfigLine", "expected_root", "too many arguments, Expected 2, but got " + std::to_string(Args.size()));
+			throw ConvertException("ConfigLine", "expected_root", "too many arguments, Expected 2, but got " + to_string(Args.size()));
 
 		ExpectedRootExtension = "/" + InterperetEnvVariable(Args.size() > 1 ? Args.at(1) : "", NULL);
 
@@ -121,7 +123,7 @@ ConfigResponse* ConfigurationState::Redirect(const ConfigRequest& Request, std::
 	ConfigRequest* NewRequest = Request.RedirectUri(Uri);
 	if (!NewRequest)
 		return NULL;
-	
+
 	ConfigResponse* Response = RedirectBase->GetResponse(*NewRequest);
 	delete NewRequest;
 
@@ -138,18 +140,20 @@ ConfigResponse* ConfigurationState::Error(const ConfigRequest& Request) const
 bool ConfigurationState::IsFileValid(const std::string& FilePath, const ConfigRequest& Request) const
 {
 	// Check if the cgi is inside the Root directory, Small problem: If you symlink outside, it still fails, why is checked? Well, you dont want someone asking for cgi "../../Makecgi" or whatever other cgi
-	char ActualPath[PATH_MAX+1];	// Not sure how i feel about allocating 1025 bytes on the stack, also can't be static, thread safety ya know?
-	char* ptr = realpath(FilePath.c_str(), ActualPath);
+	//char ActualPath[PATH_MAX+1];	// Not sure how i feel about allocating 1025 bytes on the stack, also can't be static, thread safety ya know?
+	char* ptr = realpath(FilePath.c_str(), NULL);	// Not sure how i feel about allocating on the heap for something like this
 	if (!ptr)
 		return false;
 
 	std::string Combined = Root + ExpectedRootExtension;
-	if (strncmp(ActualPath, Combined.c_str(), Combined.length()))
+	if (strncmp(ptr, Combined.c_str(), Combined.length()))
 	{
 		std::cerr << Request << ": Asked for '" << FilePath << "', But was not inside the expected root directory: '" << Combined << "'!" << std::endl;
+		free(ptr);
 		return false;
 	}
 
+	free(ptr);
 	return true;
 }
 
@@ -170,7 +174,7 @@ std::string ConfigurationState::InterperetEnvVariable(const std::string& String,
 
 	ReplaceAll(Copy, "$root", Root);
 	ReplaceAll(Copy, "$expected_root", ExpectedRootExtension);
-	
+
 	if (Request)
 	{
 		ReplaceAll(Copy, "$uri", Request->GetUri());

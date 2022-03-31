@@ -8,8 +8,9 @@ class ConfigLine_server;	// For include loops
 #include <vector>
 
 class ConfigLine_server : public ConfigListBase {
-	public: 
-		static const in_port_t DEFAULT_PORT = htons(80);
+	public:
+		//static const in_port_t DEFAULT_PORT = htons(80);	// Apparently this is not a constant expression on linux
+		static const uint16_t DEFAULT_PORT = 80;
 
 		ConfigLine_server();
 		ConfigLine_server(const ConfigBlock& Block, const ConfigurationState &Configuration);
@@ -19,7 +20,7 @@ class ConfigLine_server : public ConfigListBase {
 		// Public functions
 		friend std::ostream& operator<<(std::ostream& Stream, const ConfigLine_server& ConfigLine_server);
 		void Print(std::ostream& Stream) const;
-		
+
 		static ConfigLine_server* TryParse(const ConfigLine& Line, const ConfigurationState& Configuration);
 
 		virtual ConfigResponse* GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request) const;
@@ -34,7 +35,7 @@ class ConfigLine_server : public ConfigListBase {
 		// Class variables
 		std::vector<std::string> ServerNames;
 		std::vector<std::pair<in_addr_t, in_port_t> > Listens;
-		
+
 		// Class functions
 
 		bool MatchesIP(const ConfigRequest& Request) const;

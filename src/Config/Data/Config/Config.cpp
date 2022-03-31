@@ -17,7 +17,7 @@ std::ostream& operator<<(std::ostream& Stream, const Config& Config)
 
 Config::~Config()
 {
-	
+
 }
 
 EnterResult Config::Enters(const ConfigRequest& Request) const

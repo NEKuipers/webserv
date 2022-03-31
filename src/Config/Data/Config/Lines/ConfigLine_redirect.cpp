@@ -1,6 +1,8 @@
 #include "ConfigLine_redirect.hpp"
 #include "ConvertException.hpp"
 
+#include "ToString.hpp"
+
 ConfigLine_redirect::ConfigLine_redirect() {}
 ConfigLine_redirect::ConfigLine_redirect(const ConfigLine_redirect& From)
 {
@@ -8,12 +10,12 @@ ConfigLine_redirect::ConfigLine_redirect(const ConfigLine_redirect& From)
 }
 ConfigLine_redirect::ConfigLine_redirect(const std::string& NewUri, const ConfigurationState& Configuration) : ConfigBase(Configuration), NewUri(NewUri)
 {
-	
+
 }
 
 ConfigLine_redirect::~ConfigLine_redirect()
 {
-	
+
 }
 
 ConfigLine_redirect& ConfigLine_redirect::operator = (const ConfigLine_redirect& From)
@@ -43,8 +45,8 @@ ConfigLine_redirect* ConfigLine_redirect::TryParse(const ConfigLine& Line, const
 		return NULL;
 
 	if (Args.size() != 2)
-		throw ConvertException("ConfigLine", "ConfigLine_redirect", "Bad argument count! Expected 2, Got " + std::to_string(Args.size()));
-	
+		throw ConvertException("ConfigLine", "ConfigLine_redirect", "Bad argument count! Expected 2, Got " + to_string(Args.size()));
+
 	return new ConfigLine_redirect(Args.at(1), Configuration);
 }
 

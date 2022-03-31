@@ -10,17 +10,20 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include "ToString.hpp"
+#include <cstdlib>	// linux strtoul
+
 ConfigLine_server::ConfigLine_server() {}
 ConfigLine_server::ConfigLine_server(const ConfigBlock& Block, const ConfigurationState &Configuration_) : ConfigListBase(Configuration_)
 {
 	ReadBlock("ConfigLine_server", BaseLines, Block.GetLines());
-	
+
 	// TODO: Re-order location blocks in order of longest match length
 }
 
 ConfigLine_server::~ConfigLine_server()
 {
-	
+
 }
 
 std::ostream& operator<<(std::ostream& Stream, const ConfigLine_server& ConfigLine_server)
@@ -62,14 +65,14 @@ ConfigLine_server* ConfigLine_server::TryParse(const ConfigLine& Line, const Con
 	std::vector<std::string> Args = Line.GetArguments();
 	if (Args.at(0) != "server")
 		return NULL;
-	
+
 	if (Args.size() != 1)
-		throw ConvertException("ConfigLine", "ConfigLine_server", "Bad argument count! Expected 1, Got " + std::to_string(Args.size()));
+		throw ConvertException("ConfigLine", "ConfigLine_server", "Bad argument count! Expected 1, Got " + to_string(Args.size()));
 
 	ConfigBlock* Block = Line.GetBlock();
 	if (Block == NULL)
 		throw ConvertException("ConfigLine", "ConfigLine_server", "Missing block!");
-	
+
 	return new ConfigLine_server(*Block, Configuration);
 }
 
@@ -121,7 +124,7 @@ bool ConfigLine_server::EatLine(const ConfigLine& Line)
 		{
 			std::string AddrStr = *It;
 
-			in_port_t Port = DEFAULT_PORT;
+			in_port_t Port = htons(DEFAULT_PORT);
 			size_t split = AddrStr.find(":");
 			if (split != std::string::npos)
 			{
@@ -175,13 +178,13 @@ ConfigResponse* ConfigLine_server::GetIteratorResponse(std::vector<ConfigBase*>:
 		bool IpMatch = Curr->MatchesIP(Request);
 		if (!IpMatch && Curr->Listens.size() > 0)
 			continue;	// Ip does not match, but a ip was specified, this server does not respond.
-		
+
 		if (Default == NULL || (IpMatch && !DefaultIpMatch))
 		{
 			Default = Curr;	// Set the default, first server that matches ip
 			DefaultIpMatch = IpMatch;
 		}
-		
+
 		if (Curr->MatchesServerName(Request))
 		{
 			if (IpMatch)

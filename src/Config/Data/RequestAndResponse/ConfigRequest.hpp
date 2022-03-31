@@ -5,9 +5,10 @@ class ConfigRequest;	// For include loops
 
 #include <ostream>
 #include <vector>
+#include <netinet/in.h>
 
 class ConfigRequest {
-	public: 
+	public:
 		ConfigRequest();
 		ConfigRequest(const ConfigRequest& From);
 		ConfigRequest(in_addr_t Addr, in_port_t Port, const std::string& ServerName, const std::string& Uri, size_t ContentLength, const std::string& Method);
@@ -20,7 +21,7 @@ class ConfigRequest {
 		friend std::ostream& operator<<(std::ostream& Stream, const ConfigRequest& ConfigRequest);
 
 		ConfigRequest* RedirectUri(std::string Uri) const;
-		
+
 		in_addr_t GetAddr() const;
 		in_port_t GetPort() const;
 		const std::string& GetServerName() const;
@@ -40,7 +41,7 @@ class ConfigRequest {
 		size_t ContentLength;
 		std::string Method;
 		// Class functions
-		
+
 		std::vector<std::string> PreviousUris;	// To detect redirect loops
 };
 

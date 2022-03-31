@@ -4,7 +4,7 @@
 #include "ConfigListBase.hpp"
 
 class Config : public ConfigListBase {
-	public: 
+	public:
 		Config(const ConfigFile& File);
 
 		~Config();
@@ -13,7 +13,7 @@ class Config : public ConfigListBase {
 		friend std::ostream& operator<<(std::ostream& Stream, const Config& Config);
 	protected:
 		virtual EnterResult Enters(const ConfigRequest& Request) const;
-		
+
 		// Public functions
 	private:
 		// No copying
@@ -21,7 +21,7 @@ class Config : public ConfigListBase {
 		Config& operator = (const Config& From);
 
 		// Class variables
-		
+
 		// Class functions
-		
+
 };

@@ -2,7 +2,7 @@
 
 LocationException::LocationException(const std::string& Search) : Search(Search) { }
 
-LocationException::~LocationException() _NOEXCEPT
+LocationException::~LocationException() throw()
 {
 
 }

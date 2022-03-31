@@ -1,6 +1,8 @@
 #include "ConfigLine_location.hpp"
 #include "ConvertException.hpp"
 
+#include "ToString.hpp"
+
 ConfigLine_location::ConfigLine_location() {}
 ConfigLine_location::ConfigLine_location(const std::string& Location, const ConfigBlock& Block, const ConfigurationState &Configuration) : ConfigListBase(Configuration), Location(Location)
 {
@@ -9,7 +11,7 @@ ConfigLine_location::ConfigLine_location(const std::string& Location, const Conf
 }
 ConfigLine_location::~ConfigLine_location()
 {
-	
+
 }
 
 std::ostream& operator<<(std::ostream& Stream, const ConfigLine_location& ConfigLine_location)
@@ -30,7 +32,7 @@ ConfigLine_location* ConfigLine_location::TryParse(const ConfigLine& Line, const
 		return NULL;
 
 	if (Args.size() != 2)
-		throw ConvertException("ConfigLine", "ConfigLine_location", "Bad argument count! Expected 2, Got " + std::to_string(Args.size()));
+		throw ConvertException("ConfigLine", "ConfigLine_location", "Bad argument count! Expected 2, Got " + to_string(Args.size()));
 
 	ConfigBlock* Block = Line.GetBlock();
 	if (Block == NULL)
@@ -74,7 +76,7 @@ ConfigResponse* ConfigLine_location::GetIteratorResponse(std::vector<ConfigBase*
 			continue;
 		if (Curr->ChecksConfiguration() && !Curr->Configuration.IsValidWithRequest(Request))
 			continue;
-		
+
 		if (Best == NULL || Best->Location.length() < Curr->Location.length())
 			Best = Curr;
 	}

@@ -2,6 +2,7 @@
 #include "UnexpectedTokenException.hpp"
 
 #include <iostream>
+#include "ToString.hpp"
 
 Lexer::Lexer(std::istream& Stream) : Stream(Stream), UnparsedString("")
 {
@@ -70,6 +71,6 @@ std::string Lexer::TokenToString(Token Token)
 		case CloseParen: return "CloseParen";
 		case Stop: return "Stop";
 		case Word: return "Word";
-		default: return "Unknown token: " + std::to_string(Token);
+		default: return "Unknown token: " + to_string(Token);
 	}
 }
