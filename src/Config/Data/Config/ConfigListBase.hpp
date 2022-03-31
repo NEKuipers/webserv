@@ -27,6 +27,8 @@ class ConfigListBase : public ConfigBase {
 		// Public functions
 		friend std::ostream& operator<<(std::ostream& Stream, const ConfigListBase& ConfigListBase);
 		virtual void Print(std::ostream& Stream) const;
+
+		const std::vector<ConfigBase*>& GetChildren();
 	protected:
 		void ReadBlock(const std::string& CreateClass, const TryParseLineFunc* NullTerminatedParseFuncs, const std::vector<ConfigLine>& Lines);
 		virtual bool EatLine(const ConfigLine& Line);

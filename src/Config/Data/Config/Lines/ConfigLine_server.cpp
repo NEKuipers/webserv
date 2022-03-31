@@ -14,11 +14,9 @@
 #include <cstdlib>	// linux strtoul
 
 ConfigLine_server::ConfigLine_server() {}
-ConfigLine_server::ConfigLine_server(const ConfigBlock& Block, const ConfigurationState &Configuration_) : ConfigListBase(Configuration_)
+ConfigLine_server::ConfigLine_server(const ConfigBlock& Block, const ConfigurationState &Configuration_) : ConfigListBase(Configuration_), ServerNames(), Listens()
 {
 	ReadBlock("ConfigLine_server", BaseLines, Block.GetLines());
-
-	// TODO: Re-order location blocks in order of longest match length
 }
 
 ConfigLine_server::~ConfigLine_server()
@@ -75,6 +73,8 @@ ConfigLine_server* ConfigLine_server::TryParse(const ConfigLine& Line, const Con
 
 	return new ConfigLine_server(*Block, Configuration);
 }
+
+const std::vector<std::pair<in_addr_t, in_port_t> >& ConfigLine_server::GetListens() { return Listens; }
 
 bool ConfigLine_server::MatchesServerName(const ConfigRequest& Request) const
 {

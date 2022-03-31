@@ -42,11 +42,21 @@ int         main(int argc, char **argv)
 	(void)argv;
 
 	try {
-		Config Conf(ConfigFile("SmallConfig.conf"));
+		Config Conf(ConfigFile("./SmallConfig.conf"));
 		std::cout << Conf << std::endl;
 
 		in_addr Addr;
 		inet_aton("127.0.0.1", &Addr);
+
+		std::vector<std::pair<in_addr_t, in_port_t> >* Listens = Conf.GetListenConnections();
+
+		for (std::vector<std::pair<in_addr_t, in_port_t> >::const_iterator It = Listens->begin(); It != Listens->end(); It++)
+		{
+			in_addr DumbHistoricalReasonsStruct;
+			DumbHistoricalReasonsStruct.s_addr = It->first;
+			std::cout << "Listening on: " << inet_ntoa(DumbHistoricalReasonsStruct) << ":" << ntohs(It->second) << std::endl;
+		}
+		delete Listens;
 
 		// Note: Currently it does not use the URI, so the "File1" stuff is pretty pointless now
 		PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(27162), "test1.com", "File1", 0, "GET"));

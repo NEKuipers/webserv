@@ -11,6 +11,8 @@ class Config : public ConfigListBase {
 
 
 		friend std::ostream& operator<<(std::ostream& Stream, const Config& Config);
+
+		std::vector<std::pair<in_addr_t, in_port_t> >* GetListenConnections();
 	protected:
 		virtual EnterResult Enters(const ConfigRequest& Request) const;
 
