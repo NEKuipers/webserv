@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <iostream>
+#include <fcntl.h>
 #include "SimpleSocket.hpp"
 
 class ServerSocket: public SimpleSocket
