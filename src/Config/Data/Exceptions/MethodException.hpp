@@ -12,7 +12,7 @@ struct MethodException : public std::exception
 
 	MethodException(const std::string& Type, const std::string& Method);
 
-	virtual ~MethodException() _NOEXCEPT;
+	virtual ~MethodException() throw();
 
 	const char* what () const throw ();
 

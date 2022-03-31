@@ -34,8 +34,11 @@ class ConfigurationState {
 		std::vector<std::string> AcceptedMethods;
 
 		std::string Root;	// std::filesystem::path (I can't use fancy features, codam says i must use only the oldest of old stuff)
+		std::string ExpectedRootExtension;	// when searching for a file, it will be $root/$URI, and will only be served if its inside the directory $root/$expectedRootExtension, the location block writes to this variable
 		std::string ErrorUri;
 		size_t MaxBodySize;
+
+		bool IsFileValid(const std::string& FilePath, const ConfigRequest& Request) const;
 
 		std::string InterperetEnvVariable(const std::string& String, const ConfigRequest* Request) const;	// Ill probably want to use some state to change the env stuff, so its here even tho it does not use anything of the state for now
 	private:

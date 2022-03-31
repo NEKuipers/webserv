@@ -27,6 +27,13 @@ ConfigResponse* ConfigBase::GetResponse(const ConfigRequest& Request) const
 	return NULL;
 }
 
+ConfigResponse* ConfigBase::GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request) const
+{
+	It++;
+	(void)ItEnd;
+	return GetResponse(Request);
+}
+
 bool ConfigBase::ChecksConfiguration() const
 {
 	return true;

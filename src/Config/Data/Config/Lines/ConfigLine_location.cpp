@@ -1,14 +1,17 @@
 #include "ConfigLine_location.hpp"
 #include "ConvertException.hpp"
 
+#include "ToString.hpp"
+
 ConfigLine_location::ConfigLine_location() {}
 ConfigLine_location::ConfigLine_location(const std::string& Location, const ConfigBlock& Block, const ConfigurationState &Configuration) : ConfigListBase(Configuration), Location(Location)
 {
+	this->Configuration.ExpectedRootExtension = this->Configuration.ExpectedRootExtension + "/" + Location;
 	ReadBlock("ConfigLine_location", BaseLines, Block.GetLines());
 }
 ConfigLine_location::~ConfigLine_location()
 {
-	
+
 }
 
 std::ostream& operator<<(std::ostream& Stream, const ConfigLine_location& ConfigLine_location)
@@ -29,7 +32,7 @@ ConfigLine_location* ConfigLine_location::TryParse(const ConfigLine& Line, const
 		return NULL;
 
 	if (Args.size() != 2)
-		throw ConvertException("ConfigLine", "ConfigLine_location", "Bad argument count! Expected 2, Got " + std::to_string(Args.size()));
+		throw ConvertException("ConfigLine", "ConfigLine_location", "Bad argument count! Expected 2, Got " + to_string(Args.size()));
 
 	ConfigBlock* Block = Line.GetBlock();
 	if (Block == NULL)
@@ -48,8 +51,37 @@ EnterResult ConfigLine_location::Enters(const ConfigRequest& Request) const
 {
 	const std::string& URI = Request.GetUri();
 
-	if (URI.rfind(Location, 0) == std::string::npos)	// URI.starts_with(Location)
-		return EnterResult_No;
+	if (Location.length() > 0 && ((Location.at(0) == '*')	// I mean, routes wont be using regex, but that does not mean i can't do something simple like this, right?
+		? (URI.find(Location.c_str() + 1, URI.length() - Location.length()) == std::string::npos)	// URI.ends_with(Location+1)
+		: (URI.rfind(Location, 0) == std::string::npos)	// URI.starts_with(Location)
+	))
+			return EnterResult_No;
 
 	return EnterResult_EnterAndError;
+}
+
+ConfigResponse* ConfigLine_location::GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request) const
+{
+	const ConfigLine_location* Best = NULL;
+
+	while (It != ItEnd)
+	{
+		const ConfigLine_location* Curr = dynamic_cast<const ConfigLine_location*>(*It);
+		if (!Curr)
+			break;
+		It++;
+
+		EnterResult Enters = Curr->Enters(Request);
+		if (Enters == EnterResult_No)
+			continue;
+		if (Curr->ChecksConfiguration() && !Curr->Configuration.IsValidWithRequest(Request))
+			continue;
+
+		if (Best == NULL || Best->Location.length() < Curr->Location.length())
+			Best = Curr;
+	}
+
+	if (!Best)
+		return NULL;
+	return Best->GetBaseResponse(Request);
 }

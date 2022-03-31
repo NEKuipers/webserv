@@ -19,6 +19,8 @@ class ConfigBase {
 
 		// Public functions
 		ConfigResponse* GetResponse(const ConfigRequest& Request) const;	// Basically checks the Configuration if its valid with this request, if it is valid, returns GetBaseResponse(), otherwise returns null
+		// Note: When calling *It must be equal to this
+		virtual ConfigResponse* GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request) const;	// I would have liked this to be a templated iterator type, but virtuals and templates dont mix, and i dont really feel like going down the rabbit hole of type erasure
 
 		friend std::ostream& operator<<(std::ostream& Stream, const ConfigBase& ConfigBase);
 		virtual void Print(std::ostream& Stream) const = 0;	// Apparently this is how you do virtual logging?

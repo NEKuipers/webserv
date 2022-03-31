@@ -12,7 +12,7 @@ struct ConvertException : public std::exception
 
 	ConvertException(const std::string& From, const std::string& To, const std::string& Reason);
 
-	virtual ~ConvertException() _NOEXCEPT;
+	virtual ~ConvertException() throw();
 
 	const char* what () const throw ();
 

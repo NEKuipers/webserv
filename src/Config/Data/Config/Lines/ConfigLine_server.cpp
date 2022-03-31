@@ -10,17 +10,18 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include "ToString.hpp"
+#include <cstdlib>	// linux strtoul
+
 ConfigLine_server::ConfigLine_server() {}
-ConfigLine_server::ConfigLine_server(const ConfigBlock& Block, const ConfigurationState &Configuration_) : ConfigListBase(Configuration_)
+ConfigLine_server::ConfigLine_server(const ConfigBlock& Block, const ConfigurationState &Configuration_) : ConfigListBase(Configuration_), ServerNames(), Listens()
 {
 	ReadBlock("ConfigLine_server", BaseLines, Block.GetLines());
-	
-	// TODO: Re-order location blocks in order of longest match length
 }
 
 ConfigLine_server::~ConfigLine_server()
 {
-	
+
 }
 
 std::ostream& operator<<(std::ostream& Stream, const ConfigLine_server& ConfigLine_server)
@@ -62,43 +63,51 @@ ConfigLine_server* ConfigLine_server::TryParse(const ConfigLine& Line, const Con
 	std::vector<std::string> Args = Line.GetArguments();
 	if (Args.at(0) != "server")
 		return NULL;
-	
+
 	if (Args.size() != 1)
-		throw ConvertException("ConfigLine", "ConfigLine_server", "Bad argument count! Expected 1, Got " + std::to_string(Args.size()));
+		throw ConvertException("ConfigLine", "ConfigLine_server", "Bad argument count! Expected 1, Got " + to_string(Args.size()));
 
 	ConfigBlock* Block = Line.GetBlock();
 	if (Block == NULL)
 		throw ConvertException("ConfigLine", "ConfigLine_server", "Missing block!");
-	
+
 	return new ConfigLine_server(*Block, Configuration);
+}
+
+const std::vector<std::pair<in_addr_t, in_port_t> >& ConfigLine_server::GetListens() { return Listens; }
+
+bool ConfigLine_server::MatchesServerName(const ConfigRequest& Request) const
+{
+	for (std::vector<std::string>::const_iterator It = ServerNames.begin(); It != ServerNames.end(); It++)
+		if (Request.GetServerName() == *It)
+			return true;
+	return false;
+}
+bool ConfigLine_server::MatchesIP(const ConfigRequest& Request) const
+{
+	for (std::vector<std::pair<in_addr_t, in_port_t> >::const_iterator It = Listens.begin(); It != Listens.end(); It++)
+		if (Request.GetAddr() == It->first && Request.GetPort() == It->second)
+			return true;
+	return false;
 }
 
 EnterResult ConfigLine_server::Enters(const ConfigRequest& Request) const
 {
+	(void)Request;
+
+	// Due to overloaded GetIteratorResponse we know already that we should enter
+	/*
 	if (ServerNames.size() > 0)
 	{
-		bool HasMatch = false;
-		for (std::vector<std::string>::const_iterator It = ServerNames.begin(); It != ServerNames.end(); It++)
-			if (Request.GetServerName() == *It)
-			{
-				HasMatch = true;
-				break;
-			}
-		if (!HasMatch)
+		if (!MatchesServerName(Request))
 			return EnterResult_No;
 	}
 	if (Listens.size() > 0)
 	{
-		bool HasMatch = false;
-		for (std::vector<std::pair<in_addr_t, in_port_t> >::const_iterator It = Listens.begin(); It != Listens.end(); It++)
-			if (Request.GetAddr() == It->first && Request.GetPort() == It->second)
-			{
-				HasMatch = true;
-				break;
-			}
-		if (!HasMatch)
+		if (!MatchesIP(Request))
 			return EnterResult_No;
 	}
+	*/
 
 	return EnterResult_EnterAndError;
 }
@@ -115,7 +124,7 @@ bool ConfigLine_server::EatLine(const ConfigLine& Line)
 		{
 			std::string AddrStr = *It;
 
-			in_port_t Port = DEFAULT_PORT;
+			in_port_t Port = htons(DEFAULT_PORT);
 			size_t split = AddrStr.find(":");
 			if (split != std::string::npos)
 			{
@@ -142,4 +151,53 @@ bool ConfigLine_server::EatLine(const ConfigLine& Line)
 	else
 		return false;
 	return true;
+}
+
+ConfigResponse* ConfigLine_server::GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request) const
+{
+	const ConfigLine_server* Default = NULL;
+	bool DefaultIpMatch = false;
+
+	// Basically:
+	//	The first one that matches the server_name is the default, otherwise the first one that matches the ip, and otherwise the first wildcard ip
+	//	If there is one that matches both the IP AND server name, instantly return that
+
+	// So the priority is:
+	//	IP && NAME
+	//	NAME
+	//	IP
+	//	Wildcard IP
+
+	while (It != ItEnd)
+	{
+		const ConfigLine_server* Curr = dynamic_cast<const ConfigLine_server*>(*It);
+		if (!Curr)
+			break;
+		It++;
+
+		bool IpMatch = Curr->MatchesIP(Request);
+		if (!IpMatch && Curr->Listens.size() > 0)
+			continue;	// Ip does not match, but a ip was specified, this server does not respond.
+
+		if (Default == NULL || (IpMatch && !DefaultIpMatch))
+		{
+			Default = Curr;	// Set the default, first server that matches ip
+			DefaultIpMatch = IpMatch;
+		}
+
+		if (Curr->MatchesServerName(Request))
+		{
+			if (IpMatch)
+				return Curr->GetBaseResponse(Request);	// Well, IP matches, and server name matches, there is no way we have a server that has a higher priority
+			else
+			{
+				Default = Curr;	// wildcard IP and matching server name? set new default
+				DefaultIpMatch = true;	// only matching server name has more priority than only matching ip
+			}
+		}
+	}
+
+	if (!Default)
+		return NULL;
+	return Default->GetBaseResponse(Request);
 }

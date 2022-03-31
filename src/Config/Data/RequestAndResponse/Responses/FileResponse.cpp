@@ -2,11 +2,11 @@
 
 FileResponse::FileResponse(const std::string& FileName, std::ifstream* Stream) : FileName(FileName), Stream(Stream)
 {
-	
+
 }
 FileResponse::~FileResponse()
 {
-	free(Stream);
+	delete Stream;
 }
 
 const std::ifstream& FileResponse::GetStream() const { return *Stream; }

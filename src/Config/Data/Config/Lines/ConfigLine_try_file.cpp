@@ -59,20 +59,10 @@ ConfigResponse* ConfigLine_try_file::GetBaseResponse(const ConfigRequest& Reques
 	{
 		std::string File = Configuration.InterperetEnvVariable(*It, &Request);
 		File = Configuration.Root + "/" + File;	// Isn't there a utility function that combines paths?
-		
-		// Check if the File is inside the Root directory, Small problem: If you symlink outside, it still fails, why is checked? Well, you dont want someone asking for file "../../Makefile" or whatever other file
-		char ActualPath[PATH_MAX+1];	// Not sure how i feel about allocating 1025 bytes on the stack, also can't be static, thread safety ya know?
-		char* ptr = realpath(File.c_str(), ActualPath);
-		if (!ptr)
-			continue;	// The file does not exist
+		if (!Configuration.IsFileValid(File, Request))
+			continue;
 
-		if (strncmp(ActualPath, Configuration.Root.c_str(), Configuration.Root.length()))
-		{
-			std::cerr << Request << ": Asked for '" << File << "', But was not inside the root directory: '" << Configuration.Root << "'!" << std::endl;
-			continue;	// The File path did NOT start with root, this is not what we want!
-		}
-
-		std::ifstream* Stream = new std::ifstream(ActualPath);
+		std::ifstream* Stream = new std::ifstream(File.c_str());	// Annoyingly, linux does not have a string contructor
 		if (Stream->is_open())
 			return new FileResponse(File, Stream);
 		delete Stream;	// Well, realpath said the file exists, but we can't open it? Well, whatever, just continue
@@ -85,7 +75,7 @@ ConfigLine_try_file* ConfigLine_try_file::TryParse(const ConfigLine& Line, const
 	std::vector<std::string> Args = Line.GetArguments();
 	if (Args.at(0) != "try_files" && Args.at(0) != "try_file")
 		return NULL;
-	
+
 	// Remove the first arg, the rest are files as arguments
 	std::vector<std::string> New;
 	New.insert(New.begin(), Args.begin() + 1, Args.end());

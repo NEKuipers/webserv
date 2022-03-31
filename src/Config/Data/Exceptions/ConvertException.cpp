@@ -2,7 +2,7 @@
 
 ConvertException::ConvertException(const std::string& From, const std::string& To, const std::string& Reason) : From(From), To(To), Reason(Reason) { }
 
-ConvertException::~ConvertException() _NOEXCEPT
+ConvertException::~ConvertException() throw()
 {
 
 }

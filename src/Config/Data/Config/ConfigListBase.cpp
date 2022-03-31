@@ -2,6 +2,7 @@
 #include "PrefixStreambuf.hpp"
 
 #include "ConfigLine_try_file.hpp"
+#include "ConfigLine_try_cgi.hpp"
 #include "ConfigLine_redirect.hpp"
 #include "ConfigLine_server.hpp"
 #include "ConfigLine_location.hpp"
@@ -14,6 +15,7 @@ ConfigListBase::TryParseLineFunc ConfigListBase::BaseLines[] = {
 	(ConfigListBase::TryParseLineFunc) ConfigLine_redirect::TryParse,
 	(ConfigListBase::TryParseLineFunc) ConfigLine_server  ::TryParse,
 	(ConfigListBase::TryParseLineFunc) ConfigLine_location::TryParse,
+	(ConfigListBase::TryParseLineFunc) ConfigLine_try_cgi ::TryParse,
 	NULL
 };
 
@@ -25,6 +27,8 @@ ConfigListBase::~ConfigListBase()
 	for (std::vector<ConfigBase*>::const_iterator It = Children.begin(); It != Children.end(); It++)
 		delete *It;
 }
+
+const std::vector<ConfigBase*>& ConfigListBase::GetChildren() { return Children; }
 
 ConfigResponse* ConfigListBase::GetBaseResponse(const ConfigRequest& Request) const
 {
@@ -42,14 +46,14 @@ ConfigResponse* ConfigListBase::GetBaseResponse(const ConfigRequest& Request) co
 			ErrorIfNoResult = true;
 			break;
 		default:
-			throw "Unknown EnterResult was returned!";	
+			throw "Unknown EnterResult was returned!";
 	}
 
-	for (std::vector<ConfigBase*>::const_iterator It = Children.begin(); It != Children.end(); It++)
+	for (std::vector<ConfigBase*>::const_iterator It = Children.begin(); It != Children.end();) // It++)
 	{
 		const ConfigBase* Child = *It;
 
-		ConfigResponse* Response = Child->GetResponse(Request);
+		ConfigResponse* Response = Child->GetIteratorResponse(It, Children.end(), Request); //Child->GetResponse(Request);
 		if (Response)
 			return Response;
 	}
@@ -74,11 +78,11 @@ void ConfigListBase::ReadBlock(const std::string& CreateClass, const TryParseLin
 		const ConfigLine& Line = *It;
 		if (Configuration.EatLine(Line) || EatLine(Line))
 			goto AteLine;
-		
+
 		for (size_t i = 0; NullTerminatedParseFuncs[i]; i++)
 			if (AddToChildren(NullTerminatedParseFuncs[i](Line, Configuration)))
 				goto AteLine;	// Using goto because i had to break out of a loop, and also skip over the throw after the loop
-		
+
 		throw ConvertException("ConfigLine", CreateClass, "Could not determine the meaning of line: '" + Line.GetArguments()[0] + "' in '" + CreateClass + "' context");
 		AteLine:;
 	}

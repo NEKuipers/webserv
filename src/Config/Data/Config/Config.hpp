@@ -4,16 +4,18 @@
 #include "ConfigListBase.hpp"
 
 class Config : public ConfigListBase {
-	public: 
+	public:
 		Config(const ConfigFile& File);
 
 		~Config();
 
 
 		friend std::ostream& operator<<(std::ostream& Stream, const Config& Config);
+
+		std::vector<std::pair<in_addr_t, in_port_t> >* GetListenConnections();
 	protected:
 		virtual EnterResult Enters(const ConfigRequest& Request) const;
-		
+
 		// Public functions
 	private:
 		// No copying
@@ -21,7 +23,7 @@ class Config : public ConfigListBase {
 		Config& operator = (const Config& From);
 
 		// Class variables
-		
+
 		// Class functions
-		
+
 };

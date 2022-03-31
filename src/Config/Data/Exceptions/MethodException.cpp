@@ -2,7 +2,7 @@
 
 MethodException::MethodException(const std::string& Type, const std::string& Method) : Type(Type), Method(Method) { }
 
-MethodException::~MethodException() _NOEXCEPT
+MethodException::~MethodException() throw()
 {
 
 }
