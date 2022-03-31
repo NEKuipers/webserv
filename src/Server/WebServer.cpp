@@ -1,5 +1,7 @@
 #include "WebServer.hpp"
 #include <ctime>
+#include <iostream>
+#include <fstream>
 
 WebServer::WebServer(int domain, int service, int protocol, int port, u_long interface, int bklg)
 {
@@ -46,26 +48,42 @@ void	WebServer::connectionAccepter(ServerSocket *conn_socket)
 		std::cerr<<e.what()<<std::endl;
 	}
 	conn_socket->set_sock_fd(newsock);
-	read(conn_socket->get_sock_fd(), buffer, 30000);
 }
 
-void	WebServer::connectionHandler(ServerSocket *conn_socket)
+int		WebServer::connectionHandler(ServerSocket *conn_socket)
 {
-	(void)conn_socket;
-	//TODO: Add parsing and inputvalidation for the HTTP request here
-	std::cout << buffer << std::endl;
-}
+	char	buffer[BUFFER_SIZE];
+	bzero(buffer, BUFFER_SIZE);
 
-void	WebServer::connectionResponder(ServerSocket *conn_socket)
-{
-	std::string response = "Test\n";
-	//code below only for testing and keeping track of timestamp
+	int ret = 0;
+
+	ret = read(conn_socket->get_sock_fd(), buffer, 30000);
+	if (ret > 0) 
+	{
+		std::cout << "======START OF REQUEST======="<<std::endl;
+		Request new_request(buffer);
+		std::cout << new_request << std::endl;
+		std::cout << "======END OF REQUEST======"<<std::endl;
+	}
+	else
+	{
+		//TODO better errorhandling
+		std::cerr << "Error: could not read from socket" << std::endl;
+		return (1);
+	}
+
+	//response
+	// std::ifstream resp("resources/index.html");
+	// std::string response((std::istreambuf_iterator<char>(resp)), std::istreambuf_iterator<char>());
+
+	std::string response = "<!DOCTYPE html><head><title>Webserv Testpage</title></head><body><p>Hello World!\n It is ";
 	time_t now = time(0);
 	char *datetime = ctime(&now);
 	response.append(datetime);
-
+	response.append("<p></body></html>");
 	//TODO: Add the creation of requested response here
 	write(conn_socket->get_sock_fd(), response.c_str(), response.size());
+	return (0);
 }
 
 void	WebServer::connectionCloser(ServerSocket *conn_socket)
@@ -79,7 +97,7 @@ static void	sigintHandler(int signum)
 	exit(signum);
 }
 
-void	WebServer::launch()
+int	WebServer::launch()
 {
 	fd_set 	read_fds, write_fds, save_read_fds, save_write_fds; //we need backups because select() alters fds in the set
 	int		max_fd;
@@ -97,11 +115,12 @@ void	WebServer::launch()
 		for (size_t count = 0; count < sockets.size(); count++)
 		{
 			connectionAccepter(sockets[count]);
-			connectionHandler(sockets[count]);
-			connectionResponder(sockets[count]);
+			if (connectionHandler(sockets[count]) != 0)
+				return (1);
 			connectionCloser(sockets[count]);
 		}
 	}
+	return (0);
 }
 
 std::vector<ServerSocket *>		WebServer::get_sockets()
