@@ -39,23 +39,23 @@ int    Request::parse_header_fields(std::vector<std::string> lines)
 
     for (i = 1; lines.size(); i++)
     {
-        struct header_field new_field;
-
+        std::string key, value;
 		if (lines[i] == "\r" || lines[i].length() == 0)
 			return (i);
 		if ((pos = lines[i].find(':')) == std::string::npos) 
 			throw ParseRequestException("Incorrect formatting found in header.");
-		new_field.header_key = lines[i].substr(0, pos);
+		key = lines[i].substr(0, pos);
 		lines[i].erase(0, pos + 1);
 		if (lines[i][0] == ' ')
 			lines[i].erase(0, 1);
 		if (lines[i].find('\r') != std::string::npos)
-			new_field.header_value = lines[i].substr(0, lines[i].find('\r'));
+			value = lines[i].substr(0, lines[i].find('\r'));
 		else if (lines[i].find('\n') != std::string::npos)
-			new_field.header_value = lines[i].substr(0, lines[i].find('\n'));
+			value = lines[i].substr(0, lines[i].find('\n'));
 		else
-			new_field.header_value = lines[i].substr(0, lines[i].length());
-        this->header_fields.push_back(new_field);
+			value = lines[i].substr(0, lines[i].length());
+        
+        this->header_fields.insert(std::pair<std::string, std::string>(key, value));
     }
     return (i);
 }
@@ -125,7 +125,7 @@ struct Request::request_line                 Request::get_request_line()
     return this->req_line;
 }
 
-std::vector<struct Request::header_field>    Request::get_header_fields()
+std::map<std::string, std::string>   Request::get_header_fields()
 {
     return this->header_fields;
 }
@@ -137,24 +137,23 @@ std::string                         Request::get_plain_request()
 
 std::string                         Request::get_header_value(std::string key)
 {
-    for (size_t i = 0; i < header_fields.size(); i++)
+    for (std::map<std::string, std::string>::const_iterator it = header_fields.begin(); it != header_fields.end(); it++)
     {
-        if (strcmp(header_fields[i].header_key.c_str(), key.c_str()) == 0)
-            return (header_fields[i].header_value);
+        if (strcmp(it->first.c_str(), key.c_str()) == 0)
+            return (it->second);
     }
     return NULL;
 }
 
-
-std::ostream                                &operator<<(std::ostream &Stream, const Request &request)
+std::ostream                        &operator<<(std::ostream &Stream, const Request &request)
 {
     Stream << "Request method is " << request.req_line.method << std::endl;
     Stream << "Requested file is " << request.req_line.target << std::endl;
     Stream << "HTTP version is " << request.req_line.http_version << std::endl;
     Stream << "Other header fields: " <<std::endl;
-    for (size_t i = 0; i < request.header_fields.size(); i++)
+    for (std::map<std::string, std::string>::const_iterator it = request.header_fields.begin(); it != request.header_fields.end(); it++)
     {
-        Stream << "["<<request.header_fields[i].header_key << "] : [" << request.header_fields[i].header_value << "]" << std::endl;
+        Stream << "["<<it->first << "] : [" <<it->second << "]" << std::endl;
     }
     if (request.body.size() > 1) {
         Stream << "Body: " <<std::endl;
