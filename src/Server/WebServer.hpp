@@ -1,6 +1,7 @@
 #ifndef WEBSERVER_HPP
 # define WEBSERVER_HPP
 # include "ServerSocket.hpp"
+# include "Config.hpp"
 # include "Request.hpp"
 # include <csignal>
 # include <unistd.h>
@@ -24,7 +25,7 @@ class WebServer
 		WebServer(int domain, int service, int protocol, int port, u_long interface, int bklg);
 		WebServer(const WebServer &src);
 		WebServer						&operator=(const WebServer &rhs);
-		//WebServer(Configuration) Er moet een constructor komen die het config-object omzet in socket(s)
+		WebServer(Config &config);
 		~WebServer();
 		int							launch();
 		ServerSocket				*get_socket();

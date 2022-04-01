@@ -16,3 +16,4 @@ ConnectionErrorException      &ConnectionErrorException::operator=(const Connect
 const char       *ConnectionErrorException::what() const throw() {
     return ("Connection error.");
 }
+

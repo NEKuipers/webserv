@@ -12,12 +12,22 @@ WebServer::WebServer(int domain, int service, int protocol, int port, u_long int
 
 WebServer::WebServer()
 {
-	ServerSocket *newsocket = new ServerSocket(AF_INET, SOCK_STREAM,0,80,INADDR_ANY,10);
+	ServerSocket *newsocket = new ServerSocket(AF_INET, SOCK_STREAM,0,20480,INADDR_ANY,10);
 	sockets.push_back(newsocket);
 	launch();
 }
 
-//WebServer::WebServer(Configuration config) {}
+WebServer::WebServer(Config &config)
+{
+	std::vector<std::pair<in_addr_t, in_port_t> > *Vec = config.GetListenConnections();
+
+	for (std::vector<std::pair<in_addr_t, in_port_t> >::iterator iter = Vec->begin(); iter != Vec->end(); iter++)
+	{
+		ServerSocket *newsocket = new ServerSocket(AF_INET, SOCK_STREAM, iter->first, iter->second, INADDR_ANY, 10);
+		sockets.push_back(newsocket);
+	}
+	launch();
+}
 
 
 WebServer::WebServer(const WebServer &src)

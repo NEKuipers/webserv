@@ -5,8 +5,8 @@ SimpleSocket::SimpleSocket(int domain, int service, int protocol, int port, u_lo
 {
     //Define address struct
     address.sin_family = domain;
-    address.sin_port = htons(port);
-    address.sin_addr.s_addr = htonl(interface);
+    address.sin_port = port;
+    address.sin_addr.s_addr = interface;
 
     //Establish socket and connection, and test
     sock = socket(domain, service, protocol);

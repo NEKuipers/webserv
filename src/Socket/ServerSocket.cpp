@@ -7,7 +7,6 @@ ServerSocket::ServerSocket(int domain, int service, int protocol, int port, u_lo
 	backlog = bklg;
 	connect_to_network(get_sock(), get_address());
 	test_connection(get_sock());
-	fcntl(get_sock(), F_SETFL, O_NONBLOCK);
 	listen(get_sock(), backlog);
 }
 
