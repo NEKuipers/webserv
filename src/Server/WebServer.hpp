@@ -11,6 +11,7 @@
 # include <vector>
 # include <ctime>
 # include <sys/select.h>
+# include <Config.hpp>
 
 class WebServer
 {
@@ -18,6 +19,7 @@ class WebServer
 		std::vector<ServerSocket *>	accept_sockets;
 		// std::vector<int> read_sockets;
 		std::vector<ClientSocket *> read_sockets;
+		Config*						configuration;
 
 
 		int							connectionAccepter(ServerSocket *conn_socket);

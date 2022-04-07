@@ -76,7 +76,7 @@ ConfigResponse* ConfigLine_location::GetIteratorResponse(std::vector<ConfigBase*
 			continue;
 		if (Curr->ChecksConfiguration() && !Curr->Configuration.IsValidWithRequest(Request))
 			continue;
-
+		// Small issue here, ends with should have max length according to nginx
 		if (Best == NULL || Best->Location.length() < Curr->Location.length())
 			Best = Curr;
 	}

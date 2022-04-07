@@ -7,6 +7,7 @@
 #include <iostream>
 #include "SimpleSocket.hpp"
 #include "Request.hpp"
+#include "ConfigResponse.hpp"
 
 enum read_status
 {
@@ -17,14 +18,17 @@ enum read_status
 
 class ClientSocket: public SimpleSocket
 {
-	std::string buffer;
-	Request 	request;
-	bool 		headers_complete;
+	std::string 	buffer;
+	Request 		request;
+	bool 			headers_complete;
 
 
 	public:
+		ConfigResponse*	response;
+
 		// Constructor
 		ClientSocket(struct sockaddr_in address, int sock);
+		virtual ~ClientSocket();
 
 		enum read_status	read_to_request();
 		Request				get_request();

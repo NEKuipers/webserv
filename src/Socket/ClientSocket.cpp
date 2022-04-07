@@ -4,9 +4,14 @@
 #include <unistd.h>
 
 // Constructor
-ClientSocket::ClientSocket(struct sockaddr_in address, int sock) : SimpleSocket(address, sock)
+ClientSocket::ClientSocket(struct sockaddr_in address, int sock) : SimpleSocket(address, sock), headers_complete(false), response(NULL)
 {
-	headers_complete = false;
+
+}
+
+ClientSocket::~ClientSocket()
+{
+	delete response;
 }
 
 enum read_status		ClientSocket::read_to_request() {
@@ -53,6 +58,7 @@ enum read_status		ClientSocket::read_to_request() {
 				{
 					request.validate_request();
 					headers_complete = true;
+
 					return HEADER_COMPLETE;
 				}
 			}

@@ -5,3 +5,8 @@ ConfigResponse::~ConfigResponse()
 {
 	
 }
+
+bool ConfigResponse::RequiresBody()
+{
+	return false;
+}
