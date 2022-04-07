@@ -1,6 +1,7 @@
 #ifndef WEBSERVER_HPP
 # define WEBSERVER_HPP
 # include "ServerSocket.hpp"
+# include "ClientSocket.hpp"
 # include "Config.hpp"
 # include "Request.hpp"
 # include <csignal>
@@ -10,16 +11,17 @@
 # include <vector>
 # include <ctime>
 # include <sys/select.h>
-# define BUFFER_SIZE 30000
 
 class WebServer
 {
 	private:
-		std::vector<ServerSocket *>	sockets;
-		
-		void						connectionAccepter(ServerSocket *conn_socket);
-		int							connectionHandler(ServerSocket *conn_socket);
-		void						connectionCloser(ServerSocket *conn_socket);
+		std::vector<ServerSocket *>	accept_sockets;
+		// std::vector<int> read_sockets;
+		std::vector<ClientSocket *> read_sockets;
+
+
+		int							connectionAccepter(ServerSocket *conn_socket);
+		bool						connectionHandler(ClientSocket *conn_socket);
 	public:
 		WebServer();
 		WebServer(int domain, int service, int protocol, int port, u_long interface, int bklg);

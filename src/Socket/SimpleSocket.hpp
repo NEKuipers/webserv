@@ -15,12 +15,10 @@ class SimpleSocket
 
     public:
         SimpleSocket(int domain, int service, int protocol, int port, u_long interface);
+        SimpleSocket(struct sockaddr_in address, int sock);
         virtual ~SimpleSocket(){}
         SimpleSocket(const SimpleSocket &src);
         SimpleSocket           &operator=(const SimpleSocket &rhs);
-
-        // Connect_to_network() needs to be implemented as either bind or connect depending on server or client
-        virtual int         connect_to_network(int sock, struct sockaddr_in address) = 0;
 
         // Function to test sockets in connections
         void                test_connection(int item_to_test);
@@ -28,6 +26,8 @@ class SimpleSocket
         // Getter functions
         struct sockaddr_in  get_address();
         int                 get_sock();
+
+        static void         close_all();
 
 
 };

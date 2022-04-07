@@ -101,6 +101,9 @@ int         main(int argc, char **argv)
 	} catch (MethodException E) {
 		std::cout << E << std::endl;
 		return 1;
+	} catch (ConnectionErrorException E) {
+		std::cout << E.what() << std::endl;
+		return 1;
 	}
 
     return (0);

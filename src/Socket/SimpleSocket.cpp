@@ -1,6 +1,11 @@
 #include "SimpleSocket.hpp"
+#include <vector>
+#include <unistd.h>
 
 // Default constructor
+
+static std::vector<int> g_open_sockets;
+
 SimpleSocket::SimpleSocket(int domain, int service, int protocol, int port, u_long interface) 
 {
     //Define address struct
@@ -10,8 +15,12 @@ SimpleSocket::SimpleSocket(int domain, int service, int protocol, int port, u_lo
 
     //Establish socket and connection, and test
     sock = socket(domain, service, protocol);
+    g_open_sockets.push_back(sock);
     test_connection(sock);
 }
+
+SimpleSocket::SimpleSocket(struct sockaddr_in address, int sock) : address(address), sock(sock)
+{}
 
 // Copy constructor
 SimpleSocket::SimpleSocket(const SimpleSocket &src)
@@ -27,13 +36,18 @@ SimpleSocket    &SimpleSocket::operator=(const SimpleSocket &rhs)
     return (*this);
 }
 
+void    SimpleSocket::close_all()
+{
+    for(std::vector<int>::const_iterator it = g_open_sockets.begin(); it != g_open_sockets.end(); it++)
+        close(*it);
+}
+
 // Function to test sockets in connections
 void    SimpleSocket::test_connection(int item_to_test)
 {
     if (item_to_test < 0) 
     {
         throw ConnectionErrorException();
-        exit(EXIT_FAILURE);
     }
 }
 

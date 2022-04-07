@@ -1,16 +1,21 @@
-// This class serves as a client and is probably unnecessary for webserv, but may come in handy for testing?
-
 #include "ClientSocket.hpp"
+#include "Request.hpp"
+#define BUFFER_SIZE 30000
+#include <unistd.h>
 
 // Constructor
-ClientSocket::ClientSocket(int domain, int service, int protocol, int port, u_long interface) : SimpleSocket(domain, service, protocol, port, interface)
-{
-	connect_to_network(get_sock(), get_address());
-	test_connection(get_sock());
+ClientSocket::ClientSocket(struct sockaddr_in address, int sock) : SimpleSocket(address, sock)
+{}
+
+std::string ClientSocket::get_buffer() {
+	return buffer;
 }
 
-// Definition of connect_to_network virtual function
-int ClientSocket::connect_to_network(int sock, struct sockaddr_in address)
-{
-	return connect(sock, (struct sockaddr *)&address, sizeof(address));
+bool		ClientSocket::read_to_buffer() {
+
+	char	read_buffer[BUFFER_SIZE];
+	int ret = read(get_sock(), read_buffer, BUFFER_SIZE);
+
+	buffer += std::string(read_buffer, ret);
+	return (true); //TODO only return true if request is complete
 }

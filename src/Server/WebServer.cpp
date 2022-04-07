@@ -6,14 +6,14 @@
 WebServer::WebServer(int domain, int service, int protocol, int port, u_long interface, int bklg)
 {
 	ServerSocket *newsocket = new ServerSocket(domain, service, protocol, port, interface, bklg);
-	sockets.push_back(newsocket);
+	accept_sockets.push_back(newsocket);
 	launch();
 }
 
 WebServer::WebServer()
 {
 	ServerSocket *newsocket = new ServerSocket(AF_INET, SOCK_STREAM,0,20480,INADDR_ANY,10);
-	sockets.push_back(newsocket);
+	accept_sockets.push_back(newsocket);
 	launch();
 }
 
@@ -23,9 +23,11 @@ WebServer::WebServer(Config &config)
 
 	for (std::vector<std::pair<in_addr_t, in_port_t> >::iterator iter = Vec->begin(); iter != Vec->end(); iter++)
 	{
-		ServerSocket *newsocket = new ServerSocket(AF_INET, SOCK_STREAM, iter->first, iter->second, INADDR_ANY, 10);
-		sockets.push_back(newsocket);
+		ServerSocket *newsocket = new ServerSocket(AF_INET, SOCK_STREAM, 0, iter->second, iter->first, 10);
+		accept_sockets.push_back(newsocket);
 	}
+	// ServerSocket *two = new ServerSocket(AF_INET, SOCK_STREAM,0,htons(443),INADDR_ANY,10);
+	// sockets.push_back(two)
 	launch();
 }
 
@@ -37,51 +39,35 @@ WebServer::WebServer(const WebServer &src)
 
 WebServer		&WebServer::operator=(const WebServer &rhs)
 {
-	this->sockets = rhs.sockets;
+	this->accept_sockets = rhs.accept_sockets;
 	return (*this);
 }
 
 WebServer::~WebServer(){}
 
-void	WebServer::connectionAccepter(ServerSocket *conn_socket)
+int	WebServer::connectionAccepter(ServerSocket *conn_socket)
 {
-	int newsock;
+	int client;
 	struct sockaddr_in address = conn_socket->get_address();
 	int addrlen = sizeof(address);
-	try
-	{
-		if ((newsock = accept(conn_socket->get_sock(), (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
-			throw ConnectionErrorException();
-	}
-	catch (std::exception &e)
-	{
-		std::cerr<<e.what()<<std::endl;
-	}
-	conn_socket->set_sock_fd(newsock);
+	if ((client = accept(conn_socket->get_sock(), (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
+		throw ConnectionErrorException();
+	return (client);
 }
 
-int		WebServer::connectionHandler(ServerSocket *conn_socket)
+bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 {
-	char	buffer[BUFFER_SIZE];
-	bzero(buffer, BUFFER_SIZE);
-
-	int ret = 0;
-
-	ret = read(conn_socket->get_sock_fd(), buffer, 30000);
-	if (ret > 0) 
-	{
-		std::cout << "======START OF REQUEST======="<<std::endl;
-		Request new_request(buffer);
-		std::cout << new_request << std::endl;
-		std::cout << "======END OF REQUEST======"<<std::endl;
-	}
-	else
+	if (!conn_socket->read_to_buffer()) 
 	{
 		//TODO better errorhandling
 		std::cerr << "Error: could not read from socket" << std::endl;
-		return (1);
+		return (false);
 	}
+	std::cout << "======START OF REQUEST======="<<std::endl;
 
+	Request new_request(conn_socket->get_buffer());
+	std::cout << new_request << std::endl;
+	std::cout << "======END OF REQUEST======"<<std::endl;
 	//response
 	// std::ifstream resp("resources/index.html");
 	// std::string response((std::istreambuf_iterator<char>(resp)), std::istreambuf_iterator<char>());
@@ -92,42 +78,62 @@ int		WebServer::connectionHandler(ServerSocket *conn_socket)
 	response.append(datetime);
 	response.append("<p></body></html>");
 	//TODO: Add the creation of requested response here
-	write(conn_socket->get_sock_fd(), response.c_str(), response.size());
-	return (0);
-}
-
-void	WebServer::connectionCloser(ServerSocket *conn_socket)
-{
-	close(conn_socket->get_sock_fd());
+	write(conn_socket->get_sock(), response.c_str(), response.size());
+	close(conn_socket->get_sock());
+	return (true);
 }
 
 static void	sigintHandler(int signum)
 {
 	std::cerr << "\b\bServer interrupted. Exiting." << std::endl;
+	SimpleSocket::close_all();
 	exit(signum);
 }
 
 int	WebServer::launch()
 {
-	fd_set 	read_fds, write_fds, save_read_fds, save_write_fds; //we need backups because select() alters fds in the set
-	int		max_fd;
-
+	fd_set save_read_fds = this->get_socket_fd_set();
+ 	fd_set save_write_fds;
 	FD_ZERO(&save_write_fds);
-	save_read_fds = this->get_socket_fd_set();
-	max_fd = this->get_highest_fd();
+	int max_fd = this->get_highest_fd();
 	signal(SIGINT, sigintHandler);
 	std::cout << "Server is running!"<<std::endl;
 	while(true)
 	{
-		read_fds = save_read_fds;
-		write_fds = save_write_fds;
-		select(max_fd + 1, &read_fds, &write_fds, NULL, NULL);
-		for (size_t count = 0; count < sockets.size(); count++)
+		fd_set read_fds = save_read_fds;
+		if (select(max_fd + 1, &read_fds, NULL, NULL, NULL) == -1)
 		{
-			connectionAccepter(sockets[count]);
-			if (connectionHandler(sockets[count]) != 0)
-				return (1);
-			connectionCloser(sockets[count]);
+			std::cout << "error: " << strerror(errno) << std::endl;
+			throw ConnectionErrorException(); //TODO specify exceptions 
+		}
+		for (size_t count = 0; count < accept_sockets.size(); count++) 
+		{
+			if (FD_ISSET(accept_sockets[count]->get_sock_fd(), &read_fds)) 
+			{
+				try {
+					int new_client = connectionAccepter(accept_sockets[count]);
+					FD_SET(new_client, &save_read_fds);
+					max_fd = std::max(max_fd, new_client);
+					read_sockets.push_back(new ClientSocket(accept_sockets[count]->get_address(), new_client));
+				} catch (std::exception &e) {
+					std::cout << e.what() << std::endl;
+				}
+			}
+		}
+		for (size_t count = 0; count < read_sockets.size(); count++) 
+		{
+			if (FD_ISSET(read_sockets[count]->get_sock(), &read_fds)) 
+			{
+				try {
+					if (connectionHandler(read_sockets[count]))
+					{
+						FD_CLR(read_sockets[count]->get_sock(), &save_read_fds);
+						read_sockets.erase(read_sockets.begin() + count--);
+					}
+				} catch (std::exception &e) {
+					std::cout << e.what() << std::endl;
+				}
+			}
 		}
 	}
 	return (0);
@@ -135,7 +141,7 @@ int	WebServer::launch()
 
 std::vector<ServerSocket *>		WebServer::get_sockets()
 {
-	return this->sockets;
+	return this->accept_sockets;
 }
 
 fd_set							WebServer::get_socket_fd_set()
@@ -143,7 +149,7 @@ fd_set							WebServer::get_socket_fd_set()
 	fd_set	socket_fd_set;
 
 	FD_ZERO(&socket_fd_set);
-	for (std::vector<ServerSocket *>::iterator it = this->sockets.begin(); it != this->sockets.end(); it++)
+	for (std::vector<ServerSocket *>::iterator it = this->accept_sockets.begin(); it != this->accept_sockets.end(); it++)
 	{
 		FD_SET((*it)->get_sock_fd(), &socket_fd_set);
 	}
@@ -152,5 +158,5 @@ fd_set							WebServer::get_socket_fd_set()
 
 int							WebServer::get_highest_fd()
 {
-	return ((*(this->sockets.end() - 1))->get_sock_fd());
+	return ((*(this->accept_sockets.end() - 1))->get_sock_fd());
 }

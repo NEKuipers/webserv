@@ -9,12 +9,18 @@
 
 class ClientSocket: public SimpleSocket
 {
+	std::string buffer;
+
+
 	public:
 		// Constructor
-		ClientSocket(int domain, int service, int protocol, int port, u_long interface);
+		ClientSocket(struct sockaddr_in address, int sock);
+
+		bool			read_to_buffer();
+		std::string		get_buffer();
+
+
 		
-		// Virtual function from parent
-		int		connect_to_network(int sock, struct sockaddr_in address);
 };
 
 #endif
