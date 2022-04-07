@@ -26,8 +26,6 @@ WebServer::WebServer(Config &config)
 		ServerSocket *newsocket = new ServerSocket(AF_INET, SOCK_STREAM, 0, iter->second, iter->first, 10);
 		accept_sockets.push_back(newsocket);
 	}
-	// ServerSocket *two = new ServerSocket(AF_INET, SOCK_STREAM,0,htons(443),INADDR_ANY,10);
-	// sockets.push_back(two)
 	launch();
 }
 
