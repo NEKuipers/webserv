@@ -1,4 +1,6 @@
 #include "WebServer.hpp"
+#include "ReadFromSocketException.hpp"
+#include "SelectErrorException.hpp"
 #include <ctime>
 #include <iostream>
 #include <fstream>
@@ -57,8 +59,7 @@ bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 {
 	if (!conn_socket->read_to_buffer()) 
 	{
-		//TODO better errorhandling
-		std::cerr << "Error: could not read from socket" << std::endl;
+		throw ReadFromSocketException();
 		return (false);
 	}
 	std::cout << "======START OF REQUEST======="<<std::endl;
@@ -100,13 +101,10 @@ int	WebServer::launch()
 	{
 		fd_set read_fds = save_read_fds;
 		if (select(max_fd + 1, &read_fds, NULL, NULL, NULL) == -1)
-		{
-			std::cout << "error: " << strerror(errno) << std::endl;
-			throw ConnectionErrorException(); //TODO specify exceptions 
-		}
+			throw SelectErrorException();
 		for (size_t count = 0; count < accept_sockets.size(); count++) 
 		{
-			if (FD_ISSET(accept_sockets[count]->get_sock_fd(), &read_fds)) 
+			if (FD_ISSET(accept_sockets[count]->get_sock(), &read_fds)) 
 			{
 				try {
 					int new_client = connectionAccepter(accept_sockets[count]);
@@ -149,12 +147,12 @@ fd_set							WebServer::get_socket_fd_set()
 	FD_ZERO(&socket_fd_set);
 	for (std::vector<ServerSocket *>::iterator it = this->accept_sockets.begin(); it != this->accept_sockets.end(); it++)
 	{
-		FD_SET((*it)->get_sock_fd(), &socket_fd_set);
+		FD_SET((*it)->get_sock(), &socket_fd_set);
 	}
 	return (socket_fd_set);
 }
 
 int							WebServer::get_highest_fd()
 {
-	return ((*(this->accept_sockets.end() - 1))->get_sock_fd());
+	return ((*(this->accept_sockets.end() - 1))->get_sock());
 }

@@ -1,8 +1,6 @@
 #include "Request.hpp"
 #include "ParseRequestException.hpp"
 
-//TODO: Fix exception throwing
-
 std::vector<std::string> Request::content_to_lines(std::string req)
 {
     std::vector<std::string> lines;

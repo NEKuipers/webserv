@@ -11,7 +11,6 @@ class ClientSocket: public SimpleSocket
 {
 	std::string buffer;
 
-
 	public:
 		// Constructor
 		ClientSocket(struct sockaddr_in address, int sock);
@@ -19,8 +18,6 @@ class ClientSocket: public SimpleSocket
 		bool			read_to_buffer();
 		std::string		get_buffer();
 
-
-		
 };
 
 #endif
