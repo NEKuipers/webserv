@@ -6,18 +6,28 @@
 #include <netinet/in.h>
 #include <iostream>
 #include "SimpleSocket.hpp"
+#include "Request.hpp"
+
+enum read_status
+{
+	NOT_COMPLETE,
+	HEADER_COMPLETE,
+	BODY_COMPLETE
+};
 
 class ClientSocket: public SimpleSocket
 {
 	std::string buffer;
+	Request 	request;
+	bool 		headers_complete;
+
 
 	public:
 		// Constructor
 		ClientSocket(struct sockaddr_in address, int sock);
 
-		bool			read_to_buffer();
-		std::string		get_buffer();
-
+		enum read_status	read_to_request();
+		Request				get_request();
 };
 
 #endif

@@ -16,44 +16,44 @@ std::vector<std::string> Request::content_to_lines(std::string req)
     return lines;
 }
 
-void    Request::parse_requestline(std::vector<std::string> lines)
+void    Request::parse_requestline(std::string line)
 {
-	this->req_line.method = lines[0].substr(0, lines[0].find(' '));
-	lines[0].erase(0, this->req_line.method.length() + 1);
-	this->req_line.target = lines[0].substr(0, lines[0].find(' '));
-	lines[0].erase(0, this->req_line.target.length() + 1);
-	if (lines[0].find('\r') != std::string::npos)
-		this->req_line.http_version = lines[0].substr(0, lines[0].find('\r'));
-	else if (lines[0].find('\n') != std::string::npos)
-		this->req_line.http_version = lines[0].substr(0, lines[0].find('\n'));
-	else
-		this->req_line.http_version = lines[0].substr(0, lines[0].find(' '));
+    //TODO erase weghalen want vindt jasper niet leuk
+	this->req_line.method = line.substr(0, line.find(' '));
+	line.erase(0, this->req_line.method.length() + 1);
+	this->req_line.target = line.substr(0, line.find(' '));
+	line.erase(0, this->req_line.target.length() + 1);
+	this->req_line.http_version = line.substr(0, line.find_first_of("\r\n "));
+}
+
+bool   Request::parse_single_header_field(std::string line)
+{
+    if (line == "\r" || line.length() == 0)
+		return (true);
+    size_t pos = line.find(':');
+    if (pos == std::string::npos) 
+        throw ParseRequestException("Incorrect formatting found in header.");
+    std::string header_key = line.substr(0, pos);
+    pos++;
+    if (line[pos] == ' ')
+        pos++;
+    std::string header_value;
+    header_value = line.substr(pos, line.find_first_of("\r\n ", pos) - pos);
+    this->header_fields.insert(std::make_pair(header_key, header_value));
+    return (false);
 }
 
 int    Request::parse_header_fields(std::vector<std::string> lines)
 {
-    size_t i, pos;
+    size_t i;
 
     for (i = 1; lines.size(); i++)
-    {
-		if (lines[i] == "\r" || lines[i].length() == 0)
+	{
+        bool last_line = parse_single_header_field(lines[i]);
+		if (last_line)
 			return (i);
-		if ((pos = lines[i].find(':')) == std::string::npos) 
-			throw ParseRequestException("Incorrect formatting found in header.");
-		std::string header_key = lines[i].substr(0, pos);
-		lines[i].erase(0, pos + 1);
-		if (lines[i][0] == ' ')
-			lines[i].erase(0, 1);
-        std::string header_value;
-		if (lines[i].find('\r') != std::string::npos)
-			header_value = lines[i].substr(0, lines[i].find('\r'));
-		else if (lines[i].find('\n') != std::string::npos)
-			header_value = lines[i].substr(0, lines[i].find('\n'));
-		else
-			header_value = lines[i].substr(0, lines[i].length());
-        this->header_fields.insert(std::make_pair(header_key, header_value));
     }
-    return (i);
+	return (i);
 }
 
 static int validate_http_version(std::string http_version)
@@ -84,19 +84,27 @@ int     Request::validate_request()
     return (0);
 }
 
+void	Request::set_request_body(const std::string &buffer)
+{
+	body = buffer;
+}
+
+Request::Request() {}
+
 Request::Request(const std::string &request_content)
 {
     plain_request = request_content;
     std::vector<std::string> lines = content_to_lines(plain_request);
     if (lines.size() < 1)
         throw ParseRequestException("Empty request.");
-    parse_requestline(lines);
+    parse_requestline(lines[0]);
     size_t i = parse_header_fields(lines);
     while (i < lines.size() && (lines[i] == "\r" || lines[i].length() == 0))
         i++;
-    std::vector<std::string>::iterator start = lines.begin() + i;
-    if (start < lines.end())
-        body = std::vector<std::string>(start, lines.end());
+	std::string f2body;
+	for (std::vector<std::string>::const_iterator it = lines.begin() + i; it != lines.end(); ++it)
+		f2body += *it;
+	set_request_body(f2body);
     if (validate_request())
         throw ParseRequestException("Invalid header content.");
 }

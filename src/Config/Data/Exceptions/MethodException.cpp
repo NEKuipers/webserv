@@ -1,11 +1,8 @@
 #include "MethodException.hpp"
 
-MethodException::MethodException(const std::string& Type, const std::string& Method) : Type(Type), Method(Method) { }
+MethodException::MethodException(const std::string& Type, const std::string& Method) : Type(Type), Method(Method) {}
 
-MethodException::~MethodException() throw()
-{
-
-}
+MethodException::~MethodException() throw() {}
 
 const char* MethodException::what () const throw () {
 	return "Method was required to be accepted, but wasn't!";

@@ -1,5 +1,5 @@
 #include "WebServer.hpp"
-#include "ReadFromSocketException.hpp"
+// #include "ReadFromSocketException.hpp"
 #include "SelectErrorException.hpp"
 #include <ctime>
 #include <iostream>
@@ -57,14 +57,15 @@ int	WebServer::connectionAccepter(ServerSocket *conn_socket)
 
 bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 {
-	if (!conn_socket->read_to_buffer()) 
-	{
-		throw ReadFromSocketException();
-		return (false);
-	}
-	std::cout << "======START OF REQUEST======="<<std::endl;
+	enum read_status status = conn_socket->read_to_request();
+	if (status == NOT_COMPLETE)
+		return false;
 
-	Request new_request(conn_socket->get_buffer());
+	// IF: status == HEADER_COMPLETE, make config request & see what file it should return
+	// IF: status == BODY_COMPLETE OR it should return something that requires the body, call read_to_request AGAIN
+		
+	std::cout << "======START OF REQUEST======="<<std::endl;
+	Request new_request = conn_socket->get_request();
 	std::cout << new_request << std::endl;
 	std::cout << "======END OF REQUEST======"<<std::endl;
 	//response

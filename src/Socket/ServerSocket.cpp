@@ -1,4 +1,5 @@
 #include "ServerSocket.hpp"
+#include "SetSockOptErrorException.hpp"
 #include <unistd.h>
 
 // Constructor
