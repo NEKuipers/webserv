@@ -9,13 +9,6 @@
 #include "Request.hpp"
 #include "ConfigResponse.hpp"
 
-enum read_status
-{
-	NOT_COMPLETE,
-	HEADER_COMPLETE,
-	BODY_COMPLETE
-};
-
 class ClientSocket: public SimpleSocket
 {
 	std::string 	buffer;
@@ -30,8 +23,9 @@ class ClientSocket: public SimpleSocket
 		ClientSocket(struct sockaddr_in address, int sock);
 		virtual ~ClientSocket();
 
-		enum read_status	read_to_request();
 		Request				get_request();
+		bool				read_body();
+		bool				read_headers();
 };
 
 #endif

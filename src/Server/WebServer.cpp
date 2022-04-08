@@ -114,14 +114,14 @@ static void writeResponse(ClientSocket *conn_socket)
 
 bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 {
-	enum read_status status = conn_socket->read_to_request();
-	if (status == NOT_COMPLETE)
+	bool status = conn_socket->read_headers();
+	if (status == false)
 		return false;
 
 	// Do config stuff
 	if (configuration)
 	{
-		if (status == HEADER_COMPLETE)
+		if (status == true)
 		{
 			conn_socket->response = configuration->GetResponse(ConfigRequest(
 				conn_socket->get_address().sin_addr.s_addr,
@@ -145,9 +145,6 @@ bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 	Request new_request = conn_socket->get_request();
 	std::cout << new_request << std::endl;
 	std::cout << "======END OF REQUEST======"<<std::endl;
-	//response
-	// std::ifstream resp("resources/index.html");
-	// std::string response((std::istreambuf_iterator<char>(resp)), std::istreambuf_iterator<char>());
 
 	writeResponse(conn_socket);
 	
@@ -173,6 +170,8 @@ int	WebServer::launch()
 	while(true)
 	{
 		fd_set read_fds = save_read_fds;
+		for (int fd = 0; fd <= max_fd; fd++)
+			std::cerr << "fd " << fd << ": " << FD_ISSET(fd, &read_fds) << "\n";
 		if (select(max_fd + 1, &read_fds, NULL, NULL, NULL) == -1)
 			throw SelectErrorException();
 		for (size_t count = 0; count < accept_sockets.size(); count++) 
