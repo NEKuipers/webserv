@@ -138,8 +138,6 @@ bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 		if (conn_socket->response && conn_socket->response->RequiresBody() && !conn_socket->check_body())
 			return false;
 		// We have now read the whole packet, if we want to read the body, we have also read that, send back the stuff
-
-		
 	}
 
 	std::cout << "======START OF REQUEST======="<<std::endl;
@@ -174,7 +172,6 @@ int	WebServer::launch()
 		fd_set write_fds = save_write_fds;
 		if (select(max_fd + 1, &read_fds, &write_fds, NULL, NULL) == -1)
 			throw SelectErrorException();
-		std::cout << "Select complete!" << std::endl;
 		for (size_t count = 0; count < accept_sockets.size(); count++) 
 		{
 			if (FD_ISSET(accept_sockets[count]->get_sock(), &read_fds)) 
