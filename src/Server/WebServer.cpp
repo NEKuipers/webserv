@@ -98,7 +98,8 @@ static void writeResponse(ClientSocket *conn_socket)
 	char *datetime = ctime(&now);
 	Body.append(datetime);
 
-	Body.append("Response type: " + to_string(*conn_socket->response));
+	if (conn_socket->response)
+		Body.append("Response type: " + to_string(*conn_socket->response));
 
 	std::string response = "HTTP/1.1 " + Status + "\r\n";
 	response += Headers;
@@ -170,8 +171,6 @@ int	WebServer::launch()
 	while(true)
 	{
 		fd_set read_fds = save_read_fds;
-		for (int fd = 0; fd <= max_fd; fd++)
-			std::cerr << "fd " << fd << ": " << FD_ISSET(fd, &read_fds) << "\n";
 		if (select(max_fd + 1, &read_fds, NULL, NULL, NULL) == -1)
 			throw SelectErrorException();
 		for (size_t count = 0; count < accept_sockets.size(); count++) 

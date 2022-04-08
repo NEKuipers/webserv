@@ -6,7 +6,8 @@
 ConfigLine_location::ConfigLine_location() {}
 ConfigLine_location::ConfigLine_location(const std::string& Location, const ConfigBlock& Block, const ConfigurationState &Configuration) : ConfigListBase(Configuration), Location(Location)
 {
-	this->Configuration.ExpectedRootExtension = this->Configuration.ExpectedRootExtension + "/" + Location;
+	if (Location.size() > 0 && Location.at(0) != '*')
+		this->Configuration.ExpectedRootExtension = this->Configuration.ExpectedRootExtension + "/" + Location;
 	ReadBlock("ConfigLine_location", BaseLines, Block.GetLines());
 }
 ConfigLine_location::~ConfigLine_location()
