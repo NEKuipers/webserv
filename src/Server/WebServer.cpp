@@ -59,14 +59,14 @@ int	WebServer::connectionAccepter(ServerSocket *conn_socket)
 
 bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 {
-	enum read_status status = conn_socket->read_to_request();
-	if (status == NOT_COMPLETE)
+	bool status = conn_socket->read_headers();
+	if (status == false)
 		return false;
 
 	// Do config stuff
 	if (configuration)
 	{
-		if (status == HEADER_COMPLETE)
+		if (status == true)
 		{
 			conn_socket->response = configuration->GetResponse(ConfigRequest(
 				conn_socket->get_address().sin_addr.s_addr,
@@ -77,8 +77,8 @@ bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 				conn_socket->get_request().get_request_line().method
 			));
 
-			if (conn_socket->response->RequiresBody())
-				return connectionHandler(conn_socket);
+			// if (conn_socket->response->RequiresBody())
+				conn_socket->read_body();
 		}		
 		
 		// We have now read the whole packet, if we want to read the body, we have also read that, send back the stuff
@@ -137,6 +137,8 @@ int	WebServer::launch()
 	while(true)
 	{
 		fd_set read_fds = save_read_fds;
+		for (int fd = 0; fd <= max_fd; fd++)
+			std::cerr << "fd " << fd << ": " << FD_ISSET(fd, &read_fds) << "\n";
 		if (select(max_fd + 1, &read_fds, NULL, NULL, NULL) == -1)
 			throw SelectErrorException();
 		for (size_t count = 0; count < accept_sockets.size(); count++) 
