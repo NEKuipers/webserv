@@ -18,7 +18,7 @@ class CgiResponse : public ConfigResponse {
 		friend std::ostream& operator<<(std::ostream& Stream, const CgiResponse& CgiResponse);
 		virtual void Print(std::ostream& Stream) const;
 
-		virtual bool RequiresBody();
+		virtual bool RequiresBody() const;
 	private:
 		// No, we dont copy, and we dont have a default constructor
 		CgiResponse();

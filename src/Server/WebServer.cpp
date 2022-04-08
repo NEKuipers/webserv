@@ -63,12 +63,14 @@ static void writeResponse(ClientSocket *conn_socket)
 	std::string Status;
 	// TODO: Response headers
 	std::string Headers = "";
+	std::string ContentType = "";
 	std::string Body;
 
 
 	if (FileResponse* FileResponsePtr = dynamic_cast<FileResponse*>(conn_socket->response))
 	{
 		Status = "200 OK";
+		ContentType = FileResponsePtr->GetContentType();
 		Body = to_string(FileResponsePtr->GetStream().rdbuf());
 	}
 	else
@@ -76,17 +78,17 @@ static void writeResponse(ClientSocket *conn_socket)
 		if (conn_socket->response)
 		{
 			Status = "200 OK";
+			ContentType = "text/html";
 
 			Body = "<!DOCTYPE html><head><title>Webserv Testpage</title></head><body><p>Hello World!\n";
-
 			Body.append("Unknown response type: " + to_string(*conn_socket->response));
-
 			Body.append("<p></body></html>");
 		}
 		else
 		{
 			// I guess this is a default error page or something i dunno
 			Status = "404 OK";
+			ContentType = "text/html";
 			Body = "<!DOCTYPE html><head><title>Webserv ErrorPage</title></head><body><p>You have made a invalid request!<p></body></html>";
 		}
 	}
@@ -100,6 +102,8 @@ static void writeResponse(ClientSocket *conn_socket)
 
 	std::string response = "HTTP/1.1 " + Status + "\r\n";
 	response += Headers;
+	response += "[Content-Type]: " + ContentType + "\r\n";
+	response += "[Content-Length]: " + to_string(Body.length()) + "\r\n";
 	response += "\r\n";	// End of headers
 	response += Body;
 

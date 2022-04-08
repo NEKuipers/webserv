@@ -6,7 +6,7 @@ ConfigResponse::~ConfigResponse()
 	
 }
 
-bool ConfigResponse::RequiresBody()
+bool ConfigResponse::RequiresBody() const
 {
 	return false;
 }

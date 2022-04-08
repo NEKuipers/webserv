@@ -13,7 +13,7 @@ class ConfigResponse {
 
 		virtual void Print(std::ostream& Stream) const = 0;	// Apparently this is how you do virtual logging?
 
-		virtual bool RequiresBody();
+		virtual bool RequiresBody() const;
 	private:
 		// No copying
 		ConfigResponse(const ConfigResponse& From);

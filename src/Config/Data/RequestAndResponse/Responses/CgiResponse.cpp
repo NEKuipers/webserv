@@ -22,7 +22,7 @@ void CgiResponse::Print(std::ostream& PrintStream) const
 	PrintStream << "CgiResponse " << CgiFile;
 }
 
-bool CgiResponse::RequiresBody()
+bool CgiResponse::RequiresBody() const
 {
 	return true;
 }
