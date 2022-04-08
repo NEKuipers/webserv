@@ -84,13 +84,10 @@ int         main(int argc, char **argv)
 		// Mhhh, yeah, still some problems here, not sure how i can prevent this though
 		// PrintResponse(Conf, ConfigRequest(Addr.s_addr, htons(17176), "test2.com", "test/../File2", 0, "GET"));	// Gets supposedly overridden File2
 
-
 		// return 0;
 
 		std::cout << "Starting...." <<std::endl;
 		WebServer testserver = WebServer(Conf);
-
-		//Response = Conf.GetResponse(Request);
 
 	} catch (UnexpectedTokenException E) {
 		std::cout << E << std::endl;
