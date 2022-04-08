@@ -11,13 +11,11 @@
 # include <vector>
 # include <ctime>
 # include <sys/select.h>
-# include <Config.hpp>
 
 class WebServer
 {
 	private:
 		std::vector<ServerSocket *>	accept_sockets;
-		// std::vector<int> read_sockets;
 		std::vector<ClientSocket *> read_sockets;
 		Config*						configuration;
 

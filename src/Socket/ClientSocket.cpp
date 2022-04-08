@@ -1,8 +1,9 @@
 #include "ClientSocket.hpp"
 #include "Request.hpp"
-#define BUFFER_SIZE 30000
+#define BUFFER_SIZE 3000
 #include <unistd.h>
 #include <map>
+#include "ReadFromSocketException.hpp"
 
 // Constructor
 ClientSocket::ClientSocket(struct sockaddr_in address, int sock) : SimpleSocket(address, sock), headers_complete(false), response(NULL)
@@ -15,15 +16,25 @@ ClientSocket::~ClientSocket()
 	delete response;
 }
 
-enum read_status		ClientSocket::read_to_request() {
-
+enum read_status		ClientSocket::read_to_request() 
+{
 	// Read everything
 
 	if (headers_complete)
 	{
-		if (request.get_header_value("content-length") != "")
-			std::cerr << "Dit hoort niet te gebeuren" << std::endl;
-			// TODO NICK: Check if buffer.size() >= content-length, and if so, apply body & return
+		std::string content_length = request.get_header_value("Content-Length");
+		if (content_length == "")
+			return BODY_COMPLETE;
+		else
+		{
+			char	read_buffer[BUFFER_SIZE];
+			int ret = read(get_sock(), read_buffer, BUFFER_SIZE);
+			if (ret < 0)
+				throw ReadFromSocketException();
+			buffer += std::string(read_buffer, ret);
+			if (int(buffer.size()) >= std::stoi(content_length))
+				request.set_request_body(buffer);
+		}
 		return BODY_COMPLETE;
 	}
 	else
@@ -34,16 +45,12 @@ enum read_status		ClientSocket::read_to_request() {
 			int ret = read(get_sock(), read_buffer, BUFFER_SIZE);
 			if (ret < 0)
 			{
-				std::cout << "Not supposed to happen!" << std::endl;
+				throw ReadFromSocketException();
 				break;
 			}
-			// if (ret < 0)
-			// 	throw ReadFromSocketException(); //TODO NICK make this
 			if (ret == 0)
 				return NOT_COMPLETE;
-			
 			buffer += std::string(read_buffer, ret);
-
 			while (true)
 			{
 				size_t found_line = buffer.find("\n");
@@ -61,7 +68,6 @@ enum read_status		ClientSocket::read_to_request() {
 				{
 					request.validate_request();
 					headers_complete = true;
-
 					return HEADER_COMPLETE;
 				}
 			}

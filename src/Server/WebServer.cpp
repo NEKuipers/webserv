@@ -96,9 +96,6 @@ bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 	Request new_request = conn_socket->get_request();
 	std::cout << new_request << std::endl;
 	std::cout << "======END OF REQUEST======"<<std::endl;
-	//response
-	// std::ifstream resp("resources/index.html");
-	// std::string response((std::istreambuf_iterator<char>(resp)), std::istreambuf_iterator<char>());
 
 	std::string response = "<!DOCTYPE html><head><title>Webserv Testpage</title></head><body><p>Hello World!\n It is ";
 	time_t now = time(0);
