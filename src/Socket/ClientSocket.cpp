@@ -2,6 +2,7 @@
 #include "Request.hpp"
 #define BUFFER_SIZE 30000
 #include <unistd.h>
+#include <map>
 
 // Constructor
 ClientSocket::ClientSocket(struct sockaddr_in address, int sock) : SimpleSocket(address, sock)
@@ -15,7 +16,9 @@ enum read_status		ClientSocket::read_to_request() {
 
 	if (headers_complete)
 	{
-		// TODO NICK: Check if buffer.size() >= content-length, and if so, apply body & return
+		if (request.get_header_value("content-length") != "")
+			std::cerr << "Dit hoort niet te gebeuren" << std::endl;
+			// TODO NICK: Check if buffer.size() >= content-length, and if so, apply body & return
 		return BODY_COMPLETE;
 	}
 	else
