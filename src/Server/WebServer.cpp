@@ -110,9 +110,7 @@ bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 	{
 		response.append("\n\rAnd a config response of: ");
 		
-		std::ostringstream str;
-		conn_socket->response->Print(str);
-		response.append(str.str());
+		response.append(to_string(*conn_socket->response));
 	}
 
 	response.append("<p></body></html>");
