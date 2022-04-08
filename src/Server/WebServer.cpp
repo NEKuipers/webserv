@@ -115,7 +115,9 @@ static void writeResponse(ClientSocket *conn_socket)
 
 bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 {
-	bool status = conn_socket->read_headers();
+	conn_socket->read();
+
+	bool status = conn_socket->check_headers();
 	if (status == false)
 		return false;
 
@@ -132,11 +134,9 @@ bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 				0,	// TODO: Get Content-length
 				conn_socket->get_request().get_request_line().method
 			));
-
-			if (conn_socket->response && conn_socket->response->RequiresBody())
-				return connectionHandler(conn_socket);
 		}
-		
+		if (conn_socket->response && conn_socket->response->RequiresBody() && !conn_socket->check_body())
+			return false;
 		// We have now read the whole packet, if we want to read the body, we have also read that, send back the stuff
 
 		
@@ -174,6 +174,7 @@ int	WebServer::launch()
 		fd_set write_fds = save_write_fds;
 		if (select(max_fd + 1, &read_fds, &write_fds, NULL, NULL) == -1)
 			throw SelectErrorException();
+		std::cout << "Select complete!" << std::endl;
 		for (size_t count = 0; count < accept_sockets.size(); count++) 
 		{
 			if (FD_ISSET(accept_sockets[count]->get_sock(), &read_fds)) 

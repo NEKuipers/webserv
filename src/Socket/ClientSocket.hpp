@@ -24,8 +24,10 @@ class ClientSocket: public SimpleSocket
 		virtual ~ClientSocket();
 
 		Request				get_request();
-		bool				read_body();
-		bool				read_headers();
+
+		void				read();
+		bool				check_body();
+		bool				check_headers();
 };
 
 #endif

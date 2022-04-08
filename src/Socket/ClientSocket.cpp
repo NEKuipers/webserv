@@ -16,36 +16,33 @@ ClientSocket::~ClientSocket()
 	delete response;
 }
 
-bool					ClientSocket::read_body()
-{
-	std::string content_length = request.get_header_value("Content-Length");
-	if (content_length == "")
-		return true;
-	else
-	{
-		char	read_buffer[BUFFER_SIZE];
-		int ret = recv(get_sock(), read_buffer, BUFFER_SIZE, MSG_DONTWAIT);
-		if (ret < 0)
-			throw ReadFromSocketException();
-		buffer += std::string(read_buffer, ret);
-		if (int(buffer.size()) >= std::stoi(content_length))
-			request.set_request_body(buffer);
-	}
-	return true;
-}
-
-bool					ClientSocket::read_headers()
+void					ClientSocket::read()
 {
 	char	read_buffer[BUFFER_SIZE];
 	int ret = recv(get_sock(), read_buffer, BUFFER_SIZE, MSG_DONTWAIT);
 	if (ret < 0)
 	{
-		std::cerr << strerror(errno) << std::endl;
 		throw ReadFromSocketException();
 	}
-	if (ret == 0)
-		return false;
 	buffer += std::string(read_buffer, ret);
+}
+
+bool					ClientSocket::check_body()
+{
+	std::string content_length = request.get_header_value("Content-Length");
+	if (content_length == "" || int(buffer.size()) >= std::stoi(content_length))
+	{
+		request.set_request_body(buffer);
+		return true;
+	}
+	return false;
+}
+
+bool					ClientSocket::check_headers()
+{
+	if (headers_complete)
+		return true;
+	
 	while (true)
 	{
 		size_t found_line = buffer.find("\n");
