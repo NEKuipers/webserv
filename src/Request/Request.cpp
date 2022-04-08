@@ -18,7 +18,6 @@ std::vector<std::string> Request::content_to_lines(std::string req)
 
 void    Request::parse_requestline(std::string line)
 {
-    //TODO erase weghalen want vindt jasper niet leuk
 	this->req_line.method = line.substr(0, line.find(' '));
 	line.erase(0, this->req_line.method.length() + 1);
 	this->req_line.target = line.substr(0, line.find(' '));
