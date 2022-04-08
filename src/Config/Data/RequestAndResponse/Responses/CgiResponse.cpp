@@ -21,3 +21,8 @@ void CgiResponse::Print(std::ostream& PrintStream) const
 {
 	PrintStream << "CgiResponse " << CgiFile;
 }
+
+bool CgiResponse::RequiresBody()
+{
+	return true;
+}

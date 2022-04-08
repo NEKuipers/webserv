@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include "ToString.hpp"
+#include "FileResponse.hpp"
 
 WebServer::WebServer(int domain, int service, int protocol, int port, u_long interface, int bklg) : configuration(NULL)
 {
@@ -57,6 +58,56 @@ int	WebServer::connectionAccepter(ServerSocket *conn_socket)
 	return (client);
 }
 
+static void writeResponse(ClientSocket *conn_socket)
+{
+	std::string Status;
+	// TODO: Response headers
+	std::string Headers = "";
+	std::string Body;
+
+
+	if (FileResponse* FileResponsePtr = dynamic_cast<FileResponse*>(conn_socket->response))
+	{
+		Status = "200 OK";
+		Body = to_string(FileResponsePtr->GetStream().rdbuf());
+	}
+	else
+	{
+		if (conn_socket->response)
+		{
+			Status = "200 OK";
+
+			Body = "<!DOCTYPE html><head><title>Webserv Testpage</title></head><body><p>Hello World!\n";
+
+			Body.append("Unknown response type: " + to_string(*conn_socket->response));
+
+			Body.append("<p></body></html>");
+		}
+		else
+		{
+			// I guess this is a default error page or something i dunno
+			Status = "404 OK";
+			Body = "<!DOCTYPE html><head><title>Webserv ErrorPage</title></head><body><p>You have made a invalid request!<p></body></html>";
+		}
+	}
+
+	// Debugging infos
+	time_t now = time(0);
+	char *datetime = ctime(&now);
+	Body.append(datetime);
+
+	Body.append("Response type: " + to_string(*conn_socket->response));
+
+	std::string response = "HTTP/1.1 " + Status + "\r\n";
+	response += Headers;
+	response += "\r\n";	// End of headers
+	response += Body;
+
+	
+
+	write(conn_socket->get_sock(), response.c_str(), response.size());
+}
+
 bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 {
 	enum read_status status = conn_socket->read_to_request();
@@ -77,19 +128,13 @@ bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 				conn_socket->get_request().get_request_line().method
 			));
 
-			if (conn_socket->response->RequiresBody())
+			if (conn_socket->response && conn_socket->response->RequiresBody())
 				return connectionHandler(conn_socket);
-		}		
+		}
 		
 		// We have now read the whole packet, if we want to read the body, we have also read that, send back the stuff
 
-		// I guess this is a default error page or something i dunno
-		if (!conn_socket->response)
-		{
-			std::string response = "<!DOCTYPE html><head><title>Webserv ErrorPage</title></head><body><p>You have made a invalid request!<p></body></html>";
-			write(conn_socket->get_sock(), response.c_str(), response.size());
-			return true;
-		}
+		
 	}
 
 	std::cout << "======START OF REQUEST======="<<std::endl;
@@ -100,22 +145,8 @@ bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 	// std::ifstream resp("resources/index.html");
 	// std::string response((std::istreambuf_iterator<char>(resp)), std::istreambuf_iterator<char>());
 
-	std::string response = "<!DOCTYPE html><head><title>Webserv Testpage</title></head><body><p>Hello World!\n It is ";
-	time_t now = time(0);
-	char *datetime = ctime(&now);
-	response.append(datetime);
-
-	// Also add some info about the thing you requested
-	if (conn_socket->response)
-	{
-		response.append("\n\rAnd a config response of: ");
-		
-		response.append(to_string(*conn_socket->response));
-	}
-
-	response.append("<p></body></html>");
-	//TODO: Add the creation of requested response here
-	write(conn_socket->get_sock(), response.c_str(), response.size());
+	writeResponse(conn_socket);
+	
 	close(conn_socket->get_sock());	// NOTE: It is possibly easier to add the close function to the simplesocket destructor, thay way its automatic and cannot be forgotten
 	return (true);
 }

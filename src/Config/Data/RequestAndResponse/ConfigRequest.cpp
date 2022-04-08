@@ -12,7 +12,8 @@ ConfigRequest::ConfigRequest(const ConfigRequest& From)
 ConfigRequest::ConfigRequest(in_addr_t Addr, in_port_t Port, const std::string& ServerName, const std::string& Uri, size_t ContentLength, const std::string& Method) 
 	: Addr(Addr), Port(Port), ServerName(ServerName), Uri(Uri),ContentLength(ContentLength), Method(Method), PreviousUris()
 {
-
+	if (this->Uri.length() > 0 && this->Uri.at(0) == '/')
+		this->Uri = this->Uri.substr(1);	// Remove / at the start
 }
 
 ConfigRequest::ConfigRequest(const ConfigRequest& From, const std::string& NewUri) 

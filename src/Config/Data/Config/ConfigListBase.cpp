@@ -6,6 +6,7 @@
 #include "ConfigLine_redirect.hpp"
 #include "ConfigLine_server.hpp"
 #include "ConfigLine_location.hpp"
+#include "ConfigLine_index.hpp"
 
 #include "ConvertException.hpp"
 
@@ -15,6 +16,7 @@ ConfigListBase::TryParseLineFunc ConfigListBase::BaseLines[] = {
 	(ConfigListBase::TryParseLineFunc) ConfigLine_redirect::TryParse,
 	(ConfigListBase::TryParseLineFunc) ConfigLine_server  ::TryParse,
 	(ConfigListBase::TryParseLineFunc) ConfigLine_location::TryParse,
+	(ConfigListBase::TryParseLineFunc) ConfigLine_index::TryParse,
 	(ConfigListBase::TryParseLineFunc) ConfigLine_try_cgi ::TryParse,
 	NULL
 };
