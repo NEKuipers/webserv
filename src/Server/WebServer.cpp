@@ -4,22 +4,23 @@
 #include <ctime>
 #include <iostream>
 #include <fstream>
+#include "ToString.hpp"
 
-WebServer::WebServer(int domain, int service, int protocol, int port, u_long interface, int bklg)
+WebServer::WebServer(int domain, int service, int protocol, int port, u_long interface, int bklg) : configuration(NULL)
 {
 	ServerSocket *newsocket = new ServerSocket(domain, service, protocol, port, interface, bklg);
 	accept_sockets.push_back(newsocket);
 	launch();
 }
 
-WebServer::WebServer()
+WebServer::WebServer() : configuration(NULL)
 {
 	ServerSocket *newsocket = new ServerSocket(AF_INET, SOCK_STREAM,0,20480,INADDR_ANY,10);
 	accept_sockets.push_back(newsocket);
 	launch();
 }
 
-WebServer::WebServer(Config &config)
+WebServer::WebServer(Config &config) : configuration(&config)
 {
 	std::vector<std::pair<in_addr_t, in_port_t> > *Vec = config.GetListenConnections();
 
@@ -28,6 +29,7 @@ WebServer::WebServer(Config &config)
 		ServerSocket *newsocket = new ServerSocket(AF_INET, SOCK_STREAM, 0, iter->second, iter->first, 10);
 		accept_sockets.push_back(newsocket);
 	}
+	
 	launch();
 }
 
@@ -61,9 +63,35 @@ bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 	if (status == NOT_COMPLETE)
 		return false;
 
-	// IF: status == HEADER_COMPLETE, make config request & see what file it should return
-	// IF: status == BODY_COMPLETE OR it should return something that requires the body, call read_to_request AGAIN
+	// Do config stuff
+	if (configuration)
+	{
+		if (status == HEADER_COMPLETE)
+		{
+			conn_socket->response = configuration->GetResponse(ConfigRequest(
+				conn_socket->get_address().sin_addr.s_addr,
+				conn_socket->get_address().sin_port,
+				"Unknown",	// TODO: Probabily in a header field
+				conn_socket->get_request().get_request_line().target,
+				0,	// TODO: Get Content-length
+				conn_socket->get_request().get_request_line().method
+			));
+
+			if (conn_socket->response->RequiresBody())
+				return connectionHandler(conn_socket);
+		}		
 		
+		// We have now read the whole packet, if we want to read the body, we have also read that, send back the stuff
+
+		// I guess this is a default error page or something i dunno
+		if (!conn_socket->response)
+		{
+			std::string response = "<!DOCTYPE html><head><title>Webserv ErrorPage</title></head><body><p>You have made a invalid request!<p></body></html>";
+			write(conn_socket->get_sock(), response.c_str(), response.size());
+			return true;
+		}
+	}
+
 	std::cout << "======START OF REQUEST======="<<std::endl;
 	Request new_request = conn_socket->get_request();
 	std::cout << new_request << std::endl;
@@ -76,10 +104,21 @@ bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 	time_t now = time(0);
 	char *datetime = ctime(&now);
 	response.append(datetime);
+
+	// Also add some info about the thing you requested
+	if (conn_socket->response)
+	{
+		response.append("\n\rAnd a config response of: ");
+		
+		std::ostringstream str;
+		conn_socket->response->Print(str);
+		response.append(str.str());
+	}
+
 	response.append("<p></body></html>");
 	//TODO: Add the creation of requested response here
 	write(conn_socket->get_sock(), response.c_str(), response.size());
-	close(conn_socket->get_sock());
+	close(conn_socket->get_sock());	// NOTE: It is possibly easier to add the close function to the simplesocket destructor, thay way its automatic and cannot be forgotten
 	return (true);
 }
 
@@ -125,6 +164,7 @@ int	WebServer::launch()
 					if (connectionHandler(read_sockets[count]))
 					{
 						FD_CLR(read_sockets[count]->get_sock(), &save_read_fds);
+						delete read_sockets[count];
 						read_sockets.erase(read_sockets.begin() + count--);
 					}
 				} catch (std::exception &e) {
