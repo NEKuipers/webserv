@@ -147,7 +147,7 @@ std::string                         Request::get_header_value(std::string key)
         if (strcmp((it)->first.c_str(), key.c_str()) == 0)
             return ((it)->second);
     }
-    return NULL;
+    return "";
 }
 
 
