@@ -110,7 +110,7 @@ static void writeResponse(ClientSocket *conn_socket)
 
 	
 
-	write(conn_socket->get_sock(), response.c_str(), response.size());
+	send(conn_socket->get_sock(), response.c_str(), response.size(), 0);
 }
 
 bool		WebServer::connectionHandler(ClientSocket *conn_socket)
@@ -161,7 +161,7 @@ static void	sigintHandler(int signum)
 }
 
 int	WebServer::launch()
-{
+{ 
 	fd_set save_read_fds = this->get_socket_fd_set();
  	fd_set save_write_fds;
 	FD_ZERO(&save_write_fds);
@@ -171,7 +171,8 @@ int	WebServer::launch()
 	while(true)
 	{
 		fd_set read_fds = save_read_fds;
-		if (select(max_fd + 1, &read_fds, NULL, NULL, NULL) == -1)
+		fd_set write_fds = save_write_fds;
+		if (select(max_fd + 1, &read_fds, &write_fds, NULL, NULL) == -1)
 			throw SelectErrorException();
 		for (size_t count = 0; count < accept_sockets.size(); count++) 
 		{
@@ -202,6 +203,11 @@ int	WebServer::launch()
 					std::cout << e.what() << std::endl;
 				}
 			}
+			// if (FD_ISSET(read_sockets[count]->get_sock(), &write_fds))//TODO Write fds implementation!
+			// {
+			// 	;
+			// 	FD_CLR(read_sockets[count]->get_sock(), &save_write_fds);
+			// }
 		}
 	}
 	return (0);

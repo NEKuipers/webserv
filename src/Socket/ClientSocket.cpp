@@ -24,7 +24,7 @@ bool					ClientSocket::read_body()
 	else
 	{
 		char	read_buffer[BUFFER_SIZE];
-		int ret = read(get_sock(), read_buffer, BUFFER_SIZE);
+		int ret = recv(get_sock(), read_buffer, BUFFER_SIZE, MSG_DONTWAIT);
 		if (ret < 0)
 			throw ReadFromSocketException();
 		buffer += std::string(read_buffer, ret);
@@ -36,39 +36,37 @@ bool					ClientSocket::read_body()
 
 bool					ClientSocket::read_headers()
 {
+	char	read_buffer[BUFFER_SIZE];
+	int ret = recv(get_sock(), read_buffer, BUFFER_SIZE, MSG_DONTWAIT);
+	if (ret < 0)
+	{
+		std::cerr << strerror(errno) << std::endl;
+		throw ReadFromSocketException();
+	}
+	if (ret == 0)
+		return false;
+	buffer += std::string(read_buffer, ret);
 	while (true)
 	{
-		char	read_buffer[BUFFER_SIZE];
-		int ret = read(get_sock(), read_buffer, BUFFER_SIZE);
-		if (ret < 0)
-		{
-			throw ReadFromSocketException();
+		size_t found_line = buffer.find("\n");
+		if (found_line == std::string::npos)
 			break;
-		}
-		if (ret == 0)
-			return false;
-		buffer += std::string(read_buffer, ret);
-		while (true)
+		
+		std::string line = buffer.substr(0, found_line);
+		buffer.erase(0, found_line + 1);
+
+		bool is_first_line = request.get_request_line().http_version == "";
+
+		if (is_first_line)
+			request.parse_requestline(line);
+		else if (request.parse_single_header_field(line))
 		{
-			size_t found_line = buffer.find("\n");
-			if (found_line == std::string::npos)
-				break;
-			
-			std::string line = buffer.substr(0, found_line);
-			buffer.erase(0, found_line + 1);
-
-			bool is_first_line = request.get_request_line().http_version == "";
-
-			if (is_first_line)
-				request.parse_requestline(line);
-			else if (request.parse_single_header_field(line))
-			{
-				request.validate_request();
-				headers_complete = true;
-				return true;
-			}
+			request.validate_request();
+			headers_complete = true;
+			return true;
 		}
 	}
+	return false;
 }
 
 	// Step 1: Read next line
