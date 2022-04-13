@@ -18,10 +18,10 @@ class WebServer
 		std::vector<ServerSocket *>	accept_sockets;
 		std::vector<ClientSocket *> read_sockets;
 		Config*						configuration;
-
-
 		int							connectionAccepter(ServerSocket *conn_socket);
 		bool						connectionHandler(ClientSocket *conn_socket);
+		bool						connectionResponder(ClientSocket *conn_socket);
+
 	public:
 		WebServer();
 		WebServer(int domain, int service, int protocol, int port, u_long interface, int bklg);

@@ -58,60 +58,7 @@ int	WebServer::connectionAccepter(ServerSocket *conn_socket)
 	return (client);
 }
 
-static void writeResponse(ClientSocket *conn_socket)
-{
-	std::string Status;
-	// TODO: Response headers
-	std::string Headers = "";
-	std::string ContentType = "";
-	std::string Body;
 
-
-	if (FileResponse* FileResponsePtr = dynamic_cast<FileResponse*>(conn_socket->response))
-	{
-		Status = "200 OK";
-		ContentType = FileResponsePtr->GetContentType();
-		Body = to_string(FileResponsePtr->GetStream().rdbuf());
-	}
-	else
-	{
-		if (conn_socket->response)
-		{
-			Status = "200 OK";
-			ContentType = "text/html";
-
-			Body = "<!DOCTYPE html><head><title>Webserv Testpage</title></head><body><p>Hello World!\n";
-			Body.append("Unknown response type: " + to_string(*conn_socket->response));
-			Body.append("<p></body></html>");
-		}
-		else
-		{
-			// I guess this is a default error page or something i dunno
-			Status = "404 OK";
-			ContentType = "text/html";
-			Body = "<!DOCTYPE html><head><title>Webserv ErrorPage</title></head><body><p>You have made a invalid request!<p></body></html>";
-		}
-	}
-
-	// Debugging infos
-	time_t now = time(0);
-	char *datetime = ctime(&now);
-	Body.append(datetime);
-
-	if (conn_socket->response)
-		Body.append("Response type: " + to_string(*conn_socket->response));
-
-	std::string response = "HTTP/1.1 " + Status + "\r\n";
-	response += Headers;
-	response += "[Content-Type]: " + ContentType + "\r\n";
-	response += "[Content-Length]: " + to_string(Body.length()) + "\r\n";
-	response += "\r\n";	// End of headers
-	response += Body;
-
-	
-
-	send(conn_socket->get_sock(), response.c_str(), response.size(), 0);
-}
 
 bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 {
@@ -145,11 +92,14 @@ bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 	std::cout << new_request << std::endl;
 	std::cout << "======END OF REQUEST======"<<std::endl;
 
-	writeResponse(conn_socket);
-	
-	close(conn_socket->get_sock());	// NOTE: It is possibly easier to add the close function to the simplesocket destructor, thay way its automatic and cannot be forgotten
 	return (true);
 }
+
+bool	WebServer::connectionResponder(ClientSocket *conn_socket)
+{
+	return (conn_socket->send());
+}
+
 
 static void	sigintHandler(int signum)
 {
@@ -188,12 +138,26 @@ int	WebServer::launch()
 		}
 		for (size_t count = 0; count < read_sockets.size(); count++) 
 		{
-			if (FD_ISSET(read_sockets[count]->get_sock(), &read_fds)) 
+			if (FD_ISSET(read_sockets[count]->get_sock(), &read_fds))
 			{
 				try {
 					if (connectionHandler(read_sockets[count]))
 					{
+						read_sockets[count]->read_successfully = true;
+						read_sockets[count]->createResponse();
+						FD_SET(read_sockets[count]->get_sock(), &save_write_fds);
+					}
+				} catch (std::exception &e) {
+					std::cout << e.what() << std::endl;
+				}
+			}
+			if (FD_ISSET(read_sockets[count]->get_sock(), &write_fds))
+			{
+				try{
+					if (read_sockets[count]->read_successfully == true && connectionResponder(read_sockets[count]))
+					{
 						FD_CLR(read_sockets[count]->get_sock(), &save_read_fds);
+						FD_CLR(read_sockets[count]->get_sock(), &save_write_fds);
 						delete read_sockets[count];
 						read_sockets.erase(read_sockets.begin() + count--);
 					}
@@ -201,11 +165,6 @@ int	WebServer::launch()
 					std::cout << e.what() << std::endl;
 				}
 			}
-			// if (FD_ISSET(read_sockets[count]->get_sock(), &write_fds))//TODO Write fds implementation!
-			// {
-			// 	;
-			// 	FD_CLR(read_sockets[count]->get_sock(), &save_write_fds);
-			// }
 		}
 	}
 	return (0);

@@ -1,4 +1,6 @@
 #include "ClientSocket.hpp"
+#include "FileResponse.hpp"
+#include "ToString.hpp"
 #include "Request.hpp"
 #define BUFFER_SIZE 3000
 #include <unistd.h>
@@ -6,7 +8,7 @@
 #include "ReadFromSocketException.hpp"
 
 // Constructor
-ClientSocket::ClientSocket(struct sockaddr_in address, int sock) : SimpleSocket(address, sock), headers_complete(false), response(NULL)
+ClientSocket::ClientSocket(struct sockaddr_in address, int sock) : SimpleSocket(address, sock), headers_complete(false), written_size(0), response(NULL), read_successfully(false)
 {
 
 }
@@ -14,6 +16,75 @@ ClientSocket::ClientSocket(struct sockaddr_in address, int sock) : SimpleSocket(
 ClientSocket::~ClientSocket()
 {
 	delete response;
+}
+
+	// Step 1: Read next line
+	// Step 2: If first line, call parse_requestline on request, otherwise, call parse_single_header_field, if it returns true, call validate_request() & return HEADER_COMPLETE
+	// Step 3: If header is complete, wait till buffer has [content-length] of bytes, once it is, call set_request_body and return BODY_COMPLETE
+
+
+
+void 	ClientSocket::createResponse()
+{
+	std::string Status;
+	// TODO: Response headers
+	std::string Headers = "";
+	std::string ContentType = "";
+	std::string Body;
+
+
+	if (FileResponse* FileResponsePtr = dynamic_cast<FileResponse*>(response))
+	{
+		Status = "200 OK";
+		ContentType = FileResponsePtr->GetContentType();
+		Body = to_string(FileResponsePtr->GetStream().rdbuf());
+	}
+	else
+	{
+		if (response)
+		{
+			Status = "200 OK";
+			ContentType = "text/html";
+
+			Body = "<!DOCTYPE html><head><title>Webserv Testpage</title></head><body><p>Hello World!\n";
+			Body.append("Unknown response type: " + to_string(*response));
+			Body.append("<p></body></html>");
+		}
+		else
+		{
+			// I guess this is a default error page or something i dunno
+			Status = "404 OK";
+			ContentType = "text/html";
+			Body = "<!DOCTYPE html><head><title>Webserv ErrorPage</title></head><body><p>You have made a invalid request!<p></body></html>";
+		}
+	}
+
+	// Debugging infos
+	time_t now = time(0);
+	char *datetime = ctime(&now);
+	Body.append(datetime);
+
+	if (response)
+		Body.append("Response type: " + to_string(*response));
+
+	to_write = "HTTP/1.1 " + Status + "\r\n";
+	to_write += Headers;
+	to_write += "[Content-Type]: " + ContentType + "\r\n";
+	to_write += "[Content-Length]: " + to_string(Body.length()) + "\r\n";
+	to_write += "\r\n";	// End of headers
+	to_write += Body;
+}
+
+Request					ClientSocket::get_request()
+{
+	return request;
+}
+
+bool					ClientSocket::send()
+{
+	std::cout << "writing bytes " << written_size << ".." << to_write.size() << std::endl;
+	written_size += ::send(get_sock(), to_write.c_str()+written_size, to_write.size()-written_size, 0);
+	return written_size >= ssize_t(to_write.size());
 }
 
 void					ClientSocket::read()
@@ -64,13 +135,4 @@ bool					ClientSocket::check_headers()
 		}
 	}
 	return false;
-}
-
-	// Step 1: Read next line
-	// Step 2: If first line, call parse_requestline on request, otherwise, call parse_single_header_field, if it returns true, call validate_request() & return HEADER_COMPLETE
-	// Step 3: If header is complete, wait till buffer has [content-length] of bytes, once it is, call set_request_body and return BODY_COMPLETE
-
-Request		ClientSocket::get_request()
-{
-	return request;
 }

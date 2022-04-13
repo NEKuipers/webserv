@@ -22,6 +22,11 @@ SimpleSocket::SimpleSocket(int domain, int service, int protocol, int port, u_lo
 SimpleSocket::SimpleSocket(struct sockaddr_in address, int sock) : address(address), sock(sock)
 {}
 
+SimpleSocket::~SimpleSocket()
+{
+	close(get_sock());
+}
+
 // Copy constructor
 SimpleSocket::SimpleSocket(const SimpleSocket &src)
 {
