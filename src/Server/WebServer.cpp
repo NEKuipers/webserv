@@ -133,6 +133,10 @@ int	WebServer::launch()
 					read_sockets.push_back(new ClientSocket(accept_sockets[count]->get_address(), new_client));
 				} catch (std::exception &e) {
 					std::cout << e.what() << std::endl;
+					FD_CLR(accept_sockets[count]->get_sock(), &save_read_fds);
+					FD_CLR(accept_sockets[count]->get_sock(), &save_write_fds);
+					delete accept_sockets[count];
+					accept_sockets.erase(accept_sockets.begin() + count--);
 				}
 			}
 		}
@@ -148,22 +152,28 @@ int	WebServer::launch()
 					}
 				} catch (std::exception &e) {
 					std::cout << e.what() << std::endl;
-					//TODO remove client
+					FD_CLR(read_sockets[count]->get_sock(), &save_read_fds);
+					FD_CLR(read_sockets[count]->get_sock(), &save_write_fds);
+					delete read_sockets[count];
+					read_sockets.erase(read_sockets.begin() + count--);
 				}
 			}
 			if (FD_ISSET(read_sockets[count]->get_sock(), &write_fds))
 			{
-				try{
-					if (connectionResponder(read_sockets[count]))
-					{
-						FD_CLR(read_sockets[count]->get_sock(), &save_read_fds);
-						FD_CLR(read_sockets[count]->get_sock(), &save_write_fds);
-						delete read_sockets[count];
-						read_sockets.erase(read_sockets.begin() + count--);
-					}
+				try {
+				if (connectionResponder(read_sockets[count]))
+				{
+					FD_CLR(read_sockets[count]->get_sock(), &save_read_fds);
+					FD_CLR(read_sockets[count]->get_sock(), &save_write_fds);
+					delete read_sockets[count];
+					read_sockets.erase(read_sockets.begin() + count--);
+				}
 				} catch (std::exception &e) {
 					std::cout << e.what() << std::endl;
-					//TODO remove client
+					FD_CLR(read_sockets[count]->get_sock(), &save_read_fds);
+					FD_CLR(read_sockets[count]->get_sock(), &save_write_fds);
+					delete read_sockets[count];
+					read_sockets.erase(read_sockets.begin() + count--);
 				}
 			}
 		}

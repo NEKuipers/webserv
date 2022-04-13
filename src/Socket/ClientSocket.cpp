@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <map>
 #include "ReadFromSocketException.hpp"
+#include "SendResponseException.hpp"
 
 // Constructor
 ClientSocket::ClientSocket(struct sockaddr_in address, int sock) : SimpleSocket(address, sock), headers_complete(false), written_size(0), response(NULL)
@@ -17,12 +18,6 @@ ClientSocket::~ClientSocket()
 {
 	delete response;
 }
-
-	// Step 1: Read next line
-	// Step 2: If first line, call parse_requestline on request, otherwise, call parse_single_header_field, if it returns true, call validate_request() & return HEADER_COMPLETE
-	// Step 3: If header is complete, wait till buffer has [content-length] of bytes, once it is, call set_request_body and return BODY_COMPLETE
-
-
 
 void 	ClientSocket::createResponse()
 {
@@ -82,7 +77,10 @@ Request					ClientSocket::get_request()
 
 bool					ClientSocket::send()
 {
-	written_size += ::send(get_sock(), to_write.c_str()+written_size, to_write.size()-written_size, 0);
+	int send_rv = ::send(get_sock(), to_write.c_str()+written_size, to_write.size()-written_size, 0);
+	if (send_rv == -1)
+		throw SendResponseException();
+	written_size += send_rv;
 	return written_size >= ssize_t(to_write.size()); //TODO if send returns -1, throw exception and remove client
 }
 
