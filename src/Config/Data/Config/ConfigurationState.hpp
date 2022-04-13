@@ -26,15 +26,21 @@ class ConfigurationState {
 
 		bool EatLine(const ConfigLine& Line);
 
+		void AppendLocationRoot(const std::string& Location);
+
 		ConfigResponse* Redirect(const ConfigRequest& Request, std::string NewUri) const;
 		ConfigResponse* Error(const ConfigRequest& Request) const;
 
+		const std::string& GetRoot() const;
+		const std::string& GetCombinedRoot() const;
+		const std::string& GetRawLocationRoot() const;
+		const std::string& GetLocationRoot() const;
+
+		std::string RemoveLocationRoot(const std::string& Uri) const;
+
 		// Public functions
-		// TODO: directory
 		std::vector<std::string> AcceptedMethods;
 
-		std::string Root;	// std::filesystem::path (I can't use fancy features, codam says i must use only the oldest of old stuff)
-		std::string ExpectedRootExtension;	// when searching for a file, it will be $root/$URI, and will only be served if its inside the directory $root/$expectedRootExtension, the location block writes to this variable
 		std::string ErrorUri;
 		size_t MaxBodySize;
 
@@ -43,6 +49,14 @@ class ConfigurationState {
 		std::string InterperetEnvVariable(const std::string& String) const;
 		std::string InterperetEnvVariableUserVariables(const std::string& String, const ConfigRequest* Request, bool& MustValidate) const;
 	private:
+		void UpdateCombinedRoot();
+
+		// std::filesystem::path (I can't use fancy features, codam says i must use only the oldest of old stuff)
+		std::string Root;
+		std::string RawLocationRoot;	// This is the actual location in the config
+		std::string LocationRoot;	// This can be modified by the location_root directive
+		std::string CombinedRoot;
+
 		ConfigBase* RedirectBase;
 		// Class variables
 		

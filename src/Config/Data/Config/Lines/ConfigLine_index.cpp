@@ -50,8 +50,8 @@ EnterResult ConfigLine_index::Enters(const ConfigRequest& Request) const
 	// ExpectedRootExtension can be "" or "/data"
 	// We dont care about the slashes
 	
-	if (Configuration.ExpectedRootExtension == URI	// If both are empty
-	|| Configuration.ExpectedRootExtension + "/" == "/" + URI)	// Or both are filled
+	if (Configuration.GetLocationRoot() == URI	// If both are empty
+	|| Configuration.GetLocationRoot() + "/" == "/" + URI)	// Or both are filled
 		return EnterResult_EnterAndError;
 
 	return EnterResult_No;
