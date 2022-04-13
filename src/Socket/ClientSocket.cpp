@@ -1,5 +1,6 @@
 #include "ClientSocket.hpp"
 #include "FileResponse.hpp"
+#include "ErrorResponse.hpp"
 #include "ToString.hpp"
 #include "Request.hpp"
 #define BUFFER_SIZE 3000
@@ -33,7 +34,14 @@ void 	ClientSocket::createResponse()
 	std::string Body;
 
 
-	if (FileResponse* FileResponsePtr = dynamic_cast<FileResponse*>(response))
+	if (!response || dynamic_cast<ErrorResponse*>(response))
+	{
+		// I guess this is a default error page or something i dunno
+		Status = "404 Not found";
+		ContentType = "text/html";
+		Body = "<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>Default error page<br>You seem to have made a invalid request!</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>";
+	}
+	else if (FileResponse* FileResponsePtr = dynamic_cast<FileResponse*>(response))
 	{
 		Status = "200 OK";
 		ContentType = FileResponsePtr->GetContentType();
@@ -41,22 +49,12 @@ void 	ClientSocket::createResponse()
 	}
 	else
 	{
-		if (response)
-		{
-			Status = "200 OK";
-			ContentType = "text/html";
+		Status = "200 OK";
+		ContentType = "text/html";
 
-			Body = "<!DOCTYPE html><head><title>Webserv Testpage</title></head><body><p>Hello World!\n";
-			Body.append("Unknown response type: " + to_string(*response));
-			Body.append("<p></body></html>");
-		}
-		else
-		{
-			// I guess this is a default error page or something i dunno
-			Status = "404 OK";
-			ContentType = "text/html";
-			Body = "<!DOCTYPE html><head><title>Webserv ErrorPage</title></head><body><p>You have made a invalid request!<p></body></html>";
-		}
+		Body = "<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>Unknown response type:<br>";
+		Body.append(to_string(*response));
+		Body.append("</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>");
 	}
 
 	// Debugging infos

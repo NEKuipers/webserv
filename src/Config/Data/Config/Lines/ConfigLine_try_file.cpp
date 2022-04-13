@@ -57,9 +57,10 @@ ConfigResponse* ConfigLine_try_file::GetBaseResponse(const ConfigRequest& Reques
 {
 	for (std::vector<std::string>::const_iterator It = Files.begin(); It != Files.end(); It++)
 	{
-		std::string File = Configuration.InterperetEnvVariable(*It, &Request);
+		bool MustValidate = false;
+		std::string File = Configuration.InterperetEnvVariableUserVariables(*It, &Request, MustValidate);
 		File = Configuration.Root + "/" + File;	// Isn't there a utility function that combines paths?
-		if (!Configuration.IsFileValid(File, Request))
+		if (MustValidate && !Configuration.IsFileValid(File, Request))
 			continue;
 
 		std::ifstream* Stream = new std::ifstream(File.c_str());	// Annoyingly, linux does not have a string contructor

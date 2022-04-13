@@ -18,6 +18,8 @@ class FileResponse : public ConfigResponse {
 		friend std::ostream& operator<<(std::ostream& Stream, const FileResponse& FileResponse);
 		virtual void Print(std::ostream& Stream) const;
 		const std::string GetContentType() const;
+
+		static void InitContentTypes();
 	private:
 		// No, we dont copy, and we dont have a default constructor
 		FileResponse();

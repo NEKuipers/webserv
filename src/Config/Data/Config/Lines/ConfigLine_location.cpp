@@ -61,6 +61,14 @@ EnterResult ConfigLine_location::Enters(const ConfigRequest& Request) const
 	return EnterResult_EnterAndError;
 }
 
+int ConfigLine_location::GetWeight() const
+{
+	if (Location.length() > 0 && Location.at(0) == '*')
+		return INT_MAX;
+	else
+		return Location.length();
+}
+
 ConfigResponse* ConfigLine_location::GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request) const
 {
 	const ConfigLine_location* Best = NULL;
@@ -77,8 +85,7 @@ ConfigResponse* ConfigLine_location::GetIteratorResponse(std::vector<ConfigBase*
 			continue;
 		if (Curr->ChecksConfiguration() && !Curr->Configuration.IsValidWithRequest(Request))
 			continue;
-		// Small issue here, ends with should have max length according to nginx
-		if (Best == NULL || Best->Location.length() < Curr->Location.length())
+		if (Best == NULL || Best->GetWeight() < Curr->GetWeight())
 			Best = Curr;
 	}
 

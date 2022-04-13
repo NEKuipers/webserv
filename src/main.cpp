@@ -4,6 +4,7 @@
 #include "WebServer.hpp"
 #include "Lexer.hpp"
 #include "Config.hpp"
+#include "FileResponse.hpp"
 
 #include "fstream"
 #include <iostream>
@@ -41,6 +42,8 @@ int         main(int argc, char **argv)
 	// }
 	(void)argc;
 	(void)argv;
+
+	FileResponse::InitContentTypes();
 
 	try {
 		Config Conf(ConfigFile("./SmallConfig.conf"));

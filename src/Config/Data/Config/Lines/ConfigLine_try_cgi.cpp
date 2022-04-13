@@ -62,10 +62,11 @@ ConfigResponse* ConfigLine_try_cgi::GetBaseResponse(const ConfigRequest& Request
 {
 	for (std::vector<std::string>::const_iterator It = cgis.begin(); It != cgis.end(); It++)
 	{
-		std::string cgi = Configuration.InterperetEnvVariable(*It, &Request);
+		bool MustValidate = false;
+		std::string cgi = Configuration.InterperetEnvVariableUserVariables(*It, &Request, MustValidate);
 		cgi = Configuration.Root + "/" + cgi;	// Isn't there a utility function that combines paths?
 		
-		if (!Configuration.IsFileValid(cgi, Request))
+		if (MustValidate && !Configuration.IsFileValid(cgi, Request))
 			continue;
 
 		return new CgiResponse(cgi);

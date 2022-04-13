@@ -1,6 +1,7 @@
 #include "ConfigurationState.hpp"
 #include "ConvertException.hpp"
 #include "ConfigBase.hpp"
+#include "ErrorResponse.hpp"
 
 #include <stdlib.h>	// realpath
 #include <iostream>
@@ -64,7 +65,7 @@ bool ConfigurationState::EatLine(const ConfigLine& Line)
 		if (Args.size() > 2)
 			throw ConvertException("ConfigLine", "root", "too many arguments, Expected 2, but got " + to_string(Args.size()));
 
-		Root = InterperetEnvVariable(Args.size() > 1 ? Args.at(1) : "", NULL);
+		Root = InterperetEnvVariable(Args.size() > 1 ? Args.at(1) : "");
 
 		// Now convert it to the real path
 		char* ptr = realpath(Root.c_str(), NULL);
@@ -81,7 +82,7 @@ bool ConfigurationState::EatLine(const ConfigLine& Line)
 		if (Args.size() > 2)
 			throw ConvertException("ConfigLine", "expected_root", "too many arguments, Expected 2, but got " + to_string(Args.size()));
 
-		ExpectedRootExtension = "/" + InterperetEnvVariable(Args.size() > 1 ? Args.at(1) : "", NULL);
+		ExpectedRootExtension = "/" + InterperetEnvVariable(Args.size() > 1 ? Args.at(1) : "");
 
 		return true;
 	}
@@ -134,14 +135,13 @@ ConfigResponse* ConfigurationState::Error(const ConfigRequest& Request) const
 {
 	if (ErrorUri != "")
 		return Redirect(Request, ErrorUri);
-	return NULL;
+	return new ErrorResponse();
 }
 
 bool ConfigurationState::IsFileValid(const std::string& FilePath, const ConfigRequest& Request) const
 {
 	// Check if the cgi is inside the Root directory, Small problem: If you symlink outside, it still fails, why is checked? Well, you dont want someone asking for cgi "../../Makecgi" or whatever other cgi
-	//char ActualPath[PATH_MAX+1];	// Not sure how i feel about allocating 1025 bytes on the stack, also can't be static, thread safety ya know?
-	char* ptr = realpath(FilePath.c_str(), NULL);	// Not sure how i feel about allocating on the heap for something like this
+	char* ptr = realpath(FilePath.c_str(), NULL);
 	if (!ptr)
 		return false;
 
@@ -157,28 +157,36 @@ bool ConfigurationState::IsFileValid(const std::string& FilePath, const ConfigRe
 	return true;
 }
 
-static void ReplaceAll(std::string& Str, const std::string& Find, const std::string& Replace)
+static bool ReplaceAll(std::string& Str, const std::string& Find, const std::string& Replace)
 {
+	bool ReplacedSomething = false;
+
 	while (true) {
 		size_t Found = Str.find(Find, 0);
 		if (Found == std::string::npos)
 			break;
 
 		Str.replace(Found, Find.length(), Replace);
+		ReplacedSomething = true;
 	}
+	return ReplacedSomething;
 }
 
-std::string ConfigurationState::InterperetEnvVariable(const std::string& String, const ConfigRequest* Request) const
+std::string ConfigurationState::InterperetEnvVariable(const std::string& String) const
 {
 	std::string Copy = String;
 
 	ReplaceAll(Copy, "$root", Root);
 	ReplaceAll(Copy, "$expected_root", ExpectedRootExtension);
 
-	if (Request)
-	{
-		ReplaceAll(Copy, "$uri", Request->GetUri());
-	}
+	return Copy;
+}
+
+std::string ConfigurationState::InterperetEnvVariableUserVariables(const std::string& String, const ConfigRequest* Request, bool& MustValidate) const
+{
+	std::string Copy = InterperetEnvVariable(String);
+
+	MustValidate |= ReplaceAll(Copy, "$uri", Request->GetUri());
 
 	return Copy;
 }

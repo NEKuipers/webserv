@@ -40,7 +40,8 @@ class ConfigurationState {
 
 		bool IsFileValid(const std::string& FilePath, const ConfigRequest& Request) const;
 
-		std::string InterperetEnvVariable(const std::string& String, const ConfigRequest* Request) const;	// Ill probably want to use some state to change the env stuff, so its here even tho it does not use anything of the state for now
+		std::string InterperetEnvVariable(const std::string& String) const;
+		std::string InterperetEnvVariableUserVariables(const std::string& String, const ConfigRequest* Request, bool& MustValidate) const;
 	private:
 		ConfigBase* RedirectBase;
 		// Class variables

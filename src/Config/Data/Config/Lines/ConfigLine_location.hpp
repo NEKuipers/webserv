@@ -23,6 +23,8 @@ class ConfigLine_location : public ConfigListBase {
 	protected:
 		virtual EnterResult Enters(const ConfigRequest& Request) const;
 	private:
+		int GetWeight() const;
+
 		ConfigLine_location(const ConfigLine_location& From);
 		ConfigLine_location& operator = (const ConfigLine_location& From);
 
