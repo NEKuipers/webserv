@@ -19,7 +19,6 @@ class ClientSocket: public SimpleSocket
 
 	public:
 		ConfigResponse*	response;
-		bool			read_successfully;
 
 		// Constructor
 		ClientSocket(struct sockaddr_in address, int sock);

@@ -143,18 +143,18 @@ int	WebServer::launch()
 				try {
 					if (connectionHandler(read_sockets[count]))
 					{
-						read_sockets[count]->read_successfully = true;
 						read_sockets[count]->createResponse();
 						FD_SET(read_sockets[count]->get_sock(), &save_write_fds);
 					}
 				} catch (std::exception &e) {
 					std::cout << e.what() << std::endl;
+					//TODO remove client
 				}
 			}
 			if (FD_ISSET(read_sockets[count]->get_sock(), &write_fds))
 			{
 				try{
-					if (read_sockets[count]->read_successfully == true && connectionResponder(read_sockets[count]))
+					if (connectionResponder(read_sockets[count]))
 					{
 						FD_CLR(read_sockets[count]->get_sock(), &save_read_fds);
 						FD_CLR(read_sockets[count]->get_sock(), &save_write_fds);
@@ -163,6 +163,7 @@ int	WebServer::launch()
 					}
 				} catch (std::exception &e) {
 					std::cout << e.what() << std::endl;
+					//TODO remove client
 				}
 			}
 		}

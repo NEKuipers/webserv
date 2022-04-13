@@ -8,7 +8,7 @@
 #include "ReadFromSocketException.hpp"
 
 // Constructor
-ClientSocket::ClientSocket(struct sockaddr_in address, int sock) : SimpleSocket(address, sock), headers_complete(false), written_size(0), response(NULL), read_successfully(false)
+ClientSocket::ClientSocket(struct sockaddr_in address, int sock) : SimpleSocket(address, sock), headers_complete(false), written_size(0), response(NULL)
 {
 
 }
@@ -82,9 +82,8 @@ Request					ClientSocket::get_request()
 
 bool					ClientSocket::send()
 {
-	std::cout << "writing bytes " << written_size << ".." << to_write.size() << std::endl;
 	written_size += ::send(get_sock(), to_write.c_str()+written_size, to_write.size()-written_size, 0);
-	return written_size >= ssize_t(to_write.size());
+	return written_size >= ssize_t(to_write.size()); //TODO if send returns -1, throw exception and remove client
 }
 
 void					ClientSocket::read()
