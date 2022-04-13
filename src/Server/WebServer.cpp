@@ -108,6 +108,15 @@ static void	sigintHandler(int signum)
 	exit(signum);
 }
 
+template <typename T>
+static void	clear_socket(std::vector<T*> &sockets, fd_set &save_read_fds, fd_set &save_write_fds, size_t &count)
+{
+	FD_CLR(sockets[count]->get_sock(), &save_read_fds);
+	FD_CLR(sockets[count]->get_sock(), &save_write_fds);
+	delete sockets[count];
+	sockets.erase(sockets.begin() + count--);
+}
+
 int	WebServer::launch()
 { 
 	fd_set save_read_fds = this->get_socket_fd_set();
@@ -133,6 +142,7 @@ int	WebServer::launch()
 					read_sockets.push_back(new ClientSocket(accept_sockets[count]->get_address(), new_client));
 				} catch (std::exception &e) {
 					std::cout << e.what() << std::endl;
+					clear_socket(read_sockets, save_read_fds, save_write_fds, count);
 				}
 			}
 		}
@@ -143,26 +153,22 @@ int	WebServer::launch()
 				try {
 					if (connectionHandler(read_sockets[count]))
 					{
-						read_sockets[count]->read_successfully = true;
 						read_sockets[count]->createResponse();
 						FD_SET(read_sockets[count]->get_sock(), &save_write_fds);
 					}
 				} catch (std::exception &e) {
 					std::cout << e.what() << std::endl;
+					clear_socket(read_sockets, save_read_fds, save_write_fds, count);
 				}
 			}
 			if (FD_ISSET(read_sockets[count]->get_sock(), &write_fds))
 			{
-				try{
-					if (read_sockets[count]->read_successfully == true && connectionResponder(read_sockets[count]))
-					{
-						FD_CLR(read_sockets[count]->get_sock(), &save_read_fds);
-						FD_CLR(read_sockets[count]->get_sock(), &save_write_fds);
-						delete read_sockets[count];
-						read_sockets.erase(read_sockets.begin() + count--);
-					}
+				try {
+					if (connectionResponder(read_sockets[count]))
+						clear_socket(read_sockets, save_read_fds, save_write_fds, count);
 				} catch (std::exception &e) {
 					std::cout << e.what() << std::endl;
+					clear_socket(read_sockets, save_read_fds, save_write_fds, count);
 				}
 			}
 		}
