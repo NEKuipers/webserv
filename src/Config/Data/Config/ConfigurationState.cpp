@@ -88,7 +88,7 @@ bool ConfigurationState::EatLine(const ConfigLine& Line)
 	else if (Args.at(0) == "error_uri")
 	{
 		if (Args.size() > 2)
-			throw ConvertException("ConfigLine", "error_uri", "too manny arguments");
+			throw ConvertException("ConfigLine", "error_uri", "too many arguments");
 
 		ErrorUri = Args.size() > 1 ? Args.at(1) : "";
 		return true;
