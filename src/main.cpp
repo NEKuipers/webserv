@@ -12,6 +12,7 @@
 #include "ConvertException.hpp"
 #include "MethodException.hpp"
 #include "ConnectionErrorException.hpp"
+#include "Response.hpp"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -29,6 +30,7 @@ int         main(int argc, char **argv)
 	(void)argc;
 	(void)argv;
 
+	Response::InitContentTypes();
 	FileResponse::InitContentTypes();
 
 	try {

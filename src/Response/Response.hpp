@@ -18,7 +18,7 @@ class Response
         ~Response();
         Response(const Response &src);
 
-		void		InitContentTypes();
+		static void	InitContentTypes();
 		std::string	get_response_string();
 		std::string	get_reason_phrase(int status_code);
 };

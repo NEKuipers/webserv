@@ -13,10 +13,11 @@
 #define BUFFER_SIZE 1024
 
 
-std::map<int, std::string> g_response_code_to_reason_phrase;
+static std::map<int, std::string> g_response_code_to_reason_phrase;
 
 void Response::InitContentTypes()
 {
+	assert(g_response_code_to_reason_phrase.size() == 0);
 
 	g_response_code_to_reason_phrase[100] = "Continue";
 	g_response_code_to_reason_phrase[101] = "Switching Protocols";
@@ -80,13 +81,14 @@ static std::string get_date_header()
 
 Response::Response(ConfigResponse *conf_response, Request &request)
 {
+	assert(g_response_code_to_reason_phrase.size() != 0);
+	
 	(void)request;
 	std::string headers = "";
 	std::string body = "";
 	std::string content_type = "";
 	std::stringstream scode;
 	int status_code = 400;
-	InitContentTypes();
 
 	if (FileResponse* FileResponsePtr = dynamic_cast<FileResponse*>(conf_response))
 	{
