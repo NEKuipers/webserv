@@ -141,13 +141,10 @@ const std::string                         &Request::get_plain_request()  const
 const static std::string NoHeaderValue = "";	// Not great, but eh, const-correct
 const std::string                         &Request::get_header_value(const std::string &key) const
 {
-	std::map<std::string, std::string>::const_iterator it = header_fields.begin();
-	for (; it != header_fields.end(); it++)
-	{
-		if (strcmp((it)->first.c_str(), key.c_str()) == 0)
-			return ((it)->second);
-	}
-	return NoHeaderValue;
+	std::map<std::string, std::string>::const_iterator it = header_fields.find(key);
+	if (it == header_fields.end())
+		return NoHeaderValue;
+	return it->second;
 }
 
 
