@@ -17,6 +17,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include "CGIRunner.hpp"
+
 int         main(int argc, char **argv)
 {
 	// if (argc != 2) {
@@ -30,7 +32,6 @@ int         main(int argc, char **argv)
 	FileResponse::InitContentTypes();
 
 	try {
-		
 		Config Conf(ConfigFile(argc == 2 ? argv[1] : "./SmallConfig.conf"));
 
 

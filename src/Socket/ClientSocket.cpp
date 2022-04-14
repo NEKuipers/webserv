@@ -1,6 +1,7 @@
 #include "ClientSocket.hpp"
 #include "FileResponse.hpp"
 #include "ErrorResponse.hpp"
+#include "CgiResponse.hpp"
 #include "ToString.hpp"
 #include "Request.hpp"
 #define BUFFER_SIZE 3000
@@ -8,6 +9,8 @@
 #include <map>
 #include "ReadFromSocketException.hpp"
 #include "SendResponseException.hpp"
+
+#include "CGIRunner.hpp"
 
 // Constructor
 ClientSocket::ClientSocket(struct sockaddr_in address, int sock) : SimpleSocket(address, sock), headers_complete(false), written_size(0), response(NULL)
@@ -28,7 +31,6 @@ void 	ClientSocket::createResponse()
 	std::string ContentType = "";
 	std::string Body;
 
-
 	if (!response || dynamic_cast<ErrorResponse*>(response))
 	{
 		// I guess this is a default error page or something i dunno
@@ -41,6 +43,30 @@ void 	ClientSocket::createResponse()
 		Status = "200 OK";
 		ContentType = FileResponsePtr->GetContentType();
 		Body = to_string(FileResponsePtr->GetStream().rdbuf());
+	}
+	else if (CgiResponse* CgiResponsePtr = dynamic_cast<CgiResponse*>(response))
+	{
+		std::map<std::string, std::string> map;
+		CGIRunner runner(CgiResponsePtr->GetCgiFile(), map);
+
+		//int stat;
+		//pid_t pid = waitpid(Runner.CGIPid, &stat, 0);
+		//assert(pid == Runner.CGIPid);
+
+		// TODO: Non-Blocking read loop via select
+		Status = "200 OK";
+		to_write = "HTTP/1.1 " + Status + "\r\n";
+		while (true)
+		{
+			char	read_buffer[BUFFER_SIZE];
+			int read = ::read(runner.OutputFD, read_buffer, BUFFER_SIZE);
+			std::cout << "Read: " << read << " bytes! " << std::endl;
+			if (read <= 0)
+				break;
+			to_write += std::string(read_buffer, read);
+		}
+		std::cout << "to_write = " << to_write << std::endl;
+		return;
 	}
 	else
 	{

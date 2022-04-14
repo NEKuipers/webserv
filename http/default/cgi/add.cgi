@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 
 import cgi, cgitb
+import time
+
 cgitb.enable()
 
 input_data = cgi.FieldStorage()
+
+#time.sleep(1)
 
 print('Content-Type: text/html') # HTML is following
 print('')                         # Leave a blank line
