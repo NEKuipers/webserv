@@ -6,6 +6,8 @@ class CgiResponse;	// For include loops
 #include <ostream>
 #include <fstream>
 #include "ConfigResponse.hpp"
+#include <map>
+#include "Request.hpp"
 
 class CgiResponse : public ConfigResponse {
 	public: 
@@ -19,6 +21,8 @@ class CgiResponse : public ConfigResponse {
 		virtual void Print(std::ostream& Stream) const;
 
 		virtual bool RequiresBody() const;
+
+		void MakeEnvMap(std::map<std::string, std::string>& Map, const Request& Request);
 	private:
 		// No, we dont copy, and we dont have a default constructor
 		CgiResponse();
@@ -28,6 +32,7 @@ class CgiResponse : public ConfigResponse {
 		// Class variables
 		std::string CgiFile;
 
+		in_port_t RequestPort;
 
 		// Input:
 		//	if via POST, data is send via stdin

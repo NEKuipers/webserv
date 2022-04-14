@@ -13,10 +13,11 @@
 #define BUFFER_SIZE 1024
 
 
-std::map<int, std::string> g_response_code_to_reason_phrase;
+static std::map<int, std::string> g_response_code_to_reason_phrase;
 
 void Response::InitContentTypes()
 {
+	assert(g_response_code_to_reason_phrase.size() == 0);
 
 	g_response_code_to_reason_phrase[100] = "Continue";
 	g_response_code_to_reason_phrase[101] = "Switching Protocols";
@@ -98,12 +99,13 @@ std::string Response::create_headers()
 
 Response::Response(ConfigResponse *conf_response, Request &request)
 {
+	assert(g_response_code_to_reason_phrase.size() != 0);
+	
 	(void)request;
 	std::string body = "";
 	std::string content_type = "";
 	std::stringstream scode;
 	int status_code = 400;
-	InitContentTypes();
 	std::string cgi_response = "";
 
 	if (FileResponse* FileResponsePtr = dynamic_cast<FileResponse*>(conf_response))
@@ -115,26 +117,36 @@ Response::Response(ConfigResponse *conf_response, Request &request)
 	else if (CgiResponse* CgiResponsePtr = dynamic_cast<CgiResponse*>(conf_response))
 	{
 		std::map<std::string, std::string> map;
+		CgiResponsePtr->MakeEnvMap(map, request);
 		CGIRunner runner(CgiResponsePtr->GetCgiFile(), map);
-
-		//int stat;
-		//pid_t pid = waitpid(Runner.CGIPid, &stat, 0);
-		//assert(pid == Runner.CGIPid);
+		
+		// TODO: Non-Blocking read loop via select
+		const std::string& request_body = request.get_body();
+		ssize_t written = 0;
+		while (written < (ssize_t)request_body.length())
+		{
+			ssize_t curr = write(runner.InputFD, request_body.c_str() + written, request_body.length() - written);
+			if (curr < 0)
+				break;
+			written += curr;
+		}
 
 		// TODO: Non-Blocking read loop via select
 		while (true)
 		{
 			char	read_buffer[BUFFER_SIZE];
 			int read = ::read(runner.OutputFD, read_buffer, BUFFER_SIZE);
-			std::cout << "Read: " << read << " bytes! " << std::endl;
 			if (read <= 0)
 				break;
 			cgi_response += std::string(read_buffer, read);
 		}
-		std::cout << "cgi_response = " << cgi_response << std::endl;
+		//std::cout << "cgi_response = " << cgi_response << std::endl;
 		status_code = 200;
 		// TODO: Magic stuff
 		// NOTE: cgi_response is [headers]\n\r[body] without the http line
+
+		response_string = "HTTP/1.1 200 OK\n\r" + cgi_response;
+		return;
 	}
 	else if (!conf_response || dynamic_cast<ErrorResponse*>(conf_response))
 	{
