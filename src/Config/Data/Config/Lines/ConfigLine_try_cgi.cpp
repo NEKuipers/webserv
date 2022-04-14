@@ -21,8 +21,8 @@ ConfigLine_try_cgi::ConfigLine_try_cgi(const std::vector<std::string>& cgis, con
 
 	// We only accept those 2 requests
 	Configuration.AcceptedMethods.clear();
-	//if (AcceptsGet)
-	//	Configuration.AcceptedMethods.push_back("GET");
+	if (AcceptsGet)
+		Configuration.AcceptedMethods.push_back("GET");
 	if (AcceptsPost)
 		Configuration.AcceptedMethods.push_back("POST");
 }
