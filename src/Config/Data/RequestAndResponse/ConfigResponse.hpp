@@ -10,6 +10,7 @@ class ConfigResponse {
 	public: 
 		ConfigResponse();
 		virtual ~ConfigResponse();
+		
 
 		virtual void Print(std::ostream& Stream) const = 0;	// Apparently this is how you do virtual logging?
 
@@ -19,7 +20,6 @@ class ConfigResponse {
 		ConfigResponse(const ConfigResponse& From);
 		ConfigResponse& operator = (const ConfigResponse& From);
 		// Class variables
-		
 		// Class functions
 		
 };

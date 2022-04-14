@@ -73,7 +73,7 @@ bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 	{
 		if (status == true)
 		{
-			conn_socket->response = configuration->GetResponse(ConfigRequest(
+			conn_socket->conf_response = configuration->GetResponse(ConfigRequest(
 				conn_socket->get_address().sin_addr.s_addr,
 				conn_socket->get_address().sin_port,
 				"Unknown",	// TODO: Probabily in a header field
@@ -82,15 +82,15 @@ bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 				conn_socket->get_request().get_request_line().method
 			));
 		}
-		if (conn_socket->response && conn_socket->response->RequiresBody() && !conn_socket->check_body())
+		if (conn_socket->conf_response && conn_socket->conf_response->RequiresBody() && !conn_socket->check_body())
 			return false;
 		// We have now read the whole packet, if we want to read the body, we have also read that, send back the stuff
 	}
 
-	std::cout << "======START OF REQUEST======="<<std::endl;
+	// std::cout << "======START OF REQUEST======="<<std::endl;
 	Request new_request = conn_socket->get_request();
-	std::cout << new_request << std::endl;
-	std::cout << "======END OF REQUEST======"<<std::endl;
+	// std::cout << new_request << std::endl;
+	// std::cout << "======END OF REQUEST======"<<std::endl;
 
 	return (true);
 }
