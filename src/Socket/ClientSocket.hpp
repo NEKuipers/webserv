@@ -11,18 +11,19 @@
 
 class ClientSocket: public SimpleSocket
 {
-	std::string 	buffer;
-	Request 		request;
-	bool 			headers_complete;
-	std::string		to_write;
-	ssize_t			written_size;
+	std::string 		buffer;
+	Request 			request;
+	bool 				headers_complete;
+	std::string			to_write;
+	ssize_t				written_size;
+	struct sockaddr_in	socket_address;
 
 	public:
 		ConfigResponse*	conf_response;
 		Request*			response;
 
 		// Constructor
-		ClientSocket(struct sockaddr_in address, int sock);
+		ClientSocket(struct sockaddr_in address, int sock, struct sockaddr_in sock_adr);
 		virtual ~ClientSocket();
 		void 				createResponse();
 		Request				get_request();

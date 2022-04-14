@@ -61,22 +61,27 @@ void Response::InitContentTypes()
 	g_response_code_to_reason_phrase[505] = "HTTP Version Not Supported";
 }
 
-static std::string get_date_header()
+static std::string format_timestamp(time_t timestamp)
 {
-	struct timeval now;
-	struct timezone tz;
-	time_t timestamp;
 	char buffer[33];
 	struct tm *ts;
 	size_t last;
 
-	gettimeofday(&now, &tz);
-	timestamp = now.tv_sec + tz.tz_minuteswest * 60;
-	ts = localtime(&timestamp);
+	ts   = localtime(&timestamp);
 	last = strftime(buffer, 32, "%a, %d %b %Y %T GMT", ts);
 	buffer[last] = '\0';
 	return (std::string(buffer));
 }
+
+static std::string get_date_header()
+{
+	struct timeval now;
+	struct timezone tz;
+
+	gettimeofday(&now, &tz);
+	return (format_timestamp(now.tv_sec + tz.tz_minuteswest * 60));
+}
+
 
 std::string Response::create_headers()
 {
@@ -85,7 +90,9 @@ std::string Response::create_headers()
 	headers_string += "Server: webserv\r\n";
 	//retry_after?
 	//chunked requests
-	//Allow 
+	//Allow
+	//Last-Modified
+	
 	return (headers_string);
 }
 

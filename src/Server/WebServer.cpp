@@ -48,14 +48,15 @@ WebServer		&WebServer::operator=(const WebServer &rhs)
 
 WebServer::~WebServer(){}
 
-int	WebServer::connectionAccepter(ServerSocket *conn_socket)
+ClientSocket*	WebServer::connectionAccepter(ServerSocket *conn_socket)
 {
 	int client;
 	struct sockaddr_in address = conn_socket->get_address();
 	int addrlen = sizeof(address);
 	if ((client = accept(conn_socket->get_sock(), (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
 		throw ConnectionErrorException();
-	return (client);
+	ClientSocket *socket = new ClientSocket(conn_socket->get_address(), client, address);
+	return (socket);
 }
 
 
@@ -136,10 +137,10 @@ int	WebServer::launch()
 			if (FD_ISSET(accept_sockets[count]->get_sock(), &read_fds)) 
 			{
 				try {
-					int new_client = connectionAccepter(accept_sockets[count]);
-					FD_SET(new_client, &save_read_fds);
-					max_fd = std::max(max_fd, new_client);
-					read_sockets.push_back(new ClientSocket(accept_sockets[count]->get_address(), new_client));
+					ClientSocket *new_socket = connectionAccepter(accept_sockets[count]);
+					FD_SET(new_socket->get_sock(), &save_read_fds);
+					max_fd = std::max(max_fd, new_socket->get_sock());
+					read_sockets.push_back(new_socket);
 				} catch (std::exception &e) {
 					std::cout << e.what() << std::endl;
 					clear_socket(read_sockets, save_read_fds, save_write_fds, count);

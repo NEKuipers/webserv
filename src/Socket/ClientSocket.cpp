@@ -14,9 +14,9 @@
 #include "CGIRunner.hpp"
 
 // Constructor
-ClientSocket::ClientSocket(struct sockaddr_in address, int sock) : SimpleSocket(address, sock), headers_complete(false), written_size(0), conf_response(NULL)
+ClientSocket::ClientSocket(struct sockaddr_in address, int sock, struct sockaddr_in sock_adr) : SimpleSocket(address, sock), headers_complete(false), written_size(0), conf_response(NULL)
 {
-
+	socket_address = sock_adr;
 }
 
 ClientSocket::~ClientSocket()
