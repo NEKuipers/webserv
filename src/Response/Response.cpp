@@ -194,9 +194,10 @@ Response::Response(const Response &src)
 
 std::string			Response::get_reason_phrase(int status_code)
 {
-	if (g_response_code_to_reason_phrase.count(status_code))
-		return(g_response_code_to_reason_phrase[status_code]);
-	return ("ERROR");
+	std::map<int, std::string>::const_iterator it = g_response_code_to_reason_phrase.find(status_code);
+	if (it == g_response_code_to_reason_phrase.end())
+		return ("ERROR");
+	return (it->second);
 }
 
 std::string			Response::get_response_string()

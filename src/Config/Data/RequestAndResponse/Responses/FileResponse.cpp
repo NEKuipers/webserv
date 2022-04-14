@@ -107,8 +107,9 @@ const std::string FileResponse::GetContentType() const
 	if (dot != std::string::npos)
 	{
 		std::string ext = FileName.substr(dot + 1);
-		if (g_extension_to_content_type.count(ext))
-			return (g_extension_to_content_type[ext]);
+		std::map<std::string, std::string>::const_iterator it = g_extension_to_content_type.find(ext);
+		if (it != g_extension_to_content_type.end())
+			return (it->second);
 	}
 	return ("application/octet-stream");
 }
