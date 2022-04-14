@@ -8,7 +8,7 @@ static void UpdateEnv(const std::map<std::string, std::string>& ExtraEnv)
 {
 	for (std::map<std::string, std::string>::const_iterator It = ExtraEnv.begin(); It != ExtraEnv.end(); It++)
 	{
-		std::cout << "env[" << It->first << "] = " << It->second << ";" << std::endl;
+		//std::cout << "env[" << It->first << "] = " << It->second << ";" << std::endl;
 		setenv(It->first.c_str(), It->second.c_str(), 1);
 	}
 }

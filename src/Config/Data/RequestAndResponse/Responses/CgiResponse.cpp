@@ -1,7 +1,6 @@
 #include "CgiResponse.hpp"
 #include "Request.hpp"
 #include "ToString.hpp"
-#include "arpa/inet.h"
 
 CgiResponse::CgiResponse(const std::string& CgiFile) : CgiFile(CgiFile)
 {
@@ -32,16 +31,12 @@ bool CgiResponse::RequiresBody() const
 
 void CgiResponse::MakeEnvMap(std::map<std::string, std::string>& Map, const Request& Request)
 {
-	std::cout << Request << std::endl;
-
-	(void)Request;
-
 	Map["SERVER_SOFTWARE"] = "webserv";
 	Map["SERVER_NAME"] = "127.0.0.1";	// TODO: Double check
 	Map["GATEWAY_INTERFACE"] = "CGI/1.1";	// TODO: Double check
 
 	Map["SERVER_PROTOCOL"] = "HTTP/1.1";
-	Map["SERVER_PORT"] = to_string(ntohs(RequestPort));	// TODO: Get port
+	Map["SERVER_PORT"] = to_string(ntohs(RequestPort));
 	Map["REQUEST_METHOD"] = Request.get_request_line().method;
 	if (PATH_INFO != "")
 	{
@@ -60,5 +55,12 @@ void CgiResponse::MakeEnvMap(std::map<std::string, std::string>& Map, const Requ
 		Map["CONTENT_LENGTH"] = Request.get_header_value("Content-Length");
 	}
 
-	// TODO: HTTP stuffs
+	const std::map<std::string, std::string>& HeaderFields = Request.get_header_fields();
+	for (std::map<std::string, std::string>::const_iterator it = HeaderFields.begin(); it != HeaderFields.end(); it++)
+	{
+		std::string Upper = it->first;
+		for (size_t i = 0; i < Upper.length(); i++)
+			Upper.at(i) = std::toupper(Upper.at(i));
+		Map["HTTP_" + Upper] = it->second;
+	}
 }

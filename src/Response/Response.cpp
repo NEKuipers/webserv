@@ -121,7 +121,7 @@ Response::Response(ConfigResponse *conf_response, Request &request)
 				break;
 			cgi_response += std::string(read_buffer, read);
 		}
-		std::cout << "cgi_response = " << cgi_response << std::endl;
+		//std::cout << "cgi_response = " << cgi_response << std::endl;
 		// TODO: Magic stuff
 		// NOTE: cgi_response is [headers]\n\r[body] without the http line
 
