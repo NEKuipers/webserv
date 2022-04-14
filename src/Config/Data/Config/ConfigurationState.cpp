@@ -8,8 +8,8 @@
 #include "ToString.hpp"
 #include <cstring>	// Linux strncmp
 
-ConfigurationState::ConfigurationState() : AcceptedMethods(), Root(""), ExpectedRootExtension(""), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), RedirectBase(NULL) { }
-ConfigurationState::ConfigurationState(ConfigBase* RedirectBase) : AcceptedMethods(), Root(""), ExpectedRootExtension(""), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), RedirectBase(RedirectBase) {}
+ConfigurationState::ConfigurationState() : AcceptedMethods(), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), Root(""), LocationRoot(""), RedirectBase(NULL) { UpdateCombinedRoot(); }
+ConfigurationState::ConfigurationState(ConfigBase* RedirectBase) : AcceptedMethods(), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), Root(""), LocationRoot(""), RedirectBase(RedirectBase) { UpdateCombinedRoot(); }
 
 ConfigurationState::ConfigurationState(const ConfigurationState& From)
 {
@@ -24,7 +24,9 @@ ConfigurationState::~ConfigurationState()
 ConfigurationState& ConfigurationState::operator = (const ConfigurationState& From)
 {
 	Root = From.Root;
-	ExpectedRootExtension = From.ExpectedRootExtension;
+	CombinedRoot = From.CombinedRoot;
+	RawLocationRoot = From.RawLocationRoot;
+	LocationRoot = From.LocationRoot;
 	ErrorUri = From.ErrorUri;
 	MaxBodySize = From.MaxBodySize;
 	RedirectBase = From.RedirectBase;
@@ -74,15 +76,17 @@ bool ConfigurationState::EatLine(const ConfigLine& Line)
 
 		Root = std::string(ptr);
 		free(ptr);
+		UpdateCombinedRoot();
 
 		return true;
 	}
-	else if (Args.at(0) == "expected_root")
+	else if (Args.at(0) == "location_root")
 	{
 		if (Args.size() > 2)
-			throw ConvertException("ConfigLine", "expected_root", "too many arguments, Expected 2, but got " + to_string(Args.size()));
+			throw ConvertException("ConfigLine", "location_root", "too many arguments, Expected 2, but got " + to_string(Args.size()));
 
-		ExpectedRootExtension = "/" + InterperetEnvVariable(Args.size() > 1 ? Args.at(1) : "");
+		LocationRoot = "/" + InterperetEnvVariable(Args.size() > 1 ? Args.at(1) : "");
+		UpdateCombinedRoot();
 
 		return true;
 	}
@@ -116,6 +120,13 @@ bool ConfigurationState::EatLine(const ConfigLine& Line)
 	return false;
 }
 
+void ConfigurationState::AppendLocationRoot(const std::string& Location)
+{
+	RawLocationRoot += "/" + Location;
+	LocationRoot += "/" + Location;
+	UpdateCombinedRoot();
+}
+
 ConfigResponse* ConfigurationState::Redirect(const ConfigRequest& Request, std::string Uri) const
 {
 	if (!RedirectBase)
@@ -138,6 +149,32 @@ ConfigResponse* ConfigurationState::Error(const ConfigRequest& Request) const
 	return new ErrorResponse();
 }
 
+const std::string& ConfigurationState::GetRoot() const { return Root; }
+const std::string& ConfigurationState::GetCombinedRoot() const { return CombinedRoot; }
+const std::string& ConfigurationState::GetRawLocationRoot() const { return RawLocationRoot; }
+const std::string& ConfigurationState::GetLocationRoot() const { return LocationRoot; }
+
+std::string ConfigurationState::RemoveLocationRoot(const std::string& Uri) const
+{
+	if (RawLocationRoot.size() == 0)
+		return Uri;
+
+	//std::cout << "Removing " << RawLocationRoot << " From URI: " << Uri << std::endl;
+	assert(Uri.rfind(RawLocationRoot.substr(1) + "/", 0) != std::string::npos);	// Remove first slash, and move it to the end
+	return Uri.substr(RawLocationRoot.size());
+}
+
+void ConfigurationState::UpdateCombinedRoot()
+{
+	if (Root.length() != 0)
+		CombinedRoot = Root + LocationRoot;
+	else if (LocationRoot.length() != 0)
+		CombinedRoot = "." + LocationRoot.substr(1);
+	else
+		CombinedRoot = ".";	// Both are empty, default to working directory
+	//std::cout << "CombinedRoot '" << CombinedRoot << "' = '" << Root << "' + '" << LocationRoot << "'" << std::endl;
+}
+
 bool ConfigurationState::IsFileValid(const std::string& FilePath, const ConfigRequest& Request) const
 {
 	// Check if the cgi is inside the Root directory, Small problem: If you symlink outside, it still fails, why is checked? Well, you dont want someone asking for cgi "../../Makecgi" or whatever other cgi
@@ -145,10 +182,9 @@ bool ConfigurationState::IsFileValid(const std::string& FilePath, const ConfigRe
 	if (!ptr)
 		return false;
 
-	std::string Combined = Root + ExpectedRootExtension;
-	if (strncmp(ptr, Combined.c_str(), Combined.length()))
+	if (strncmp(ptr, CombinedRoot.c_str(), CombinedRoot.length()))
 	{
-		std::cerr << Request << ": Asked for '" << FilePath << "', But was not inside the expected root directory: '" << Combined << "'!" << std::endl;
+		std::cerr << Request << ": Asked for '" << FilePath << "', But was not inside the combined root directory: '" << CombinedRoot << "'!" << std::endl;
 		free(ptr);
 		return false;
 	}
@@ -177,7 +213,8 @@ std::string ConfigurationState::InterperetEnvVariable(const std::string& String)
 	std::string Copy = String;
 
 	ReplaceAll(Copy, "$root", Root);
-	ReplaceAll(Copy, "$expected_root", ExpectedRootExtension);
+	ReplaceAll(Copy, "$combined_root", CombinedRoot);
+	ReplaceAll(Copy, "$location_root", LocationRoot);
 
 	return Copy;
 }
@@ -186,7 +223,8 @@ std::string ConfigurationState::InterperetEnvVariableUserVariables(const std::st
 {
 	std::string Copy = InterperetEnvVariable(String);
 
-	MustValidate |= ReplaceAll(Copy, "$uri", Request->GetUri());
+	MustValidate |= ReplaceAll(Copy, "$auri", Request->GetUri());
+	MustValidate |= ReplaceAll(Copy, "$uri", RemoveLocationRoot(Request->GetUri()));
 
 	return Copy;
 }

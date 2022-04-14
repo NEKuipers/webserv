@@ -59,7 +59,7 @@ ConfigResponse* ConfigLine_try_file::GetBaseResponse(const ConfigRequest& Reques
 	{
 		bool MustValidate = false;
 		std::string File = Configuration.InterperetEnvVariableUserVariables(*It, &Request, MustValidate);
-		File = Configuration.Root + "/" + File;	// Isn't there a utility function that combines paths?
+		File = Configuration.GetCombinedRoot() + "/" + File;	// Isn't there a utility function that combines paths?
 		if (MustValidate && !Configuration.IsFileValid(File, Request))
 			continue;
 

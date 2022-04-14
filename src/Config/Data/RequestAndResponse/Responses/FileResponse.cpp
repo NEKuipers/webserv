@@ -100,6 +100,8 @@ void FileResponse::Print(std::ostream& PrintStream) const
 
 const std::string FileResponse::GetContentType() const 
 {
+	assert(g_extension_to_content_type.size() != 0);
+	
 	size_t dot = FileName.rfind(".");
 
 	if (dot != std::string::npos)
