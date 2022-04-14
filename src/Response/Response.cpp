@@ -3,14 +3,12 @@
 #include "FileResponse.hpp"
 #include "ErrorResponse.hpp"
 #include "ToString.hpp"
-#include "Request.hpp"
 #include <cstdlib>
 
 std::map<int, std::string> g_response_code_to_reason_phrase;
 
 void Response::InitContentTypes()
 {
-	assert(g_response_code_to_reason_phrase.size() == 0);
 
 	g_response_code_to_reason_phrase[100] = "Continue";
 	g_response_code_to_reason_phrase[101] = "Switching Protocols";
@@ -55,21 +53,15 @@ void Response::InitContentTypes()
 	g_response_code_to_reason_phrase[505] = "HTTP Version Not Supported";
 }
 
-
-Response::~Response(){}
-
-Response::Response(const Response &src)
+Response::Response(ConfigResponse *conf_response, Request &request)
 {
-    *this = src;
-}
-
-Response::Response(ConfigResponse *conf_response)
-{
+	(void)request;
 	std::string headers = "";
 	std::string body = "";
 	std::string content_type = "";
 	std::stringstream scode;
 	int status_code = 400;
+	InitContentTypes();
 
 	if (FileResponse* FileResponsePtr = dynamic_cast<FileResponse*>(conf_response))
 	{
@@ -93,17 +85,35 @@ Response::Response(ConfigResponse *conf_response)
 		body.append("</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>");
 	}
 	scode << status_code;
-	std::string http_version = "HTTP/1.1"; //TODO figure out if this is always the case??
-	response_string = http_version + " " + scode.str() + " " + g_response_code_to_reason_phrase[status_code] + "\r\n";
+	std::string http_version = "HTTP/1.1";
+	response_string = http_version + " " + scode.str() + " " + get_reason_phrase(status_code) + "\r\n";
 	response_string += headers;//TODO add headers here
+	//retry_after?
+	//chunked requests
+	//Allow = 
 	response_string += "Content-Type: " + content_type + "\r\n";
 	response_string += "Content-Length: " + to_string(body.length()) + "\r\n";	
+	response_string += "Date: ";
 	time_t now = time(0);
 	char *datetime = ctime(&now);
-	response_string += datetime;
-	response_string += "\r\nServer: webserv\r\n";
+	response_string += datetime; //TODO dit kan netter
+	response_string += "Server: webserv\r\n";
 	response_string += "\r\n";
 	response_string += body;
+}
+
+Response::~Response(){}
+
+Response::Response(const Response &src)
+{
+    *this = src;
+}
+
+std::string			Response::get_reason_phrase(int status_code)
+{
+	if (g_response_code_to_reason_phrase.count(status_code))
+		return(g_response_code_to_reason_phrase[status_code]);
+	return ("ERROR");
 }
 
 std::string			Response::get_response_string()
