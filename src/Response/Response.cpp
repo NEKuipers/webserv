@@ -4,6 +4,8 @@
 #include "ErrorResponse.hpp"
 #include "ToString.hpp"
 #include <cstdlib>
+#include <sys/time.h>
+
 
 std::map<int, std::string> g_response_code_to_reason_phrase;
 
@@ -53,6 +55,23 @@ void Response::InitContentTypes()
 	g_response_code_to_reason_phrase[505] = "HTTP Version Not Supported";
 }
 
+static std::string get_date_header()
+{
+	struct timeval now;
+	struct timezone tz;
+	time_t timestamp;
+	char buffer[33];
+	struct tm *ts;
+	size_t last;
+
+	gettimeofday(&now, &tz);
+	timestamp = now.tv_sec + tz.tz_minuteswest * 60;
+	ts = localtime(&timestamp);
+	last = strftime(buffer, 32, "%a, %d %b %Y %T GMT", ts);
+	buffer[last] = '\0';
+	return (std::string(buffer));
+}
+
 Response::Response(ConfigResponse *conf_response, Request &request)
 {
 	(void)request;
@@ -90,13 +109,10 @@ Response::Response(ConfigResponse *conf_response, Request &request)
 	response_string += headers;//TODO add headers here
 	//retry_after?
 	//chunked requests
-	//Allow = 
+	//Allow 
 	response_string += "Content-Type: " + content_type + "\r\n";
 	response_string += "Content-Length: " + to_string(body.length()) + "\r\n";	
-	response_string += "Date: ";
-	time_t now = time(0);
-	char *datetime = ctime(&now);
-	response_string += datetime; //TODO dit kan netter
+	response_string += "Date: " + get_date_header() + "\r\n";
 	response_string += "Server: webserv\r\n";
 	response_string += "\r\n";
 	response_string += body;
