@@ -2,7 +2,7 @@
 #include "Request.hpp"
 #include "ToString.hpp"
 
-CgiResponse::CgiResponse(const std::string& CgiFile) : CgiFile(CgiFile)
+CgiResponse::CgiResponse(const std::string& CgiFile, const ConfigCombinedResponse& CombinedResponse) : ConfigResponse(CombinedResponse), CgiFile(CgiFile)
 {
 	
 }

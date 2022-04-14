@@ -104,9 +104,16 @@ Response::Response(ConfigResponse *conf_response, Request &request)
 	(void)request;
 	std::string body = "";
 	std::string content_type = "";
-	std::stringstream scode;
 	int status_code = 400;
 	std::string cgi_response = "";
+
+	/*
+	std::cout << "Allowed methods: ";
+	std::vector<std::string> allowed = conf_response->GetAllowedMethods();
+	for (std::vector<std::string>::const_iterator it = allowed.begin(); it != allowed.end(); it++)
+		std::cout << " " << *it;
+	std::cout << std::endl;
+	*/
 
 	if (FileResponse* FileResponsePtr = dynamic_cast<FileResponse*>(conf_response))
 	{
@@ -163,9 +170,9 @@ Response::Response(ConfigResponse *conf_response, Request &request)
 		body.append(to_string(*conf_response));
 		body.append("</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>");
 	}
-	scode << status_code;
+
 	std::string http_version = "HTTP/1.1";
-	response_string = http_version + " " + scode.str() + " " + get_reason_phrase(status_code) + "\r\n";
+	response_string = http_version + " " + to_string(status_code) + " " + get_reason_phrase(status_code) + "\r\n";
 	if (cgi_response == "")
 	{
 		response_string += "Content-Type: " + content_type + "\r\n";

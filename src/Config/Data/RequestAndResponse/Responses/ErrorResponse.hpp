@@ -8,13 +8,14 @@ class ErrorResponse;	// For include loops
 
 class ErrorResponse : public ConfigResponse {
 	public: 
-		ErrorResponse();
+		ErrorResponse(const ConfigCombinedResponse& CombinedResponse);
 		~ErrorResponse();
 
 		// Public functions
 		friend std::ostream& operator<<(std::ostream& Stream, const ErrorResponse& ErrorResponse);
 		virtual void Print(std::ostream& Stream) const;
 	private:
+		ErrorResponse();
 		ErrorResponse(const ErrorResponse& From);
 		ErrorResponse& operator = (const ErrorResponse& From);
 		// Class variables

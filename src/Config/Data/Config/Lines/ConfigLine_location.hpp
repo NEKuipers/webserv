@@ -5,6 +5,7 @@ class ConfigLine_location;	// For include loops
 
 #include <ostream>
 #include "ConfigListBase.hpp"
+#include "ConfigCombinedResponse.hpp"
 
 class ConfigLine_location : public ConfigListBase {
 	public: 
@@ -19,7 +20,7 @@ class ConfigLine_location : public ConfigListBase {
 
 		static ConfigLine_location* TryParse(const ConfigLine& Line, const ConfigurationState& Configuration);
 
-		virtual ConfigResponse* GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request) const;
+		virtual ConfigResponse* GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const;
 	protected:
 		virtual EnterResult Enters(const ConfigRequest& Request) const;
 	private:

@@ -20,18 +20,26 @@ ConfigBase::~ConfigBase()
 	
 }
 
-ConfigResponse* ConfigBase::GetResponse(const ConfigRequest& Request) const
+ConfigResponse* ConfigBase::GetResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const
 {
 	if (!ChecksConfiguration() || Configuration.IsValidWithRequest(Request))
-		return GetBaseResponse(Request);
+		return GetBaseResponse(Request, CombinedResponse);
+	else
+		AddCombinedResponseIfNoResponse(Request, CombinedResponse);
 	return NULL;
 }
 
-ConfigResponse* ConfigBase::GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request) const
+void ConfigBase::AddCombinedResponseIfNoResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const
+{
+	(void)Request;
+	(void)CombinedResponse;
+}
+
+ConfigResponse* ConfigBase::GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const
 {
 	It++;
 	(void)ItEnd;
-	return GetResponse(Request);
+	return GetResponse(Request, CombinedResponse);
 }
 
 bool ConfigBase::ChecksConfiguration() const

@@ -4,6 +4,7 @@
 #include "ConfigLine.hpp"
 #include "ConfigRequest.hpp"
 #include "ConfigResponse.hpp"
+#include "ConfigCombinedResponse.hpp"
 #include <vector>
 
 //#include "ConfigBase.hpp"
@@ -28,8 +29,8 @@ class ConfigurationState {
 
 		void AppendLocationRoot(const std::string& Location);
 
-		ConfigResponse* Redirect(const ConfigRequest& Request, std::string NewUri) const;
-		ConfigResponse* Error(const ConfigRequest& Request) const;
+		ConfigResponse* Redirect(const ConfigRequest& Request, std::string NewUri, ConfigCombinedResponse& CombinedResponse) const;
+		ConfigResponse* Error(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const;
 
 		const std::string& GetRoot() const;
 		const std::string& GetCombinedRoot() const;

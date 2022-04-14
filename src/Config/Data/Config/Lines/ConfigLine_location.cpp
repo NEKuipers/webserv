@@ -69,7 +69,7 @@ int ConfigLine_location::GetWeight() const
 		return Location.length();
 }
 
-ConfigResponse* ConfigLine_location::GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request) const
+ConfigResponse* ConfigLine_location::GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const
 {
 	const ConfigLine_location* Best = NULL;
 
@@ -91,5 +91,5 @@ ConfigResponse* ConfigLine_location::GetIteratorResponse(std::vector<ConfigBase*
 
 	if (!Best)
 		return NULL;
-	return Best->GetBaseResponse(Request);
+	return Best->GetBaseResponse(Request, CombinedResponse);
 }

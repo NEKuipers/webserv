@@ -32,7 +32,7 @@ ConfigListBase::~ConfigListBase()
 
 const std::vector<ConfigBase*>& ConfigListBase::GetChildren() { return Children; }
 
-ConfigResponse* ConfigListBase::GetBaseResponse(const ConfigRequest& Request) const
+ConfigResponse* ConfigListBase::GetBaseResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const
 {
 	bool ErrorIfNoResult;
 
@@ -55,13 +55,13 @@ ConfigResponse* ConfigListBase::GetBaseResponse(const ConfigRequest& Request) co
 	{
 		const ConfigBase* Child = *It;
 
-		ConfigResponse* Response = Child->GetIteratorResponse(It, Children.end(), Request); //Child->GetResponse(Request);
+		ConfigResponse* Response = Child->GetIteratorResponse(It, Children.end(), Request, CombinedResponse);
 		if (Response)
 			return Response;
 	}
 
 	if (ErrorIfNoResult)
-		return Configuration.Error(Request);
+		return Configuration.Error(Request, CombinedResponse);
 	return NULL;
 }
 

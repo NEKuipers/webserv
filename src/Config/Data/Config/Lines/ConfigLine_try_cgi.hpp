@@ -23,8 +23,9 @@ class ConfigLine_try_cgi : public ConfigBase {
 		
 		static ConfigLine_try_cgi* TryParse(const ConfigLine& Line, const ConfigurationState& Configuration);
 	protected:
-		virtual ConfigResponse* GetBaseResponse(const ConfigRequest& Request) const;
-		
+		virtual ConfigResponse* GetBaseResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const;
+		virtual void AddCombinedResponseIfNoResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const;
+
 	private:
 		std::vector<std::string> cgis;
 		// Class variables

@@ -5,6 +5,7 @@ class ConfigLine_server;	// For include loops
 
 #include <ostream>
 #include "ConfigListBase.hpp"
+#include "ConfigCombinedResponse.hpp"
 #include <vector>
 
 class ConfigLine_server : public ConfigListBase {
@@ -23,7 +24,7 @@ class ConfigLine_server : public ConfigListBase {
 
 		static ConfigLine_server* TryParse(const ConfigLine& Line, const ConfigurationState& Configuration);
 
-		virtual ConfigResponse* GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request) const;
+		virtual ConfigResponse* GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const;
 
 		const std::vector<std::pair<in_addr_t, in_port_t> >& GetListens();
 	protected:

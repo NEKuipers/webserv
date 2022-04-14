@@ -58,7 +58,7 @@ void ConfigLine_try_cgi::Print(std::ostream& Stream) const
 	}
 }
 
-ConfigResponse* ConfigLine_try_cgi::GetBaseResponse(const ConfigRequest& Request) const
+ConfigResponse* ConfigLine_try_cgi::GetBaseResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const
 {
 	for (std::vector<std::string>::const_iterator It = cgis.begin(); It != cgis.end(); It++)
 	{
@@ -68,10 +68,26 @@ ConfigResponse* ConfigLine_try_cgi::GetBaseResponse(const ConfigRequest& Request
 		
 		if (MustValidate && !Configuration.IsFileValid(cgi, Request))
 			continue;
-
-		return new CgiResponse(cgi);
+		
+		CombinedResponse.AddAllowedMethods(Configuration.AcceptedMethods);
+		return new CgiResponse(cgi, CombinedResponse);
 	}
 	return NULL;
+}
+
+void ConfigLine_try_cgi::AddCombinedResponseIfNoResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const
+{
+	for (std::vector<std::string>::const_iterator It = cgis.begin(); It != cgis.end(); It++)
+	{
+		bool MustValidate = false;
+		std::string cgi = Configuration.InterperetEnvVariableUserVariables(*It, &Request, MustValidate);
+		cgi = Configuration.GetCombinedRoot() + "/" + cgi;	// Isn't there a utility function that combines paths?
+		if (MustValidate && !Configuration.IsFileValid(cgi, Request))
+			continue;
+		
+		CombinedResponse.AddAllowedMethods(Configuration.AcceptedMethods);
+		break;
+	}
 }
 
 ConfigLine_try_cgi* ConfigLine_try_cgi::TryParse(const ConfigLine& Line, const ConfigurationState& Configuration)

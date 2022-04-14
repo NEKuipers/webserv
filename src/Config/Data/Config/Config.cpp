@@ -26,6 +26,11 @@ EnterResult Config::Enters(const ConfigRequest& Request) const
 	return EnterResult_EnterAndError;
 }
 
+ConfigResponse* Config::GetResponse(const ConfigRequest& Request) const
+{
+	ConfigCombinedResponse CombinedResponse;	// Why C++, Why can't i do 'ConfigCombinedResponse CombinedResponse()' WHATS THE DIFFERENCE!?
+	return ConfigListBase::GetResponse(Request, CombinedResponse);
+}
 
 static void AddIfNew(std::vector<std::pair<in_addr_t, in_port_t> >* Vec, std::pair<in_addr_t, in_port_t> Pair)
 {

@@ -6,6 +6,7 @@ class ConfigLine_try_file;	// For include loops
 #include <ostream>
 #include "ConfigBase.hpp"
 #include <vector>
+#include "ConfigCombinedResponse.hpp"
 
 class ConfigLine_try_file : public ConfigBase {
 	public: 
@@ -23,8 +24,8 @@ class ConfigLine_try_file : public ConfigBase {
 		
 		static ConfigLine_try_file* TryParse(const ConfigLine& Line, const ConfigurationState& Configuration);
 	protected:
-		virtual ConfigResponse* GetBaseResponse(const ConfigRequest& Request) const;
-		
+		virtual ConfigResponse* GetBaseResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const;
+		virtual void AddCombinedResponseIfNoResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const;
 	private:
 		std::vector<std::string> Files;
 		// Class variables

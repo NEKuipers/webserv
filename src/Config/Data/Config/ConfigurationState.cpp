@@ -127,7 +127,7 @@ void ConfigurationState::AppendLocationRoot(const std::string& Location)
 	UpdateCombinedRoot();
 }
 
-ConfigResponse* ConfigurationState::Redirect(const ConfigRequest& Request, std::string Uri) const
+ConfigResponse* ConfigurationState::Redirect(const ConfigRequest& Request, std::string Uri, ConfigCombinedResponse& CombinedResponse) const
 {
 	if (!RedirectBase)
 		return NULL;
@@ -136,17 +136,17 @@ ConfigResponse* ConfigurationState::Redirect(const ConfigRequest& Request, std::
 	if (!NewRequest)
 		return NULL;
 
-	ConfigResponse* Response = RedirectBase->GetResponse(*NewRequest);
+	ConfigResponse* Response = RedirectBase->GetResponse(*NewRequest, CombinedResponse);
 	delete NewRequest;
 
 	return Response;
 }
 
-ConfigResponse* ConfigurationState::Error(const ConfigRequest& Request) const
+ConfigResponse* ConfigurationState::Error(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const
 {
 	if (ErrorUri != "")
-		return Redirect(Request, ErrorUri);
-	return new ErrorResponse();
+		return Redirect(Request, ErrorUri, CombinedResponse);
+	return new ErrorResponse(CombinedResponse);
 }
 
 const std::string& ConfigurationState::GetRoot() const { return Root; }
