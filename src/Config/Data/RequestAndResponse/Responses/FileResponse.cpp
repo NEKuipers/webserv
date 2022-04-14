@@ -98,23 +98,23 @@ void FileResponse::Print(std::ostream& PrintStream) const
 	PrintStream << "FileResponse '" << FileName << "' Type: " << GetContentType();
 }
 
-const std::string FileResponse::GetFileName()
+const std::string& FileResponse::GetFileName()
 {
 	return FileName;
 }
 
-const std::string FileResponse::GetContentType() const 
+const static std::string DefaultContentType = "application/octet-stream";
+const std::string& FileResponse::GetContentType() const 
 {
 	assert(g_extension_to_content_type.size() != 0);
 	
-	size_t dot = FileName.rfind(".");
-
-	if (dot != std::string::npos)
+	size_t Dot = FileName.rfind(".");
+	if (Dot != std::string::npos)
 	{
-		std::string ext = FileName.substr(dot + 1);
-		std::map<std::string, std::string>::const_iterator it = g_extension_to_content_type.find(ext);
+		std::string Extension = FileName.substr(Dot + 1);
+		std::map<std::string, std::string>::const_iterator it = g_extension_to_content_type.find(Extension);
 		if (it != g_extension_to_content_type.end())
-			return (it->second);
+			return it->second;
 	}
-	return ("application/octet-stream");
+	return DefaultContentType;
 }
