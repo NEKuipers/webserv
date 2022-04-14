@@ -129,26 +129,11 @@ Response::Response(ConfigResponse *conf_response, Request &request)
 		CgiResponsePtr->MakeEnvMap(map, request);
 		CGIRunner runner(CgiResponsePtr->GetCgiFile(), map);
 		
-		// TODO: Non-Blocking read loop via select
-		const std::string& request_body = request.get_body();
-		ssize_t written = 0;
-		while (written < (ssize_t)request_body.length())
-		{
-			ssize_t curr = write(runner.InputFD, request_body.c_str() + written, request_body.length() - written);
-			if (curr < 0)
-				break;
-			written += curr;
-		}
+		runner.QueuePartialBodyForWrite(request.get_body());	// NOTE: Considering this is CGI, it does not need to be started AFTER the whole body has been read, it can be done in sections, so the CGI program can be started earlier
+		
+		while (!runner.Write()) {  }			// TODO: Non-Blocking read loop via select
+		while (!runner.Read(cgi_response)) { }	// TODO: Non-Blocking read loop via select
 
-		// TODO: Non-Blocking read loop via select
-		while (true)
-		{
-			char	read_buffer[BUFFER_SIZE];
-			int read = ::read(runner.OutputFD, read_buffer, BUFFER_SIZE);
-			if (read <= 0)
-				break;
-			cgi_response += std::string(read_buffer, read);
-		}
 		//std::cout << "cgi_response = " << cgi_response << std::endl;
 		status_code = 200;
 		// TODO: Magic stuff

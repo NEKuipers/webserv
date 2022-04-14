@@ -14,7 +14,20 @@ class CGIRunner {
 
 		// Public functions
 		friend std::ostream& operator<<(std::ostream& Stream, const CGIRunner& CGIRunner);
-		
+
+		// Enqueues a bit of the body to write
+		// Whenever this is called make sure the InputFD is set in your select() function
+		void QueuePartialBodyForWrite(const std::string& PartialBody);
+
+		// Should be called when select() says that can write something
+		// returns wheter the current body was completely written
+		// if it returns true remove InputFD from your select() function
+		bool Write();
+		// Should be called when select() says it can read something
+		// returns wheter the entire CGI output was read
+		// Appends what it read to AppendRead
+		bool Read(std::string& AppendRead);
+
 		const int InputFD;
 		const int OutputFD;
 		const pid_t CGIPid;
@@ -25,7 +38,7 @@ class CGIRunner {
 		CGIRunner& operator = (const CGIRunner& From);
 
 		// Class variables
-		
+		std::string ToWritePartialBody;
 		// Class functions
 		
 };

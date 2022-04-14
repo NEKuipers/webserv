@@ -3,6 +3,10 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <iostream>
+#include "WriteException.hpp"
+#include "ReadException.hpp"
+
+#define BUFFER_SIZE 1024
 
 static void UpdateEnv(const std::map<std::string, std::string>& ExtraEnv)
 {
@@ -76,4 +80,33 @@ std::ostream& operator<<(std::ostream& Stream, const CGIRunner& CGIRunner)
 	(void)CGIRunner;
 	Stream << "CGI Runner" << std::endl;	// TODO: Possibly better logging
 	return Stream;
+}
+
+void CGIRunner::QueuePartialBodyForWrite(const std::string& PartialBody)
+{
+	ToWritePartialBody += PartialBody;
+}
+
+bool CGIRunner::Write()
+{
+	ssize_t WrittenBytes = write(InputFD, ToWritePartialBody.c_str(), ToWritePartialBody.length());
+	if (WrittenBytes < 0)
+		throw WriteException();
+	ToWritePartialBody.erase(0, WrittenBytes);
+
+	return ToWritePartialBody.length() == 0;
+}
+
+bool CGIRunner::Read(std::string& ReadPart)
+{
+	char Buffer[BUFFER_SIZE];
+	ssize_t ReadBytes = read(OutputFD, Buffer, BUFFER_SIZE);
+	if (ReadBytes < 0)
+		throw ReadException();
+	ReadPart += std::string(Buffer, ReadBytes);
+
+	// TODO: read the "Content-Length" header if it exists, and then make sure we do not read more than that
+	// Actually, what happens if it EOF's and we have read less than the content length?
+
+	return ReadBytes == 0;
 }
