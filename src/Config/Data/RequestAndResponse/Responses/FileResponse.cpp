@@ -98,6 +98,11 @@ void FileResponse::Print(std::ostream& PrintStream) const
 	PrintStream << "FileResponse '" << FileName << "' Type: " << GetContentType();
 }
 
+const std::string FileResponse::GetFileName()
+{
+	return FileName;
+}
+
 const std::string FileResponse::GetContentType() const 
 {
 	assert(g_extension_to_content_type.size() != 0);

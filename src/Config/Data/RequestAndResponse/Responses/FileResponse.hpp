@@ -18,6 +18,7 @@ class FileResponse : public ConfigResponse {
 		friend std::ostream& operator<<(std::ostream& Stream, const FileResponse& FileResponse);
 		virtual void Print(std::ostream& Stream) const;
 		const std::string GetContentType() const;
+		const std::string GetFileName();
 
 		static void InitContentTypes();
 	private:

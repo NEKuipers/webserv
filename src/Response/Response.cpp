@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <sys/time.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #define BUFFER_SIZE 1024
 
@@ -84,16 +85,19 @@ static std::string get_date_header()
 }
 
 
-std::string Response::create_headers()
+std::string Response::create_headers(ConfigResponse *conf_response, Request &request, int status_code)
 {
+	(void)request;
 	std::string headers_string = "";
 	headers_string += "Date: " + get_date_header() + "\r\n";
 	headers_string += "Server: webserv\r\n";
-	//retry_after?
-	//chunked requests
-	//Allow
-	//Last-Modified
-	
+	headers_string += "Allow: ";
+	//conf_response->allowed_methods
+	if (status_code == 201)
+	{
+		headers_string += "Location: ";
+		//dynamic_cast<PostResponse*>(conf_response)->created_uri;
+	}
 	return (headers_string);
 }
 
@@ -145,9 +149,6 @@ Response::Response(ConfigResponse *conf_response, Request &request)
 		status_code = 200;
 		// TODO: Magic stuff
 		// NOTE: cgi_response is [headers]\n\r[body] without the http line
-
-		response_string = "HTTP/1.1 200 OK\n\r" + cgi_response;
-		return;
 	}
 	else if (!conf_response || dynamic_cast<ErrorResponse*>(conf_response))
 	{
@@ -172,7 +173,7 @@ Response::Response(ConfigResponse *conf_response, Request &request)
 		response_string += "Content-Type: " + content_type + "\r\n";
 		response_string += "Content-Length: " + to_string(body.length()) + "\r\n";	
 	}
-	response_string += create_headers();//TODO add headers here
+	response_string += create_headers(conf_response, request, status_code);//TODO add headers here
 	if (cgi_response != "")
 		response_string += cgi_response;
 	else	

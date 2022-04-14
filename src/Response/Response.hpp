@@ -19,7 +19,7 @@ class Response
 		static void	InitContentTypes();
 		std::string	get_response_string();
 		std::string	get_reason_phrase(int status_code);
-		std::string create_headers();
+		std::string create_headers(ConfigResponse *conf_response, Request &request, int status_code);
 };
 
 #endif
