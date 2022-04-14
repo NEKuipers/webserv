@@ -3,22 +3,22 @@
 # include <iostream>
 # include <vector>
 # include <cstring>
+# include "ConfigResponse.hpp"
 
 class Response
 {
     public:
-        struct status_line
-        {
-            std::string http_version;// = "HTTP/1.1";
-            std::string status_code;
-            std::string reason_phrase;
-        };
+
+
+		std::string response_string;
 
     public:
-        Response();
+        Response(ConfigResponse *conf_response);
         ~Response();
         Response(const Response &src);
-        // Response        &operator=(const Response &rhs);
+
+		void		InitContentTypes();
+		std::string	get_response_string();
 };
 
 #endif

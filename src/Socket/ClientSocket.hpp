@@ -18,7 +18,8 @@ class ClientSocket: public SimpleSocket
 	ssize_t			written_size;
 
 	public:
-		ConfigResponse*	response;
+		ConfigResponse*	conf_response;
+		Request*			response;
 
 		// Constructor
 		ClientSocket(struct sockaddr_in address, int sock);

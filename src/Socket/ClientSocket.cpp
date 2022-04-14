@@ -3,6 +3,7 @@
 #include "ErrorResponse.hpp"
 #include "ToString.hpp"
 #include "Request.hpp"
+#include "Response.hpp"
 #define BUFFER_SIZE 3000
 #include <unistd.h>
 #include <map>
@@ -10,62 +11,63 @@
 #include "SendResponseException.hpp"
 
 // Constructor
-ClientSocket::ClientSocket(struct sockaddr_in address, int sock) : SimpleSocket(address, sock), headers_complete(false), written_size(0), response(NULL)
+ClientSocket::ClientSocket(struct sockaddr_in address, int sock) : SimpleSocket(address, sock), headers_complete(false), written_size(0), conf_response(NULL)
 {
 
 }
 
 ClientSocket::~ClientSocket()
 {
-	delete response;
+	delete conf_response;
 }
 
 void 	ClientSocket::createResponse()
 {
-	std::string Status;
-	// TODO: Response headers
-	std::string Headers = "";
-	std::string ContentType = "";
-	std::string Body;
+	// std::string Status;
+	// // TODO: Response headers
+	// std::string Headers = "";
+	// std::string ContentType = "";
+	// std::string Body;
 
+	Response http_response = Response(conf_response);
+	to_write = http_response.get_response_string();
+	// if (!conf_response || dynamic_cast<ErrorResponse*>(conf_response))
+	// {
+	// 	// I guess this is a default error page or something i dunno
+	// 	Status = "404 Not found";
+	// 	ContentType = "text/html";
+	// 	Body = "<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>Default error page<br>You seem to have made a invalid request!</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>";
+	// }
+	// else if (FileResponse* FileResponsePtr = dynamic_cast<FileResponse*>(conf_response))
+	// {
+	// 	Status = "200 OK";
+	// 	ContentType = FileResponsePtr->GetContentType();
+	// 	Body = to_string(FileResponsePtr->GetStream().rdbuf());
+	// }
+	// else
+	// {
+	// 	Status = "200 OK";
+	// 	ContentType = "text/html";
 
-	if (!response || dynamic_cast<ErrorResponse*>(response))
-	{
-		// I guess this is a default error page or something i dunno
-		Status = "404 Not found";
-		ContentType = "text/html";
-		Body = "<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>Default error page<br>You seem to have made a invalid request!</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>";
-	}
-	else if (FileResponse* FileResponsePtr = dynamic_cast<FileResponse*>(response))
-	{
-		Status = "200 OK";
-		ContentType = FileResponsePtr->GetContentType();
-		Body = to_string(FileResponsePtr->GetStream().rdbuf());
-	}
-	else
-	{
-		Status = "200 OK";
-		ContentType = "text/html";
+	// 	Body = "<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>Unknown response type:<br>";
+	// 	Body.append(to_string(*conf_response));
+	// 	Body.append("</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>");
+	// }
 
-		Body = "<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>Unknown response type:<br>";
-		Body.append(to_string(*response));
-		Body.append("</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>");
-	}
+	// // Debugging infos
+	// time_t now = time(0);
+	// char *datetime = ctime(&now);
+	// Body.append(datetime);
 
-	// Debugging infos
-	time_t now = time(0);
-	char *datetime = ctime(&now);
-	Body.append(datetime);
+	// if (conf_response)
+	// 	Body.append("Response type: " + to_string(*conf_response));
 
-	if (response)
-		Body.append("Response type: " + to_string(*response));
-
-	to_write = "HTTP/1.1 " + Status + "\r\n";
-	to_write += Headers;
-	to_write += "[Content-Type]: " + ContentType + "\r\n";
-	to_write += "[Content-Length]: " + to_string(Body.length()) + "\r\n";
-	to_write += "\r\n";	// End of headers
-	to_write += Body;
+	// to_write = "HTTP/1.1 " + Status + "\r\n";
+	// to_write += Headers;
+	// to_write += "Content-Type: " + ContentType + "\r\n";
+	// to_write += "Content-Length: " + to_string(Body.length()) + "\r\n";
+	// to_write += "\r\n";	// End of headers
+	// to_write += Body;
 }
 
 Request					ClientSocket::get_request()
@@ -75,11 +77,12 @@ Request					ClientSocket::get_request()
 
 bool					ClientSocket::send()
 {
+	std::cerr << "[[[[[[[" << to_write.c_str() << "]]]]]]]]" << std::endl;
 	int send_rv = ::send(get_sock(), to_write.c_str()+written_size, to_write.size()-written_size, 0);
 	if (send_rv == -1)
 		throw SendResponseException();
 	written_size += send_rv;
-	return written_size >= ssize_t(to_write.size()); //TODO if send returns -1, throw exception and remove client
+	return written_size >= ssize_t(to_write.size());
 }
 
 void					ClientSocket::read()
