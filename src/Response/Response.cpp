@@ -78,15 +78,26 @@ static std::string get_date_header()
 	return (std::string(buffer));
 }
 
+std::string Response::create_headers()
+{
+	std::string headers_string = "";
+	headers_string += "Date: " + get_date_header() + "\r\n";
+	headers_string += "Server: webserv\r\n";
+	//retry_after?
+	//chunked requests
+	//Allow 
+	return (headers_string);
+}
+
 Response::Response(ConfigResponse *conf_response, Request &request)
 {
 	(void)request;
-	std::string headers = "";
 	std::string body = "";
 	std::string content_type = "";
 	std::stringstream scode;
 	int status_code = 400;
 	InitContentTypes();
+	std::string cgi_response = "";
 
 	if (FileResponse* FileResponsePtr = dynamic_cast<FileResponse*>(conf_response))
 	{
@@ -104,7 +115,6 @@ Response::Response(ConfigResponse *conf_response, Request &request)
 		//assert(pid == Runner.CGIPid);
 
 		// TODO: Non-Blocking read loop via select
-		std::string cgi_response = "";
 		while (true)
 		{
 			char	read_buffer[BUFFER_SIZE];
@@ -115,6 +125,7 @@ Response::Response(ConfigResponse *conf_response, Request &request)
 			cgi_response += std::string(read_buffer, read);
 		}
 		std::cout << "cgi_response = " << cgi_response << std::endl;
+		status_code = 200;
 		// TODO: Magic stuff
 		// NOTE: cgi_response is [headers]\n\r[body] without the http line
 	}
@@ -136,16 +147,16 @@ Response::Response(ConfigResponse *conf_response, Request &request)
 	scode << status_code;
 	std::string http_version = "HTTP/1.1";
 	response_string = http_version + " " + scode.str() + " " + get_reason_phrase(status_code) + "\r\n";
-	//retry_after?
-	//chunked requests
-	//Allow 
-	response_string += "Content-Type: " + content_type + "\r\n";
-	response_string += "Content-Length: " + to_string(body.length()) + "\r\n";	
-	response_string += "Date: " + get_date_header() + "\r\n";
-	response_string += "Server: webserv\r\n";
-	response_string += headers;//TODO add headers here
-	response_string += "\r\n";
-	response_string += body;
+	if (cgi_response == "")
+	{
+		response_string += "Content-Type: " + content_type + "\r\n";
+		response_string += "Content-Length: " + to_string(body.length()) + "\r\n";	
+	}
+	response_string += create_headers();//TODO add headers here
+	if (cgi_response != "")
+		response_string += cgi_response;
+	else	
+		response_string += "\r\n" + body;
 }
 
 Response::~Response(){}

@@ -9,8 +9,6 @@
 class Response
 {
     public:
-
-
 		std::string response_string;
 
     public:
@@ -21,6 +19,7 @@ class Response
 		void		InitContentTypes();
 		std::string	get_response_string();
 		std::string	get_reason_phrase(int status_code);
+		std::string create_headers();
 };
 
 #endif
