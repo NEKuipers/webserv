@@ -7,7 +7,10 @@
 static void UpdateEnv(const std::map<std::string, std::string>& ExtraEnv)
 {
 	for (std::map<std::string, std::string>::const_iterator It = ExtraEnv.begin(); It != ExtraEnv.end(); It++)
+	{
+		std::cout << "env[" << It->first << "] = " << It->second << ";" << std::endl;
 		setenv(It->first.c_str(), It->second.c_str(), 1);
+	}
 }
 
 CGIRunner::CGIRunner(const std::string& PathName, const std::map<std::string, std::string>& ExtraEnv) : InputFD(-1), OutputFD(-1), CGIPid(-1)
@@ -27,6 +30,8 @@ CGIRunner::CGIRunner(const std::string& PathName, const std::map<std::string, st
 	const_cast<pid_t&>(CGIPid) = fork();
 	if (CGIPid == 0)
 	{
+		UpdateEnv(ExtraEnv);
+
 		// child
 		dup2(pipes_stdin[0], STDIN_FILENO);
 		dup2(pipes_stdout[1], STDOUT_FILENO);
@@ -41,7 +46,6 @@ CGIRunner::CGIRunner(const std::string& PathName, const std::map<std::string, st
 		for (int i = 3; i < FD_SETSIZE; i++)	// TODO: Non terrible way to do this
 			close(i);
 
-		UpdateEnv(ExtraEnv);
 
 		const char* Args[2];
 		Args[0] = PathName.c_str();

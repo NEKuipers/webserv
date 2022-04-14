@@ -156,18 +156,19 @@ std::ostream                                &operator<<(std::ostream &Stream, co
 	Stream << "Request method is " << request.req_line.method << std::endl;
 	Stream << "Requested file is " << request.req_line.target << std::endl;
 	Stream << "HTTP version is " << request.req_line.http_version << std::endl;
-	Stream << "Other header fields: " <<std::endl;
+	Stream << "Other header fields: " << std::endl;
 
-	std::map<std::string, std::string>::const_iterator it = request.header_fields.begin();
-	for (; it != request.header_fields.end(); it++)
-	{
-		Stream << "["<< it->first << "] : [" << it->second << "]" << std::endl;
-	}
+	for (std::map<std::string, std::string>::const_iterator it = request.header_fields.begin(); it != request.header_fields.end(); it++)
+		Stream << "[" << it->first << "] : [" << it->second << "]" << std::endl;
+	
 	if (request.body.size() > 1) {
-		Stream << "Body: " <<std::endl;
-		for (size_t i = 0; i < request.body.size(); i++) {
-			Stream << request.body[i] << std::endl;
-		}
+		Stream << "Body: " << std::endl;
+		Stream << request.body << std::endl;
 	}
 	return Stream;
+}
+
+const std::string							&Request::get_body() const
+{
+	return body;
 }

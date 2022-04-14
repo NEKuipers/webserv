@@ -97,11 +97,19 @@ Response::Response(ConfigResponse *conf_response, Request &request)
 	else if (CgiResponse* CgiResponsePtr = dynamic_cast<CgiResponse*>(conf_response))
 	{
 		std::map<std::string, std::string> map;
+		CgiResponsePtr->MakeEnvMap(map, request);
 		CGIRunner runner(CgiResponsePtr->GetCgiFile(), map);
-
-		//int stat;
-		//pid_t pid = waitpid(Runner.CGIPid, &stat, 0);
-		//assert(pid == Runner.CGIPid);
+		
+		// TODO: Non-Blocking read loop via select
+		const std::string& request_body = request.get_body();
+		ssize_t written = 0;
+		while (written < (ssize_t)request_body.length())
+		{
+			ssize_t curr = write(runner.InputFD, request_body.c_str() + written, request_body.length() - written);
+			if (curr < 0)
+				break;
+			written += curr;
+		}
 
 		// TODO: Non-Blocking read loop via select
 		std::string cgi_response = "";
@@ -109,7 +117,6 @@ Response::Response(ConfigResponse *conf_response, Request &request)
 		{
 			char	read_buffer[BUFFER_SIZE];
 			int read = ::read(runner.OutputFD, read_buffer, BUFFER_SIZE);
-			std::cout << "Read: " << read << " bytes! " << std::endl;
 			if (read <= 0)
 				break;
 			cgi_response += std::string(read_buffer, read);
@@ -117,6 +124,9 @@ Response::Response(ConfigResponse *conf_response, Request &request)
 		std::cout << "cgi_response = " << cgi_response << std::endl;
 		// TODO: Magic stuff
 		// NOTE: cgi_response is [headers]\n\r[body] without the http line
+
+		response_string = "HTTP/1.1 200 OK\n\r" + cgi_response;
+		return;
 	}
 	else if (!conf_response || dynamic_cast<ErrorResponse*>(conf_response))
 	{
