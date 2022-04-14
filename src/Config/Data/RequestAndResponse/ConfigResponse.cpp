@@ -1,6 +1,6 @@
 #include "ConfigResponse.hpp"
 
-ConfigResponse::ConfigResponse(const ConfigCombinedResponse& CombinedResponse) : AllowedMethods(CombinedResponse.GetAllowedMethods()) {}
+ConfigResponse::ConfigResponse(const ConfigErrorReasons& ErrorReasons) : ErrorReasons(ErrorReasons) {}
 ConfigResponse::~ConfigResponse()
 {
 	
@@ -11,7 +11,7 @@ bool ConfigResponse::RequiresBody() const
 	return false;
 }
 
-const std::vector<std::string>& ConfigResponse::GetAllowedMethods()
+const ConfigErrorReasons& ConfigResponse::GetErrorReasons()
 {
-	return AllowedMethods;
+	return ErrorReasons;
 }

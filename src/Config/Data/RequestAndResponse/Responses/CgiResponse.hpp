@@ -11,7 +11,7 @@ class CgiResponse;	// For include loops
 
 class CgiResponse : public ConfigResponse {
 	public: 
-		CgiResponse(const std::string& CgiFile, const ConfigCombinedResponse& CombinedResponse);
+		CgiResponse(const std::string& CgiFile, const ConfigErrorReasons& ErrorReasons);
 		virtual ~CgiResponse();
 
 		// Public functions

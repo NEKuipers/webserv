@@ -5,7 +5,7 @@ class ConfigListBase;	// For include loops
 
 #include <ostream>
 #include "ConfigBase.hpp"
-#include "ConfigCombinedResponse.hpp"
+#include "ConfigErrorReasons.hpp"
 
 enum EnterResult
 {
@@ -34,7 +34,7 @@ class ConfigListBase : public ConfigBase {
 		void ReadBlock(const std::string& CreateClass, const TryParseLineFunc* NullTerminatedParseFuncs, const std::vector<ConfigLine>& Lines);
 		virtual bool EatLine(const ConfigLine& Line);
 
-		virtual ConfigResponse* GetBaseResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const;
+		virtual ConfigResponse* GetBaseResponse(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const;
 		virtual bool ChecksConfiguration() const;
 
 		virtual EnterResult Enters(const ConfigRequest& Request) const = 0;

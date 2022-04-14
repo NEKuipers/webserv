@@ -50,7 +50,7 @@ ConfigLine_redirect* ConfigLine_redirect::TryParse(const ConfigLine& Line, const
 	return new ConfigLine_redirect(Args.at(1), Configuration);
 }
 
-ConfigResponse* ConfigLine_redirect::GetBaseResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const
+ConfigResponse* ConfigLine_redirect::GetBaseResponse(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const
 {
-	return Configuration.Redirect(Request, NewUri, CombinedResponse);
+	return Configuration.Redirect(Request, NewUri, ErrorReasons);
 }

@@ -5,7 +5,7 @@ class ConfigLine_redirect;	// For include loops
 
 #include <ostream>
 #include "ConfigBase.hpp"
-#include "ConfigCombinedResponse.hpp"
+#include "ConfigErrorReasons.hpp"
 
 class ConfigLine_redirect : public ConfigBase {
 	public: 
@@ -23,7 +23,7 @@ class ConfigLine_redirect : public ConfigBase {
 		
 		static ConfigLine_redirect* TryParse(const ConfigLine& Line, const ConfigurationState& Configuration);
 	protected:
-		virtual ConfigResponse* GetBaseResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const;
+		virtual ConfigResponse* GetBaseResponse(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const;
 
 	private:
 		// Class variables

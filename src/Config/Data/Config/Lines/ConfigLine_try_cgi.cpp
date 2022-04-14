@@ -21,8 +21,8 @@ ConfigLine_try_cgi::ConfigLine_try_cgi(const std::vector<std::string>& cgis, con
 
 	// We only accept those 2 requests
 	Configuration.AcceptedMethods.clear();
-	if (AcceptsGet)
-		Configuration.AcceptedMethods.push_back("GET");
+	//if (AcceptsGet)
+	//	Configuration.AcceptedMethods.push_back("GET");
 	if (AcceptsPost)
 		Configuration.AcceptedMethods.push_back("POST");
 }
@@ -58,7 +58,7 @@ void ConfigLine_try_cgi::Print(std::ostream& Stream) const
 	}
 }
 
-ConfigResponse* ConfigLine_try_cgi::GetBaseResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const
+ConfigResponse* ConfigLine_try_cgi::GetBaseResponse(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const
 {
 	for (std::vector<std::string>::const_iterator It = cgis.begin(); It != cgis.end(); It++)
 	{
@@ -69,13 +69,13 @@ ConfigResponse* ConfigLine_try_cgi::GetBaseResponse(const ConfigRequest& Request
 		if (MustValidate && !Configuration.IsFileValid(cgi, Request))
 			continue;
 		
-		CombinedResponse.AddAllowedMethods(Configuration.AcceptedMethods);
-		return new CgiResponse(cgi, CombinedResponse);
+		ErrorReasons.AddAllowedMethods(Configuration.AcceptedMethods);
+		return new CgiResponse(cgi, ErrorReasons);
 	}
 	return NULL;
 }
 
-void ConfigLine_try_cgi::AddCombinedResponseIfNoResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const
+bool ConfigLine_try_cgi::WouldHaveResponded(const ConfigRequest& Request) const
 {
 	for (std::vector<std::string>::const_iterator It = cgis.begin(); It != cgis.end(); It++)
 	{
@@ -85,9 +85,10 @@ void ConfigLine_try_cgi::AddCombinedResponseIfNoResponse(const ConfigRequest& Re
 		if (MustValidate && !Configuration.IsFileValid(cgi, Request))
 			continue;
 		
-		CombinedResponse.AddAllowedMethods(Configuration.AcceptedMethods);
-		break;
+		return true;
 	}
+
+	return false;
 }
 
 ConfigLine_try_cgi* ConfigLine_try_cgi::TryParse(const ConfigLine& Line, const ConfigurationState& Configuration)

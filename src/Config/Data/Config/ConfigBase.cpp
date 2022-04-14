@@ -20,26 +20,35 @@ ConfigBase::~ConfigBase()
 	
 }
 
-ConfigResponse* ConfigBase::GetResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const
+#include <iostream>
+ConfigResponse* ConfigBase::GetResponse(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const
 {
-	if (!ChecksConfiguration() || Configuration.IsValidWithRequest(Request))
-		return GetBaseResponse(Request, CombinedResponse);
-	else
-		AddCombinedResponseIfNoResponse(Request, CombinedResponse);
+	ConfigurationState::ValidRequestReason Reason = ConfigurationState::Valid;
+	if (ChecksConfiguration())
+		Reason = Configuration.IsValidWithRequest(Request);
+	
+	if (Reason == ConfigurationState::Valid)
+		return GetBaseResponse(Request, ErrorReasons);
+	else if (WouldHaveResponded(Request))
+	{
+		ErrorReasons.AddAllowedMethods(Configuration.AcceptedMethods);
+		if (Reason & ConfigurationState::WrongMethod)	ErrorReasons.Err_WrongMethod();
+		if (Reason & ConfigurationState::BodyTooBig)	ErrorReasons.Err_BodyTooBig();
+	}
 	return NULL;
 }
 
-void ConfigBase::AddCombinedResponseIfNoResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const
+bool ConfigBase::WouldHaveResponded(const ConfigRequest& Request) const
 {
 	(void)Request;
-	(void)CombinedResponse;
+	return false;
 }
 
-ConfigResponse* ConfigBase::GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const
+ConfigResponse* ConfigBase::GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const
 {
 	It++;
 	(void)ItEnd;
-	return GetResponse(Request, CombinedResponse);
+	return GetResponse(Request, ErrorReasons);
 }
 
 bool ConfigBase::ChecksConfiguration() const

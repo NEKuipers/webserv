@@ -5,12 +5,12 @@ class ConfigResponse;	// For include loops
 
 #include <ostream>
 #include <vector>
-#include "ConfigCombinedResponse.hpp"
+#include "ConfigErrorReasons.hpp"
 
 // Note: This is a abstract class, and a abstract function should exist that takes in the http request, socket, and writes the response into that
 class ConfigResponse {
 	public: 
-		ConfigResponse(const ConfigCombinedResponse& ConfigCombinedResponse);
+		ConfigResponse(const ConfigErrorReasons& ErrorReasons);
 		virtual ~ConfigResponse();
 		
 
@@ -18,14 +18,14 @@ class ConfigResponse {
 
 		virtual bool RequiresBody() const;
 
-		const std::vector<std::string>& GetAllowedMethods();
+		const ConfigErrorReasons& GetErrorReasons();
 	private:
 		// No copying or default constructing
 		ConfigResponse();
 		ConfigResponse(const ConfigResponse& From);
 		ConfigResponse& operator = (const ConfigResponse& From);
 		// Class variables
-		std::vector<std::string> AllowedMethods;
+		ConfigErrorReasons ErrorReasons;
 		// Class functions
 		
 };

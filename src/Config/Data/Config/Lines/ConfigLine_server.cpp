@@ -153,7 +153,7 @@ bool ConfigLine_server::EatLine(const ConfigLine& Line)
 	return true;
 }
 
-ConfigResponse* ConfigLine_server::GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const
+ConfigResponse* ConfigLine_server::GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const
 {
 	const ConfigLine_server* Default = NULL;
 	bool DefaultIpMatch = false;
@@ -188,7 +188,7 @@ ConfigResponse* ConfigLine_server::GetIteratorResponse(std::vector<ConfigBase*>:
 		if (Curr->MatchesServerName(Request))
 		{
 			if (IpMatch)
-				return Curr->GetBaseResponse(Request, CombinedResponse);	// Well, IP matches, and server name matches, there is no way we have a server that has a higher priority
+				return Curr->GetBaseResponse(Request, ErrorReasons);	// Well, IP matches, and server name matches, there is no way we have a server that has a higher priority
 			else
 			{
 				Default = Curr;	// wildcard IP and matching server name? set new default
@@ -199,5 +199,5 @@ ConfigResponse* ConfigLine_server::GetIteratorResponse(std::vector<ConfigBase*>:
 
 	if (!Default)
 		return NULL;
-	return Default->GetBaseResponse(Request, CombinedResponse);
+	return Default->GetBaseResponse(Request, ErrorReasons);
 }

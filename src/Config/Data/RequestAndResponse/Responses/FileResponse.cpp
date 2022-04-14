@@ -76,7 +76,7 @@ void FileResponse::InitContentTypes()
 	g_extension_to_content_type["7z"] = "application/x-7z-compressed";
 }
 
-FileResponse::FileResponse(const std::string& FileName, std::ifstream* Stream, const ConfigCombinedResponse& CombinedResponse) : ConfigResponse(CombinedResponse), FileName(FileName), Stream(Stream)
+FileResponse::FileResponse(const std::string& FileName, std::ifstream* Stream, const ConfigErrorReasons& ErrorReasons) : ConfigResponse(ErrorReasons), FileName(FileName), Stream(Stream)
 {
 
 }

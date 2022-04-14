@@ -6,7 +6,7 @@ class ConfigBase;	// For include loops
 #include "ConfigurationState.hpp"
 #include "ConfigRequest.hpp"
 #include "ConfigResponse.hpp"
-#include "ConfigCombinedResponse.hpp"
+#include "ConfigErrorReasons.hpp"
 
 class ConfigBase {
 	public:
@@ -19,17 +19,17 @@ class ConfigBase {
 		virtual ~ConfigBase();
 
 		// Public functions
-		ConfigResponse* GetResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const;	// Basically checks the Configuration if its valid with this request, if it is valid, returns GetBaseResponse(), otherwise returns null
+		ConfigResponse* GetResponse(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const;	// Basically checks the Configuration if its valid with this request, if it is valid, returns GetBaseResponse(), otherwise returns null & adds error reasons to the combined response
 		// Note: When calling *It must be equal to this
-		virtual ConfigResponse* GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const;	// I would have liked this to be a templated iterator type, but virtuals and templates dont mix, and i dont really feel like going down the rabbit hole of type erasure
+		virtual ConfigResponse* GetIteratorResponse(std::vector<ConfigBase*>::const_iterator& It, const std::vector<ConfigBase*>::const_iterator& ItEnd, const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const;	// I would have liked this to be a templated iterator type, but virtuals and templates dont mix, and i dont really feel like going down the rabbit hole of type erasure
 
 		friend std::ostream& operator<<(std::ostream& Stream, const ConfigBase& ConfigBase);
 		virtual void Print(std::ostream& Stream) const = 0;	// Apparently this is how you do virtual logging?
 
 	protected:		
 		virtual bool ChecksConfiguration() const;
-		virtual ConfigResponse* GetBaseResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const = 0;
-		virtual void AddCombinedResponseIfNoResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const;
+		virtual ConfigResponse* GetBaseResponse(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const = 0;
+		virtual bool WouldHaveResponded(const ConfigRequest& Request) const;
 		ConfigurationState Configuration;
 	private:
 		// Class variables

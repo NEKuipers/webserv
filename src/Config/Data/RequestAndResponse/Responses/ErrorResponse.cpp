@@ -1,6 +1,6 @@
 #include "ErrorResponse.hpp"
 
-ErrorResponse::ErrorResponse(const ConfigCombinedResponse& CombinedResponse) : ConfigResponse(CombinedResponse) {}
+ErrorResponse::ErrorResponse(const ConfigErrorReasons& ErrorReasons) : ConfigResponse(ErrorReasons) {}
 ErrorResponse::~ErrorResponse() { }
 
 std::ostream& operator<<(std::ostream& Stream, const ErrorResponse& ErrorResponse)

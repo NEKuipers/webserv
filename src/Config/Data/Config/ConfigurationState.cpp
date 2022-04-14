@@ -48,14 +48,14 @@ bool ConfigurationState::AcceptsMethod(const std::string& Method) const
 	return false;
 }
 
-bool ConfigurationState::IsValidWithRequest(const ConfigRequest& Request) const
+ConfigurationState::ValidRequestReason ConfigurationState::IsValidWithRequest(const ConfigRequest& Request) const
 {
 	if (Request.GetContentLength() > MaxBodySize)
-		return false;
+		return BodyTooBig;
 	if (!AcceptsMethod(Request.GetMethod()))
-		return false;
+		return WrongMethod;
 
-	return true;
+	return Valid;
 }
 
 bool ConfigurationState::EatLine(const ConfigLine& Line)
@@ -127,7 +127,7 @@ void ConfigurationState::AppendLocationRoot(const std::string& Location)
 	UpdateCombinedRoot();
 }
 
-ConfigResponse* ConfigurationState::Redirect(const ConfigRequest& Request, std::string Uri, ConfigCombinedResponse& CombinedResponse) const
+ConfigResponse* ConfigurationState::Redirect(const ConfigRequest& Request, std::string Uri, ConfigErrorReasons& ErrorReasons) const
 {
 	if (!RedirectBase)
 		return NULL;
@@ -136,17 +136,17 @@ ConfigResponse* ConfigurationState::Redirect(const ConfigRequest& Request, std::
 	if (!NewRequest)
 		return NULL;
 
-	ConfigResponse* Response = RedirectBase->GetResponse(*NewRequest, CombinedResponse);
+	ConfigResponse* Response = RedirectBase->GetResponse(*NewRequest, ErrorReasons);
 	delete NewRequest;
 
 	return Response;
 }
 
-ConfigResponse* ConfigurationState::Error(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const
+ConfigResponse* ConfigurationState::Error(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const
 {
 	if (ErrorUri != "")
-		return Redirect(Request, ErrorUri, CombinedResponse);
-	return new ErrorResponse(CombinedResponse);
+		return Redirect(Request, ErrorUri, ErrorReasons);
+	return new ErrorResponse(ErrorReasons);
 }
 
 const std::string& ConfigurationState::GetRoot() const { return Root; }

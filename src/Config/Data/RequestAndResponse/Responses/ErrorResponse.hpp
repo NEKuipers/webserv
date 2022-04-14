@@ -8,7 +8,7 @@ class ErrorResponse;	// For include loops
 
 class ErrorResponse : public ConfigResponse {
 	public: 
-		ErrorResponse(const ConfigCombinedResponse& CombinedResponse);
+		ErrorResponse(const ConfigErrorReasons& ErrorReasons);
 		~ErrorResponse();
 
 		// Public functions

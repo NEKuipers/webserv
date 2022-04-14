@@ -4,7 +4,7 @@
 #include "ConfigLine.hpp"
 #include "ConfigRequest.hpp"
 #include "ConfigResponse.hpp"
-#include "ConfigCombinedResponse.hpp"
+#include "ConfigErrorReasons.hpp"
 #include <vector>
 
 //#include "ConfigBase.hpp"
@@ -12,7 +12,15 @@ class ConfigBase;
 
 // This class has all the configurations you could do, max body size, directory listing, root, etc etc
 class ConfigurationState {
+
 	public:
+		typedef enum
+		{
+			Valid = 0,
+			BodyTooBig = 1 << 0,
+			WrongMethod = 1 << 1
+		} ValidRequestReason;
+
 		static const int DEFAULT_MAX_BODY_SIZE = 1048576;	// 1 mb
 		ConfigurationState();
 		ConfigurationState(ConfigBase* RedirectBase);
@@ -23,14 +31,14 @@ class ConfigurationState {
 		ConfigurationState& operator = (const ConfigurationState& From);
 
 		bool AcceptsMethod(const std::string& Method) const;
-		bool IsValidWithRequest(const ConfigRequest& Request) const;
+		ValidRequestReason IsValidWithRequest(const ConfigRequest& Request) const;
 
 		bool EatLine(const ConfigLine& Line);
 
 		void AppendLocationRoot(const std::string& Location);
 
-		ConfigResponse* Redirect(const ConfigRequest& Request, std::string NewUri, ConfigCombinedResponse& CombinedResponse) const;
-		ConfigResponse* Error(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const;
+		ConfigResponse* Redirect(const ConfigRequest& Request, std::string NewUri, ConfigErrorReasons& ErrorReasons) const;
+		ConfigResponse* Error(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const;
 
 		const std::string& GetRoot() const;
 		const std::string& GetCombinedRoot() const;

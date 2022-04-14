@@ -53,8 +53,8 @@ void ConfigLine_try_file::Print(std::ostream& Stream) const
 	}
 }
 
-// I dont really like how there are 2 locations where it loops through the files, and i also dont really like the 'AddCombinedResponseIfNoResponse', the name is too long, but anything shorter and its not descriptive enough
-ConfigResponse* ConfigLine_try_file::GetBaseResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const
+// I dont really like how there are 2 locations where it loops through the files, and i also dont really like the 'AddErrorReasonsIfNoResponse', the name is too long, but anything shorter and its not descriptive enough
+ConfigResponse* ConfigLine_try_file::GetBaseResponse(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const
 {
 	for (std::vector<std::string>::const_iterator It = Files.begin(); It != Files.end(); It++)
 	{
@@ -67,15 +67,15 @@ ConfigResponse* ConfigLine_try_file::GetBaseResponse(const ConfigRequest& Reques
 		std::ifstream* Stream = new std::ifstream(File.c_str());	// Annoyingly, linux does not have a string contructor
 		if (Stream->is_open())
 		{
-			CombinedResponse.AddAllowedMethods(Configuration.AcceptedMethods);
-			return new FileResponse(File, Stream, CombinedResponse);
+			ErrorReasons.AddAllowedMethods(Configuration.AcceptedMethods);
+			return new FileResponse(File, Stream, ErrorReasons);
 		}
 		delete Stream;	// Well, realpath said the file exists, but we can't open it? Well, whatever, just continue
 	}
 	return NULL;
 }
 
-void ConfigLine_try_file::AddCombinedResponseIfNoResponse(const ConfigRequest& Request, ConfigCombinedResponse& CombinedResponse) const
+bool ConfigLine_try_file::WouldHaveResponded(const ConfigRequest& Request) const
 {
 	for (std::vector<std::string>::const_iterator It = Files.begin(); It != Files.end(); It++)
 	{
@@ -85,9 +85,9 @@ void ConfigLine_try_file::AddCombinedResponseIfNoResponse(const ConfigRequest& R
 		if (MustValidate && !Configuration.IsFileValid(File, Request))
 			continue;
 		
-		CombinedResponse.AddAllowedMethods(Configuration.AcceptedMethods);
-		break;
+		return true;
 	}
+	return false;
 }
 
 ConfigLine_try_file* ConfigLine_try_file::TryParse(const ConfigLine& Line, const ConfigurationState& Configuration)

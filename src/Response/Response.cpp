@@ -107,13 +107,7 @@ Response::Response(ConfigResponse *conf_response, Request &request)
 	int status_code = 400;
 	std::string cgi_response = "";
 
-	/*
-	std::cout << "Allowed methods: ";
-	std::vector<std::string> allowed = conf_response->GetAllowedMethods();
-	for (std::vector<std::string>::const_iterator it = allowed.begin(); it != allowed.end(); it++)
-		std::cout << " " << *it;
-	std::cout << std::endl;
-	*/
+	std::cout << conf_response->GetErrorReasons() << std::endl;
 
 	if (FileResponse* FileResponsePtr = dynamic_cast<FileResponse*>(conf_response))
 	{

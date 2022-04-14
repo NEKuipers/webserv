@@ -28,8 +28,8 @@ EnterResult Config::Enters(const ConfigRequest& Request) const
 
 ConfigResponse* Config::GetResponse(const ConfigRequest& Request) const
 {
-	ConfigCombinedResponse CombinedResponse;	// Why C++, Why can't i do 'ConfigCombinedResponse CombinedResponse()' WHATS THE DIFFERENCE!?
-	return ConfigListBase::GetResponse(Request, CombinedResponse);
+	ConfigErrorReasons ErrorReasons;	// Why C++, Why can't i do 'ConfigErrorReasons ErrorReasons()' WHATS THE DIFFERENCE!?
+	return ConfigListBase::GetResponse(Request, ErrorReasons);
 }
 
 static void AddIfNew(std::vector<std::pair<in_addr_t, in_port_t> >* Vec, std::pair<in_addr_t, in_port_t> Pair)

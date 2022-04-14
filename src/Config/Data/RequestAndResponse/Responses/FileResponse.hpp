@@ -9,7 +9,7 @@ class FileResponse;	// For include loops
 
 class FileResponse : public ConfigResponse {
 	public: 
-		FileResponse(const std::string& FileName, std::ifstream* Stream, const ConfigCombinedResponse& CombinedResponse);
+		FileResponse(const std::string& FileName, std::ifstream* Stream, const ConfigErrorReasons& ErrorReasons);
 		virtual ~FileResponse();
 
 		// Public functions
