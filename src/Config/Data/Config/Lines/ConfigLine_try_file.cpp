@@ -4,6 +4,7 @@
 #include <iostream>
 #include "FileResponse.hpp"
 #include "MethodException.hpp"
+#include "PathUtils.hpp"
 
 #include <stdlib.h>	// realpath
 
@@ -61,11 +62,12 @@ ConfigResponse* ConfigLine_try_file::GetBaseResponse(const ConfigRequest& Reques
 		bool MustValidate = false;
 		std::string File = Configuration.InterperetEnvVariableUserVariables(*It, &Request, MustValidate);
 		File = Configuration.GetCombinedRoot() + "/" + File;	// Isn't there a utility function that combines paths?
-		if (MustValidate && !Configuration.IsFileValid(File, Request))
+
+		if (!PathUtils::IsFile(File) || (MustValidate && Configuration.IsPathValid(File, Request, NULL) != ConfigurationState::PathType_ValidFile))
 			continue;
 
 		std::ifstream* Stream = new std::ifstream(File.c_str());	// Annoyingly, linux does not have a string contructor
-		if (Stream->is_open())
+		if (Stream->is_open() && Stream->good())
 		{
 			ErrorReasons.AddAllowedMethods(Configuration.AcceptedMethods);
 			return new FileResponse(File, Stream, ErrorReasons);
@@ -82,7 +84,7 @@ bool ConfigLine_try_file::WouldHaveResponded(const ConfigRequest& Request) const
 		bool MustValidate = false;
 		std::string File = Configuration.InterperetEnvVariableUserVariables(*It, &Request, MustValidate);
 		File = Configuration.GetCombinedRoot() + "/" + File;	// Isn't there a utility function that combines paths?
-		if (MustValidate && !Configuration.IsFileValid(File, Request))
+		if (MustValidate && Configuration.IsPathValid(File, Request, NULL) != ConfigurationState::PathType_ValidFile)
 			continue;
 		
 		return true;

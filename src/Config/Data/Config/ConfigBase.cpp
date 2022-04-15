@@ -23,17 +23,17 @@ ConfigBase::~ConfigBase()
 #include <iostream>
 ConfigResponse* ConfigBase::GetResponse(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const
 {
-	ConfigurationState::ValidRequestReason Reason = ConfigurationState::Valid;
+	ConfigurationState::ValidRequestReason Reason = ConfigurationState::ValidRequestReason_Valid;
 	if (ChecksConfiguration())
 		Reason = Configuration.IsValidWithRequest(Request);
 	
-	if (Reason == ConfigurationState::Valid)
+	if (Reason == ConfigurationState::ValidRequestReason_Valid)
 		return GetBaseResponse(Request, ErrorReasons);
 	else if (WouldHaveResponded(Request))
 	{
 		ErrorReasons.AddAllowedMethods(Configuration.AcceptedMethods);
-		if (Reason & ConfigurationState::WrongMethod)	ErrorReasons.Err_WrongMethod();
-		if (Reason & ConfigurationState::BodyTooBig)	ErrorReasons.Err_BodyTooBig();
+		if (Reason & ConfigurationState::ValidRequestReason_WrongMethod)	ErrorReasons.Err_WrongMethod();
+		if (Reason & ConfigurationState::ValidRequestReason_BodyTooBig)	ErrorReasons.Err_BodyTooBig();
 	}
 	return NULL;
 }

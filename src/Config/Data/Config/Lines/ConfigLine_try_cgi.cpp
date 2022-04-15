@@ -4,6 +4,7 @@
 #include <iostream>
 #include "CgiResponse.hpp"
 #include "MethodException.hpp"
+#include "PathUtils.hpp"
 
 #include <stdlib.h>	// realpath
 
@@ -63,14 +64,19 @@ ConfigResponse* ConfigLine_try_cgi::GetBaseResponse(const ConfigRequest& Request
 	for (std::vector<std::string>::const_iterator It = cgis.begin(); It != cgis.end(); It++)
 	{
 		bool MustValidate = false;
-		std::string cgi = Configuration.InterperetEnvVariableUserVariables(*It, &Request, MustValidate);
-		cgi = Configuration.GetCombinedRoot() + "/" + cgi;	// Isn't there a utility function that combines paths?
+		std::string FullPath = Configuration.InterperetEnvVariableUserVariables(*It, &Request, MustValidate);
+		FullPath = Configuration.GetCombinedRoot() + "/" + FullPath;	// Isn't there a utility function that combines paths?
 		
-		if (MustValidate && !Configuration.IsFileValid(cgi, Request))
+		std::string PartialPath;
+		ConfigurationState::PathType PathType = Configuration.IsPathValid(FullPath, Request, &PartialPath);
+		if (!PathUtils::IsFile(FullPath) || (MustValidate && (PathType & ConfigurationState::PathType_Invalid)))
 			continue;
 		
+		if (!(PathType & ConfigurationState::PathType_ExactFileNonExistent))
+			PartialPath = FullPath;
+
 		ErrorReasons.AddAllowedMethods(Configuration.AcceptedMethods);
-		return new CgiResponse(cgi, ErrorReasons);
+		return new CgiResponse(PartialPath, FullPath, ErrorReasons);
 	}
 	return NULL;
 }
@@ -80,9 +86,9 @@ bool ConfigLine_try_cgi::WouldHaveResponded(const ConfigRequest& Request) const
 	for (std::vector<std::string>::const_iterator It = cgis.begin(); It != cgis.end(); It++)
 	{
 		bool MustValidate = false;
-		std::string cgi = Configuration.InterperetEnvVariableUserVariables(*It, &Request, MustValidate);
-		cgi = Configuration.GetCombinedRoot() + "/" + cgi;	// Isn't there a utility function that combines paths?
-		if (MustValidate && !Configuration.IsFileValid(cgi, Request))
+		std::string CgiFile = Configuration.InterperetEnvVariableUserVariables(*It, &Request, MustValidate);
+		CgiFile = Configuration.GetCombinedRoot() + "/" + CgiFile;	// Isn't there a utility function that combines paths?
+		if (MustValidate && (Configuration.IsPathValid(CgiFile, Request, NULL) & ConfigurationState::PathType_Invalid))
 			continue;
 		
 		return true;

@@ -88,14 +88,14 @@ static std::string get_date_header()
 std::string Response::create_headers(ConfigResponse *conf_response, Request &request, int status_code)
 {
 	(void)request;
-	(void)conf_response;
 	
 	std::string headers_string = "";
 	headers_string += "Date: " + get_date_header() + "\r\n";
 	headers_string += "Server: webserv\r\n";
 	headers_string += "Allow:";
-	for (std::vector<std::string>::const_iterator it = conf_response->GetErrorReasons().GetAllowedMethods().begin(); it != conf_response->GetErrorReasons().GetAllowedMethods().end(); it++)
-		headers_string += " " + *it;
+	if (conf_response)
+		for (std::vector<std::string>::const_iterator it = conf_response->GetErrorReasons().GetAllowedMethods().begin(); it != conf_response->GetErrorReasons().GetAllowedMethods().end(); it++)
+			headers_string += " " + *it;
 	headers_string += "\r\n";
 	if (status_code == 201)
 	{
@@ -115,7 +115,8 @@ Response::Response(ConfigResponse *conf_response, Request &request)
 	int status_code = 400;
 	std::string cgi_response = "";
 
-	std::cout << conf_response->GetErrorReasons() << std::endl;
+	if (conf_response)
+		std::cout << conf_response->GetErrorReasons() << std::endl;
 
 	if (FileResponse* FileResponsePtr = dynamic_cast<FileResponse*>(conf_response))
 	{
@@ -142,10 +143,13 @@ Response::Response(ConfigResponse *conf_response, Request &request)
 	else if (!conf_response || dynamic_cast<ErrorResponse*>(conf_response))
 	{
 		status_code = 404;
-		if (conf_response->GetErrorReasons().GetWasWrongMethod())
-			status_code = 405;
-		else if (conf_response->GetErrorReasons().GetWasBodyTooBig())
-			status_code = 413;
+		if (conf_response)
+		{
+			if (conf_response->GetErrorReasons().GetWasWrongMethod())
+				status_code = 405;
+			else if (conf_response->GetErrorReasons().GetWasBodyTooBig())
+				status_code = 413;
+		}
 		
 		content_type = "text/html";
 		body = "<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>Default error page<br>You seem to have made a invalid request!</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>";
@@ -172,6 +176,9 @@ Response::Response(ConfigResponse *conf_response, Request &request)
 		response_string += cgi_response;
 	else	
 		response_string += "\r\n" + body;
+	
+	if (conf_response)
+		std::cout << "Response: " << to_string(*conf_response) << std::endl;
 }
 
 Response::~Response(){}

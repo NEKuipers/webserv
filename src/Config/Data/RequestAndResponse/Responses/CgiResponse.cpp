@@ -2,7 +2,7 @@
 #include "Request.hpp"
 #include "ToString.hpp"
 
-CgiResponse::CgiResponse(const std::string& CgiFile, const ConfigErrorReasons& ErrorReasons) : ConfigResponse(ErrorReasons), CgiFile(CgiFile)
+CgiResponse::CgiResponse(const std::string& CgiFile, const std::string& FullPath, const ConfigErrorReasons& ErrorReasons) : ConfigResponse(ErrorReasons), CgiFile(CgiFile), FullPath(FullPath)
 {
 	
 }
@@ -32,8 +32,8 @@ bool CgiResponse::RequiresBody() const
 void CgiResponse::MakeEnvMap(std::map<std::string, std::string>& Map, const Request& Request)
 {
 	Map["SERVER_SOFTWARE"] = "webserv";
-	Map["SERVER_NAME"] = "127.0.0.1";	// TODO: Double check
-	Map["GATEWAY_INTERFACE"] = "CGI/1.1";	// TODO: Double check
+	Map["SERVER_NAME"] = "127.0.0.1";	// TODO: This is wrong, Its the server's hostname, DNS alias, or IP address as it appears in self-referencing URLs. Make it a config option?
+	Map["GATEWAY_INTERFACE"] = "CGI/1.1";
 
 	Map["SERVER_PROTOCOL"] = "HTTP/1.1";
 	Map["SERVER_PORT"] = to_string(ntohs(RequestPort));
@@ -41,9 +41,9 @@ void CgiResponse::MakeEnvMap(std::map<std::string, std::string>& Map, const Requ
 	if (PATH_INFO != "")
 	{
 		Map["PATH_INFO"] = PATH_INFO;
-		Map["PATH_TRANSLATED"] = CgiFile + PATH_INFO;	// TODO: Double check
+		Map["PATH_TRANSLATED"] = CgiFile + PATH_INFO;
 	}
-	Map["SCRIPT_NAME"] = CgiFile;
+	Map["SCRIPT_NAME"] = CgiFile;	// TODO: This is wrong, it should be the URI to the script, not the absolute path to the script
 	Map["QUERY_STRING"] = QUERY_STRING;
 	//Map["REMOTE_HOST"] = ?
 	Map["REMOTE_ADDR"] = "127.0.0.1";	// TODO: Get adress from Request

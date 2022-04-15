@@ -16,10 +16,17 @@ class ConfigurationState {
 	public:
 		typedef enum
 		{
-			Valid = 0,
-			BodyTooBig = 1 << 0,
-			WrongMethod = 1 << 1
+			ValidRequestReason_Valid = 0,
+			ValidRequestReason_BodyTooBig = 1 << 0,
+			ValidRequestReason_WrongMethod = 1 << 1
 		} ValidRequestReason;
+
+		typedef enum
+		{
+			PathType_ValidFile = 0,
+			PathType_ExactFileNonExistent = 1 << 0,
+			PathType_Invalid = 1 << 1
+		} PathType;
 
 		static const int DEFAULT_MAX_BODY_SIZE = 1048576;	// 1 mb
 		ConfigurationState();
@@ -53,7 +60,7 @@ class ConfigurationState {
 		std::string ErrorUri;
 		size_t MaxBodySize;
 
-		bool IsFileValid(const std::string& FilePath, const ConfigRequest& Request) const;
+		PathType IsPathValid(const std::string& Path, const ConfigRequest& Request, std::string* ErrorPath) const;
 
 		std::string InterperetEnvVariable(const std::string& String) const;
 		std::string InterperetEnvVariableUserVariables(const std::string& String, const ConfigRequest* Request, bool& MustValidate) const;

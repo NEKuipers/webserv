@@ -20,11 +20,10 @@ class CGIRunner {
 		void QueuePartialBodyForWrite(const std::string& PartialBody);
 
 		// Should be called when select() says that can write something
-		// returns wheter the current body was completely written
-		// if it returns true remove InputFD from your select() function
+		// Returns wheter the current partial body was completely written, So if it returns true remove InputFD from your select() function
 		bool Write();
 		// Should be called when select() says it can read something
-		// returns wheter the entire CGI output was read
+		// Returns wheter the entire CGI output was read
 		// Appends what it read to AppendRead
 		bool Read(std::string& AppendRead);
 

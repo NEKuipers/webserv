@@ -54,7 +54,7 @@ EnterResult ConfigLine_location::Enters(const ConfigRequest& Request) const
 
 	if (Location.length() > 0 && ((Location.at(0) == '*')	// I mean, routes wont be using regex, but that does not mean i can't do something simple like this, right?
 		? (URI.find(Location.c_str() + 1, URI.length() - Location.length()) == std::string::npos)	// URI.ends_with(Location+1)
-		: (URI.rfind(Location, 0) == std::string::npos)	// URI.starts_with(Location)
+		: (URI.rfind(Location + "/", 0) == std::string::npos)	// URI.starts_with(Location)
 	))
 			return EnterResult_No;
 

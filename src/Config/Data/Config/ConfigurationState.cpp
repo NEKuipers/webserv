@@ -51,11 +51,11 @@ bool ConfigurationState::AcceptsMethod(const std::string& Method) const
 ConfigurationState::ValidRequestReason ConfigurationState::IsValidWithRequest(const ConfigRequest& Request) const
 {
 	if (Request.GetContentLength() > MaxBodySize)
-		return BodyTooBig;
+		return ValidRequestReason_BodyTooBig;
 	if (!AcceptsMethod(Request.GetMethod()))
-		return WrongMethod;
+		return ValidRequestReason_WrongMethod;
 
-	return Valid;
+	return ValidRequestReason_Valid;
 }
 
 bool ConfigurationState::EatLine(const ConfigLine& Line)
@@ -160,7 +160,11 @@ std::string ConfigurationState::RemoveLocationRoot(const std::string& Uri) const
 		return Uri;
 
 	//std::cout << "Removing " << RawLocationRoot << " From URI: " << Uri << std::endl;
-	assert(Uri.rfind(RawLocationRoot.substr(1) + "/", 0) != std::string::npos);	// Remove first slash, and move it to the end
+	std::string RemovedSlash = RawLocationRoot.substr(1);
+	if (Uri == RemovedSlash)
+		return "";
+	
+	assert(Uri.rfind(RemovedSlash + "/", 0) != std::string::npos);	// Remove first slash, and move it to the end
 	return Uri.substr(RawLocationRoot.size());
 }
 
@@ -175,22 +179,29 @@ void ConfigurationState::UpdateCombinedRoot()
 	//std::cout << "CombinedRoot '" << CombinedRoot << "' = '" << Root << "' + '" << LocationRoot << "'" << std::endl;
 }
 
-bool ConfigurationState::IsFileValid(const std::string& FilePath, const ConfigRequest& Request) const
+ConfigurationState::PathType ConfigurationState::IsPathValid(const std::string& Path, const ConfigRequest& Request, std::string* ErrorPath) const
 {
+	ConfigurationState::PathType Ret = PathType_ValidFile;
+	
 	// Check if the cgi is inside the Root directory, Small problem: If you symlink outside, it still fails, why is checked? Well, you dont want someone asking for cgi "../../Makecgi" or whatever other cgi
-	char* ptr = realpath(FilePath.c_str(), NULL);
+	char buff[PATH_MAX];
+	char* ptr = realpath(Path.c_str(), buff);
+	
 	if (!ptr)
-		return false;
-
-	if (strncmp(ptr, CombinedRoot.c_str(), CombinedRoot.length()))
 	{
-		std::cerr << Request << ": Asked for '" << FilePath << "', But was not inside the combined root directory: '" << CombinedRoot << "'!" << std::endl;
-		free(ptr);
-		return false;
-	}
+		if (ErrorPath) *ErrorPath = std::string(buff);
+		Ret = (ConfigurationState::PathType)(Ret | PathType_ExactFileNonExistent);	// Why can't i 'Ret |= PathType_ExactFileNonExistent', Why must it be casted, why C++, WHY!?
 
-	free(ptr);
-	return true;
+	}
+	std::cout << "Path " << Path << " => " << std::string(buff) << std::endl;
+
+	if (strncmp(buff, CombinedRoot.c_str(), CombinedRoot.length()))
+	{
+		std::cerr << Request << ": Asked for '" << Path << "', But was not inside the combined root directory: '" << CombinedRoot << "'!" << std::endl;
+		Ret = (ConfigurationState::PathType)(Ret | PathType_Invalid);
+	}
+	
+	return Ret;
 }
 
 static bool ReplaceAll(std::string& Str, const std::string& Find, const std::string& Replace)
