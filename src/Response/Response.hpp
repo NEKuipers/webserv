@@ -21,7 +21,7 @@ class Response
 		bool				is_response_complete();
 		bool				cgi_write_available();
 		bool				cgi_read_available();
-		std::string			get_response_string() const;
+		bool				get_response_string(std::string &response_string) const;
 		static std::string	get_reason_phrase(int status_code);
 		static std::string	create_headers(ConfigResponse *conf_response, Request &request, int status_code);
 };

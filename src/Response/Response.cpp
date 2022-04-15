@@ -196,7 +196,8 @@ std::string			Response::get_reason_phrase(int status_code)
 	return (it->second);
 }
 
-std::string			Response::get_response_string() const
+bool			Response::get_response_string(std::string &response_string) const
 {
-	return response_string;
+	response_string = this->response_string;
+	return true;
 }
