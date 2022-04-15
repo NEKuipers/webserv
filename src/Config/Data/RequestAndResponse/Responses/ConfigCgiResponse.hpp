@@ -1,4 +1,4 @@
-class CgiResponse;	// For include loops
+class ConfigCgiResponse;	// For include loops
 
 #ifndef CGIRESPONSE_HPP
 #define CGIRESPONSE_HPP
@@ -9,15 +9,15 @@ class CgiResponse;	// For include loops
 #include <map>
 #include "Request.hpp"
 
-class CgiResponse : public ConfigResponse {
+class ConfigCgiResponse : public ConfigResponse {
 	public: 
-		CgiResponse(const std::string& CgiFile, const std::string& FullPath, const ConfigErrorReasons& ErrorReasons);
-		virtual ~CgiResponse();
+		ConfigCgiResponse(const std::string& CgiFile, const std::string& FullPath, const ConfigErrorReasons& ErrorReasons);
+		virtual ~ConfigCgiResponse();
 
 		// Public functions
 		const std::string& GetCgiFile() const;
 
-		friend std::ostream& operator<<(std::ostream& Stream, const CgiResponse& CgiResponse);
+		friend std::ostream& operator<<(std::ostream& Stream, const ConfigCgiResponse& ConfigCgiResponse);
 		virtual void Print(std::ostream& Stream) const;
 
 		virtual bool RequiresBody() const;
@@ -25,9 +25,9 @@ class CgiResponse : public ConfigResponse {
 		void MakeEnvMap(std::map<std::string, std::string>& Map, const Request& Request);
 	private:
 		// No, we dont copy, and we dont have a default constructor
-		CgiResponse();
-		CgiResponse(const CgiResponse& From);
-		CgiResponse& operator = (const CgiResponse& From);
+		ConfigCgiResponse();
+		ConfigCgiResponse(const ConfigCgiResponse& From);
+		ConfigCgiResponse& operator = (const ConfigCgiResponse& From);
 
 		// Class variables
 		std::string CgiFile;

@@ -4,7 +4,7 @@
 #include "WebServer.hpp"
 #include "Lexer.hpp"
 #include "Config.hpp"
-#include "FileResponse.hpp"
+#include "ConfigFileResponse.hpp"
 
 #include "fstream"
 #include <iostream>
@@ -30,8 +30,8 @@ int         main(int argc, char **argv)
 	(void)argc;
 	(void)argv;
 
-	Response::InitContentTypes();
-	FileResponse::InitContentTypes();
+	Response::InitStatusCodes();
+	ConfigFileResponse::InitContentTypes();
 
 	try {
 		Config Conf(ConfigFile(argc == 2 ? argv[1] : "./SmallConfig.conf"));

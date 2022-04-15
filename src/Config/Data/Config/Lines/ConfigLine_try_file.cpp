@@ -2,7 +2,7 @@
 
 #include <fstream>
 #include <iostream>
-#include "FileResponse.hpp"
+#include "ConfigFileResponse.hpp"
 #include "MethodException.hpp"
 #include "PathUtils.hpp"
 
@@ -70,7 +70,7 @@ ConfigResponse* ConfigLine_try_file::GetBaseResponse(const ConfigRequest& Reques
 		if (Stream->is_open() && Stream->good())
 		{
 			ErrorReasons.AddAllowedMethods(Configuration.AcceptedMethods);
-			return new FileResponse(File, Stream, ErrorReasons);
+			return new ConfigFileResponse(File, Stream, ErrorReasons);
 		}
 		delete Stream;	// Well, realpath said the file exists, but we can't open it? Well, whatever, just continue
 	}

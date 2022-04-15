@@ -6,7 +6,7 @@
 #include "WriteException.hpp"
 #include "ReadException.hpp"
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 10
 
 static void UpdateEnv(const std::map<std::string, std::string>& ExtraEnv)
 {
@@ -77,8 +77,7 @@ CGIRunner::~CGIRunner()
 
 std::ostream& operator<<(std::ostream& Stream, const CGIRunner& CGIRunner)
 {
-	(void)CGIRunner;
-	Stream << "CGI Runner" << std::endl;	// TODO: Possibly better logging
+	Stream << "CGI Runner, InFD: " << CGIRunner.InputFD << " OutFD: " << CGIRunner.OutputFD << ", To write: " << CGIRunner.ToWritePartialBody << std::endl;	
 	return Stream;
 }
 

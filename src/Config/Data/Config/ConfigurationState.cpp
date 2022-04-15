@@ -1,7 +1,7 @@
 #include "ConfigurationState.hpp"
 #include "ConvertException.hpp"
 #include "ConfigBase.hpp"
-#include "ErrorResponse.hpp"
+#include "ConfigErrorResponse.hpp"
 
 #include <stdlib.h>	// realpath
 #include <iostream>
@@ -146,7 +146,7 @@ ConfigResponse* ConfigurationState::Error(const ConfigRequest& Request, ConfigEr
 {
 	if (ErrorUri != "")
 		return Redirect(Request, ErrorUri, ErrorReasons);
-	return new ErrorResponse(ErrorReasons);
+	return new ConfigErrorResponse(ErrorReasons);
 }
 
 const std::string& ConfigurationState::GetRoot() const { return Root; }

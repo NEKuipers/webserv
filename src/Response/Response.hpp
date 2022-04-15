@@ -9,21 +9,20 @@
 class Response
 {
     public:
-		std::string response_string;
 
     public:
-        Response(const std::string& response_string);
+        Response();
         ~Response();
         Response(const Response &src);
 
-		static void			InitContentTypes();
+		static void			InitStatusCodes();
 		static Response*	generate_response(ConfigResponse *conf_response, Request &request);
-		bool				is_response_complete();
-		bool				cgi_write_available();
-		bool				cgi_read_available();
-		bool				get_response_string(std::string &response_string) const;
 		static std::string	get_reason_phrase(int status_code);
+		static std::string	create_status_line(int status_code);
 		static std::string	create_headers(ConfigResponse *conf_response, Request &request, int status_code);
+		
+
+		virtual bool		get_response_string(std::string &response_string) = 0;
 };
 
 #endif
