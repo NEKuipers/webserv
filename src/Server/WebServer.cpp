@@ -6,7 +6,7 @@
 #include <fstream>
 #include "ToString.hpp"
 #include "CGIRunner.hpp"
-#include "FileResponse.hpp"
+#include "ConfigFileResponse.hpp"
 
 WebServer::WebServer(int domain, int service, int protocol, int port, u_long interface, int bklg) : configuration(NULL)
 {
@@ -158,6 +158,7 @@ int	WebServer::launch()
 					if (connectionHandler(read_sockets[count]))
 					{
 						read_sockets[count]->createResponse();
+						// Response *http_response = read_sockets[count]->get_http_response();
 						FD_SET(read_sockets[count]->get_sock(), &save_write_fds);
 					}
 				} catch (std::exception &e) {

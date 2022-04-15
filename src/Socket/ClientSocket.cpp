@@ -1,7 +1,7 @@
 #include "ClientSocket.hpp"
-#include "FileResponse.hpp"
-#include "ErrorResponse.hpp"
-#include "CgiResponse.hpp"
+#include "ConfigFileResponse.hpp"
+#include "ConfigErrorResponse.hpp"
+#include "ConfigCgiResponse.hpp"
 #include "ToString.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
@@ -28,7 +28,6 @@ void 	ClientSocket::createResponse()
 {
 	http_response = Response::generate_response(conf_response, request);
 	http_response->get_response_string(to_write);
-
 }
 
 Request					ClientSocket::get_request()
@@ -96,4 +95,9 @@ bool					ClientSocket::check_headers()
 		}
 	}
 	return false;
+}
+
+Response				*ClientSocket::get_http_response() const
+{
+	return http_response;
 }

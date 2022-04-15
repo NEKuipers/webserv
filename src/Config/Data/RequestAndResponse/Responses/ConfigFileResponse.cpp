@@ -1,10 +1,10 @@
-#include "FileResponse.hpp"
+#include "ConfigFileResponse.hpp"
 #include <map>
 
 // Why does c++98 NOT have a hashmap!?
 std::map<std::string, std::string> g_extension_to_content_type;
 
-void FileResponse::InitContentTypes()
+void ConfigFileResponse::InitContentTypes()
 {
 	assert(g_extension_to_content_type.size() == 0);
 
@@ -76,35 +76,35 @@ void FileResponse::InitContentTypes()
 	g_extension_to_content_type["7z"] = "application/x-7z-compressed";
 }
 
-FileResponse::FileResponse(const std::string& FileName, std::ifstream* Stream, const ConfigErrorReasons& ErrorReasons) : ConfigResponse(ErrorReasons), FileName(FileName), Stream(Stream)
+ConfigFileResponse::ConfigFileResponse(const std::string& FileName, std::ifstream* Stream, const ConfigErrorReasons& ErrorReasons) : ConfigResponse(ErrorReasons), FileName(FileName), Stream(Stream)
 {
 
 }
-FileResponse::~FileResponse()
+ConfigFileResponse::~ConfigFileResponse()
 {
 	delete Stream;
 }
 
-const std::ifstream& FileResponse::GetStream() const { return *Stream; }
+const std::ifstream& ConfigFileResponse::GetStream() const { return *Stream; }
 
-std::ostream& operator<<(std::ostream& Stream, const FileResponse& FileResponse)
+std::ostream& operator<<(std::ostream& Stream, const ConfigFileResponse& ConfigFileResponse)
 {
-	FileResponse.Print(Stream);
+	ConfigFileResponse.Print(Stream);
 	return Stream;
 }
 
-void FileResponse::Print(std::ostream& PrintStream) const
+void ConfigFileResponse::Print(std::ostream& PrintStream) const
 {
 	PrintStream << "FileResponse '" << FileName << "' Type: " << GetContentType();
 }
 
-const std::string& FileResponse::GetFileName()
+const std::string& ConfigFileResponse::GetFileName()
 {
 	return FileName;
 }
 
 const static std::string DefaultContentType = "application/octet-stream";
-const std::string& FileResponse::GetContentType() const 
+const std::string& ConfigFileResponse::GetContentType() const 
 {
 	assert(g_extension_to_content_type.size() != 0);
 	

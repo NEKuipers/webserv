@@ -2,7 +2,7 @@
 
 #include <fstream>
 #include <iostream>
-#include "CgiResponse.hpp"
+#include "ConfigCgiResponse.hpp"
 #include "MethodException.hpp"
 #include "PathUtils.hpp"
 
@@ -76,7 +76,7 @@ ConfigResponse* ConfigLine_try_cgi::GetBaseResponse(const ConfigRequest& Request
 			PartialPath = FullPath;
 
 		ErrorReasons.AddAllowedMethods(Configuration.AcceptedMethods);
-		return new CgiResponse(PartialPath, FullPath, ErrorReasons);
+		return new ConfigCgiResponse(PartialPath, FullPath, ErrorReasons);
 	}
 	return NULL;
 }

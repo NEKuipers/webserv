@@ -1,8 +1,9 @@
 #include "Response.hpp"
 #include "ClientSocket.hpp"
-#include "FileResponse.hpp"
-#include "ErrorResponse.hpp"
-#include "CgiResponse.hpp"
+#include "ConfigFileResponse.hpp"
+#include "ConfigErrorResponse.hpp"
+#include "ConfigCgiResponse.hpp"
+#include "CGI_Response.hpp"
 #include <map>
 #include "CGIRunner.hpp"
 #include "ToString.hpp"
@@ -118,13 +119,13 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	if (conf_response)
 		std::cout << conf_response->GetErrorReasons() << std::endl;
 
-	if (FileResponse* FileResponsePtr = dynamic_cast<FileResponse*>(conf_response))
+	if (ConfigFileResponse* FileResponsePtr = dynamic_cast<ConfigFileResponse*>(conf_response))
 	{
 		status_code = 200;
 		content_type = FileResponsePtr->GetContentType();
 		body = to_string(FileResponsePtr->GetStream().rdbuf());
 	}
-	else if (CgiResponse* CgiResponsePtr = dynamic_cast<CgiResponse*>(conf_response))
+	else if (ConfigCgiResponse* CgiResponsePtr = dynamic_cast<ConfigCgiResponse*>(conf_response))
 	{
 		std::map<std::string, std::string> map;
 		CgiResponsePtr->MakeEnvMap(map, request);
@@ -140,7 +141,7 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 		// TODO: Magic stuff
 		// NOTE: cgi_response is [headers]\n\r[body] without the http line
 	}
-	else if (!conf_response || dynamic_cast<ErrorResponse*>(conf_response))
+	else if (!conf_response || dynamic_cast<ConfigErrorResponse*>(conf_response))
 	{
 		status_code = 404;
 		if (conf_response)
@@ -179,7 +180,8 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	
 	if (conf_response)
 		std::cout << "Response: " << to_string(*conf_response) << std::endl;
-	
+	if (cgi_response != "")
+		return new CGIResponse();
 	return new Response(response_string);
 }
 

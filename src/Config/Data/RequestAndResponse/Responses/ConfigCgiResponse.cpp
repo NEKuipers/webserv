@@ -1,35 +1,35 @@
-#include "CgiResponse.hpp"
+#include "ConfigCgiResponse.hpp"
 #include "Request.hpp"
 #include "ToString.hpp"
 
-CgiResponse::CgiResponse(const std::string& CgiFile, const std::string& FullPath, const ConfigErrorReasons& ErrorReasons) : ConfigResponse(ErrorReasons), CgiFile(CgiFile), FullPath(FullPath)
+ConfigCgiResponse::ConfigCgiResponse(const std::string& CgiFile, const std::string& FullPath, const ConfigErrorReasons& ErrorReasons) : ConfigResponse(ErrorReasons), CgiFile(CgiFile), FullPath(FullPath)
 {
 	
 }
-CgiResponse::~CgiResponse()
+ConfigCgiResponse::~ConfigCgiResponse()
 {
 	
 }
 
-const std::string& CgiResponse::GetCgiFile() const { return CgiFile; }
+const std::string& ConfigCgiResponse::GetCgiFile() const { return CgiFile; }
 
-std::ostream& operator<<(std::ostream& Stream, const CgiResponse& CgiResponse)
+std::ostream& operator<<(std::ostream& Stream, const ConfigCgiResponse& ConfigCgiResponse)
 {
-	CgiResponse.Print(Stream);
+	ConfigCgiResponse.Print(Stream);
 	return Stream;
 }
 
-void CgiResponse::Print(std::ostream& PrintStream) const
+void ConfigCgiResponse::Print(std::ostream& PrintStream) const
 {
-	PrintStream << "CgiResponse " << CgiFile;
+	PrintStream << "ConfigCgiResponse " << CgiFile;
 }
 
-bool CgiResponse::RequiresBody() const
+bool ConfigCgiResponse::RequiresBody() const
 {
 	return true;
 }
 
-void CgiResponse::MakeEnvMap(std::map<std::string, std::string>& Map, const Request& Request)
+void ConfigCgiResponse::MakeEnvMap(std::map<std::string, std::string>& Map, const Request& Request)
 {
 	Map["SERVER_SOFTWARE"] = "webserv";
 	Map["SERVER_NAME"] = "127.0.0.1";	// TODO: This is wrong, Its the server's hostname, DNS alias, or IP address as it appears in self-referencing URLs. Make it a config option?
