@@ -15,7 +15,7 @@ class Response
         ~Response();
         Response(const Response &src);
 
-		static void			InitContentTypes();
+		static void			InitStatusCodes();
 		static Response*	generate_response(ConfigResponse *conf_response, Request &request);
 		static std::string	get_reason_phrase(int status_code);
 		static std::string	create_status_line(int status_code);

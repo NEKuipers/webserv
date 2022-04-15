@@ -30,7 +30,7 @@ int         main(int argc, char **argv)
 	(void)argc;
 	(void)argv;
 
-	Response::InitContentTypes();
+	Response::InitStatusCodes();
 	ConfigFileResponse::InitContentTypes();
 
 	try {

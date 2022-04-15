@@ -18,7 +18,7 @@
 
 static std::map<int, std::string> g_response_code_to_reason_phrase;
 
-void Response::InitContentTypes()
+void Response::InitStatusCodes()
 {
 	assert(g_response_code_to_reason_phrase.size() == 0);
 
