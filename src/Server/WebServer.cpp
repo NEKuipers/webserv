@@ -136,8 +136,12 @@ bool	WebServer::onRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead,
 		// OnCgiRead will call Selector.Write() with what it read, if it was the last bit that it should read, pass onWriteCloseAfterComplete as the function
 		// Also call Selector.Write() with the body, that will do the entire writing thing too!
 
+		Arg->first->selector.Write(CgiResponsePtr->get_cgi_runner()->InputFD, Arg->second->get_request().get_body(), NULL, (Selector::OnWriteFunction)onWriteCloseAfterComplete);
+
 		(void)CgiResponsePtr;
 		Arg->first->selector.Write(Arg->second->get_sock(), "HTTP/1.1 200 OK\r\n\r\ncgi thing\r\n", Arg->second, (Selector::OnWriteFunction)onWriteCloseAfterComplete);
+		//Arg->first->selector.OnRead(CgiResponsePtr->get_cgi_runner()->OutputFD, Arg, (Selector::OnWriteFunction)onCgiRead);
+		return true;
 	}
 	else
 	{
@@ -151,6 +155,10 @@ bool	WebServer::onRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead,
 	// Last time we read from the client
 	delete Arg;
 	return true;
+}
+bool	WebServer::onCgiRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead, const std::string& Read)
+{
+	Arg->first->selector.Write(Arg->second->get_sock(), "HTTP/1.1 200 OK\r\n\r\ncgi thing\r\n", Arg->second, (Selector::OnWriteFunction)onWriteCloseAfterComplete);
 }
 bool	WebServer::onWriteCloseAfterComplete(ClientSocket* Arg, bool LastWrite, int StartByte, int NumBytes)
 {
