@@ -89,6 +89,7 @@ void Selector::DecrementMaxFD()
 		MaxFd--;
 }
 
+#include <iostream>	// a
 int Selector::Start()
 {
 	char Buffer[BUFFER_SIZE];
@@ -97,31 +98,53 @@ int Selector::Start()
 	{
 		fd_set CurrReadSet = ReadSet;
 		fd_set CurrWriteSet = WriteSet;
-		if (int Ret = select(MaxFd + 1, &CurrReadSet, &CurrWriteSet, NULL, NULL))
+		int Ret = select(MaxFd + 1, &CurrReadSet, &CurrWriteSet, NULL, NULL);
+		if (Ret < 0)
 			return Ret;
+		std::cout << "There are " << Ret << " FD's ready!" << std::endl;
 		
-		for (std::vector<AcceptData>::iterator it = AcceptVector.begin(); it != AcceptVector.end(); it++)
-			if (FD_ISSET(it->fd, &ReadSet))
+		for (std::vector<AcceptData>::iterator it = AcceptVector.begin(); it != AcceptVector.end();)
+		{
+			if (FD_ISSET(it->fd, &CurrReadSet))
 			{
+				std::cout << "\taccept fd: " << it->fd << std::endl;
 				struct sockaddr Address;
 				socklen_t AddressLen = sizeof(Address);
 				int ClientFD = accept(it->fd, &Address, &AddressLen);
+				std::cout << "\t\tNew client: " << ClientFD << std::endl;
 				if (it->AcceptFunc(it->Arg, ClientFD, Address, AddressLen))
+				{
+					FD_CLR(it->fd, &ReadSet);
 					it = AcceptVector.erase(it);
+					continue;
+				}
 			}
+			it++;
+		}
 
-		for (std::vector<ReadData>::iterator it = ReadVector.begin(); it != ReadVector.end(); it++)
-			if (FD_ISSET(it->fd, &ReadSet))
+		for (std::vector<ReadData>::iterator it = ReadVector.begin(); it != ReadVector.end();)
+		{
+			if (FD_ISSET(it->fd, &CurrReadSet))
 			{
+				std::cout << "\tread fd: " << it->fd << std::endl;
 				ssize_t ReadChars = read(it->fd, Buffer, BUFFER_SIZE);
 				bool End = ReadChars <= 0;
 				if (it->ReadFunc(it->Arg, ReadChars <= 0, std::string(Buffer, End ? 0 : ReadChars)) || End)
-					it = ReadVector.erase(it);	// Okay, we need to clear this FD
+				{
+					FD_CLR(it->fd, &ReadSet);
+					it = ReadVector.erase(it);
+					continue;
+				}
 			}
+			it++;
+		}
 		
-		for (std::vector<WriteData>::iterator it = WriteVector.begin(); it != WriteVector.end(); it++)
-			if (FD_ISSET(it->fd, &WriteSet))
+		for (std::vector<WriteData>::iterator it = WriteVector.begin(); it != WriteVector.end();)
+		{
+			if (FD_ISSET(it->fd, &CurrWriteSet))
 			{
+				std::cout << "\twrite fd: " << it->fd << std::endl;
+
 				ssize_t Start = it->Written;
 				
 				ssize_t WroteBytes = write(it->fd, it->ToWrite.c_str() + it->Written, it->ToWrite.length() - it->Written);
@@ -133,6 +156,7 @@ int Selector::Start()
 					WriteData* Next = it->Next;
 					if (!Next)
 					{
+						FD_CLR(it->fd, &WriteSet);
 						it = WriteVector.erase(it);
 						continue;
 					}
@@ -141,11 +165,13 @@ int Selector::Start()
 					delete Next;
 				}
 			}
+			it++;
+		}
 
 		DecrementMaxFD();
 	}
 }
 
-bool Selector::DefaultOnAcceptFunction(void* Arg, int ClientFD, struct sockaddr Address, socklen_t AddressLen) { return false; }
-bool Selector::DefaultOnReadFunction(void* Arg, bool LastRead, const std::string& Read) { return false; }
-bool Selector::DefaultOnWriteFunction(void* Arg, bool LastWrite, int StartByte, int NumBytes) { return false; }
+bool Selector::DefaultOnAcceptFunction(void* Arg, int ClientFD, struct sockaddr Address, socklen_t AddressLen) { (void)Arg; (void)ClientFD; (void)Address; (void)AddressLen; return false; }
+bool Selector::DefaultOnReadFunction(void* Arg, bool LastRead, const std::string& Read) { (void)Arg; (void)LastRead; (void)Read; return false; }
+bool Selector::DefaultOnWriteFunction(void* Arg, bool LastWrite, int StartByte, int NumBytes) { (void)Arg; (void)LastWrite; (void)StartByte; (void)NumBytes; return false; }
