@@ -7,7 +7,7 @@
 
 Selector::AcceptData::AcceptData(int fd, void* Arg, OnAcceptFunction AcceptFunc) : fd(fd), Arg(Arg), AcceptFunc(AcceptFunc) {}
 Selector::ReadData::ReadData(int fd, void* Arg, OnReadFunction ReadFunc) : fd(fd), Arg(Arg), ReadFunc(ReadFunc) {}
-Selector::WriteData::WriteData(int fd, std::string ToWrite, void* Arg, OnWriteFunction WriteFunc) : fd(fd), ToWrite(ToWrite), Arg(Arg), WriteFunc(WriteFunc), Written(0) {}
+Selector::WriteData::WriteData(int fd, std::string ToWrite, void* Arg, OnWriteFunction WriteFunc) : fd(fd), ToWrite(ToWrite), Arg(Arg), WriteFunc(WriteFunc), Written(0), Next() {}
 
 Selector::Selector() : MaxFd(0)
 {
@@ -62,7 +62,21 @@ void Selector::OnRead(int fd, void* Arg, OnReadFunction OnRead)
 }
 void Selector::Write(int fd, const std::string& ToWrite, void* Arg, OnWriteFunction OnWrite)
 {
-	assert (FD_ISSET(fd, &WriteSet) == false);
+	if (FD_ISSET(fd, &WriteSet))
+	{
+		for (std::vector<WriteData>::iterator it = WriteVector.begin(); it != WriteVector.end(); it++)
+			if (it->fd == fd)
+			{
+				WriteData* Data = &(*it);
+				while (Data->Next)
+					Data = Data->Next;
+				Data->Next = new WriteData(fd, ToWrite, Arg, OnWrite);
+				return;
+			}
+		
+		_LIBCPP_UNREACHABLE();
+	}
+
 	WriteVector.push_back(WriteData(fd, ToWrite, Arg, OnWrite));
 
 	FD_SET(fd, &WriteSet);
@@ -115,7 +129,17 @@ int Selector::Start()
 
 				bool End = it->Written >= it->ToWrite.length() || WroteBytes < 0;
 				if (it->WriteFunc(it->Arg, End, Start, WroteBytes) || End)
-					it = WriteVector.erase(it);
+				{
+					WriteData* Next = it->Next;
+					if (!Next)
+					{
+						it = WriteVector.erase(it);
+						continue;
+					}
+
+					*it = *Next;
+					delete Next;
+				}
 			}
 
 		DecrementMaxFD();

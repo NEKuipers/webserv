@@ -60,6 +60,8 @@ class Selector {
 			size_t Written;
 
 			WriteData(int fd, std::string ToWrite, void* Arg, OnWriteFunction ReadFunc);
+
+			WriteData* Next;
 		};
 
 		std::vector<AcceptData> AcceptVector;
