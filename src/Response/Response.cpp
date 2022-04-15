@@ -24,7 +24,7 @@ void Response::InitStatusCodes()
 
 	g_response_code_to_reason_phrase[100] = "Continue";
 	g_response_code_to_reason_phrase[101] = "Switching Protocols";
-	g_response_code_to_reason_phrase[200] = "OK";
+	g_response_code_to_reason_phrase[200] = "OK"; //Done
 	g_response_code_to_reason_phrase[201] = "Created";
 	g_response_code_to_reason_phrase[202] = "Accepted";
 	g_response_code_to_reason_phrase[203] = "Non-Authoritative Information";
@@ -40,10 +40,10 @@ void Response::InitStatusCodes()
 	g_response_code_to_reason_phrase[307] = "Temporary Redirect";
 	g_response_code_to_reason_phrase[400] = "Bad Request";
 	g_response_code_to_reason_phrase[401] = "Unauthorized";
-	g_response_code_to_reason_phrase[402] = "Payment Required";
+	g_response_code_to_reason_phrase[402] = "Payment Required"; //Probably not
 	g_response_code_to_reason_phrase[403] = "Forbidden";
-	g_response_code_to_reason_phrase[404] = "Not Found";
-	g_response_code_to_reason_phrase[405] = "Method Not Allowed";
+	g_response_code_to_reason_phrase[404] = "Not Found"; //Done
+	g_response_code_to_reason_phrase[405] = "Method Not Allowed"; //Done
 	g_response_code_to_reason_phrase[406] = "Not Acceptable";
 	g_response_code_to_reason_phrase[407] = "Proxy Authentication Required";
 	g_response_code_to_reason_phrase[408] = "Request Timeout";
@@ -51,18 +51,18 @@ void Response::InitStatusCodes()
 	g_response_code_to_reason_phrase[410] = "Gone";
 	g_response_code_to_reason_phrase[411] = "Length Required";
 	g_response_code_to_reason_phrase[412] = "Precondition Failed";
-	g_response_code_to_reason_phrase[413] = "Payload Too Large";
+	g_response_code_to_reason_phrase[413] = "Payload Too Large"; //Done
 	g_response_code_to_reason_phrase[414] = "URI Too Long";
 	g_response_code_to_reason_phrase[415] = "Unsupported Media Type";
 	g_response_code_to_reason_phrase[416] = "Range Not Satisfiable";
 	g_response_code_to_reason_phrase[417] = "Expectation Failed";
 	g_response_code_to_reason_phrase[426] = "Upgrade Required";
-	g_response_code_to_reason_phrase[500] = "Internal Server Error";
+	g_response_code_to_reason_phrase[500] = "Internal Server Error"; //CGI error, maybe?
 	g_response_code_to_reason_phrase[501] = "Not Implemented";
 	g_response_code_to_reason_phrase[502] = "Bad Gateway";
 	g_response_code_to_reason_phrase[503] = "Service Unavailable";
 	g_response_code_to_reason_phrase[504] = "Gateway Timeout";
-	g_response_code_to_reason_phrase[505] = "HTTP Version Not Supported";
+	g_response_code_to_reason_phrase[505] = "HTTP Version Not Supported"; //TODO
 }
 
 static std::string format_timestamp(time_t timestamp)
@@ -124,10 +124,11 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	int status_code = 400;
 	std::string cgi_response = "";
 
-	if (conf_response)
-		std::cout << conf_response->GetErrorReasons() << std::endl;
-
-	if (ConfigFileResponse* FileResponsePtr = dynamic_cast<ConfigFileResponse*>(conf_response))
+	// if (conf_response)
+	// 	std::cout << conf_response->GetErrorReasons() << std::endl;
+	if (request.get_request_line().http_version != "HTTP/1.1")
+		status_code = 505;
+	else if (ConfigFileResponse* FileResponsePtr = dynamic_cast<ConfigFileResponse*>(conf_response))
 	{
 		status_code = 200;
 		content_type = FileResponsePtr->GetContentType();
@@ -150,9 +151,10 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 		// NOTE: cgi_response is [headers]\n\r[body] without the http line
 		return new CGIResponse(runner);
 	}
-	else if (!conf_response || dynamic_cast<ConfigErrorResponse*>(conf_response))
+	else if (!conf_response || dynamic_cast<ConfigErrorResponse*>(conf_response) || status_code == 505)
 	{
-		status_code = 404;
+		if (status_code != 505)
+			status_code = 404;
 		if (conf_response)
 		{
 			if (conf_response->GetErrorReasons().GetWasWrongMethod())
@@ -162,7 +164,7 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 		}
 		
 		content_type = "text/html";
-		body = "<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>Default error page<br>You seem to have made a invalid request!</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>";
+		body = "<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>" + to_string(status_code)+ "<br>"+ get_reason_phrase(status_code) +"</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>";
 	}
 	else
 	{
@@ -187,8 +189,8 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	else	
 		response_string += "\r\n" + body;
 	
-	if (conf_response)
-		std::cout << "Response: " << to_string(*conf_response) << std::endl;
+	// if (conf_response)
+	// 	std::cout << "Response: " << to_string(*conf_response) << std::endl;
 	return new SimpleResponse(response_string);
 }
 
