@@ -5,7 +5,6 @@
 #include "ToString.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
-#define BUFFER_SIZE 3000
 #include <unistd.h>
 #include <map>
 #include "ReadFromSocketException.hpp"
@@ -14,7 +13,7 @@
 #include "CGIRunner.hpp"
 
 // Constructor
-ClientSocket::ClientSocket(struct sockaddr_in address, int sock, struct sockaddr_in sock_adr) : SimpleSocket(address, sock), headers_complete(false), written_size(0), http_response(), conf_response(NULL)
+ClientSocket::ClientSocket(struct sockaddr_in address, int sock, struct sockaddr_in sock_adr) : SimpleSocket(address, sock), headers_complete(false), http_response(), conf_response(NULL)
 {
 	socket_address = sock_adr;
 }
@@ -22,11 +21,6 @@ ClientSocket::ClientSocket(struct sockaddr_in address, int sock, struct sockaddr
 ClientSocket::~ClientSocket()
 {
 	delete conf_response;
-}
-
-bool	ClientSocket::appendResponse()
-{
-	return (http_response->get_response_string(to_write));
 }
 
 void 	ClientSocket::createResponse()
@@ -39,27 +33,9 @@ Request					ClientSocket::get_request()
 	return request;
 }
 
-bool					ClientSocket::send()
+void					ClientSocket::read(const std::string& read)
 {
-	std::cerr << "========START OF RESPONSE==========\n";
-	std::cerr << to_write.c_str() << std::endl;
-	std::cerr << "==========END OF RESPONSE==========\n";
-	int send_rv = ::send(get_sock(), to_write.c_str()+written_size, to_write.size()-written_size, 0);
-	if (send_rv == -1)
-		throw SendResponseException();
-	written_size += send_rv;
-	return written_size >= ssize_t(to_write.size());
-}
-
-void					ClientSocket::read()
-{
-	char	read_buffer[BUFFER_SIZE];
-	int ret = recv(get_sock(), read_buffer, BUFFER_SIZE, MSG_DONTWAIT);
-	if (ret < 0)
-	{
-		throw ReadFromSocketException();
-	}
-	buffer += std::string(read_buffer, ret);
+	buffer += read;
 }
 
 bool					ClientSocket::check_body()

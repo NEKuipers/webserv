@@ -16,8 +16,6 @@ class ClientSocket: public SimpleSocket
 		std::string 		buffer;
 		Request 			request;
 		bool 				headers_complete;
-		std::string			to_write;
-		ssize_t				written_size;
 		struct sockaddr_in	socket_address;
 		Response			*http_response;
 
@@ -30,9 +28,8 @@ class ClientSocket: public SimpleSocket
 		void 				createResponse();
 		Request				get_request();
 		Response			*get_http_response() const;
-		bool				send();
-		void				read();
-		bool				appendResponse();
+		
+		void				read(const std::string& read);
 		bool				check_body();
 		bool				check_headers();
 				

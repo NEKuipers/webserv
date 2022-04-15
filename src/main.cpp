@@ -38,7 +38,7 @@ int         main(int argc, char **argv)
 
 
 		std::cout << "Starting...." <<std::endl;
-		WebServer testserver = WebServer(Conf);
+		WebServer testserver(Conf);
 
 	} catch (UnexpectedTokenException E) {
 		std::cout << E << std::endl;
