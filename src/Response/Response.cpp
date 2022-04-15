@@ -3,7 +3,8 @@
 #include "ConfigFileResponse.hpp"
 #include "ConfigErrorResponse.hpp"
 #include "ConfigCgiResponse.hpp"
-#include "CGI_Response.hpp"
+#include "CGIResponse.hpp"
+#include "SimpleResponse.hpp"
 #include <map>
 #include "CGIRunner.hpp"
 #include "ToString.hpp"
@@ -106,6 +107,13 @@ std::string Response::create_headers(ConfigResponse *conf_response, Request &req
 	return (headers_string);
 }
 
+std::string	Response::create_status_line(int status_code)
+{
+	std::string http_version = "HTTP/1.1";
+	std::string status_line = http_version + " " + to_string(status_code) + " " + get_reason_phrase(status_code) + "\r\n";
+	return status_line;
+}
+
 Response	*Response::generate_response(ConfigResponse *conf_response, Request &request)
 {
 	assert(g_response_code_to_reason_phrase.size() != 0);
@@ -129,17 +137,18 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	{
 		std::map<std::string, std::string> map;
 		CgiResponsePtr->MakeEnvMap(map, request);
-		CGIRunner runner(CgiResponsePtr->GetCgiFile(), map);
+		CGIRunner *runner = new CGIRunner(CgiResponsePtr->GetCgiFile(), map);
 		
-		runner.QueuePartialBodyForWrite(request.get_body());	// NOTE: Considering this is CGI, it does not need to be started AFTER the whole body has been read, it can be done in sections, so the CGI program can be started earlier
+		runner->QueuePartialBodyForWrite(request.get_body());	// NOTE: Considering this is CGI, it does not need to be started AFTER the whole body has been read, it can be done in sections, so the CGI program can be started earlier
 		
-		while (!runner.Write()) {  }			// TODO: Non-Blocking read loop via select
-		while (!runner.Read(cgi_response)) { }	// TODO: Non-Blocking read loop via select
+		while (!runner->Write()) {  }			// TODO: Non-Blocking read loop via select
+		//while (!runner->Read(cgi_response)) { }	// TODO: Non-Blocking read loop via select
 
 		//std::cout << "cgi_response = " << cgi_response << std::endl;
 		status_code = 200;
 		// TODO: Magic stuff
 		// NOTE: cgi_response is [headers]\n\r[body] without the http line
+		return new CGIResponse(runner);
 	}
 	else if (!conf_response || dynamic_cast<ConfigErrorResponse*>(conf_response))
 	{
@@ -165,8 +174,8 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 		body.append("</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>");
 	}
 
-	std::string http_version = "HTTP/1.1";
-	std::string response_string = http_version + " " + to_string(status_code) + " " + get_reason_phrase(status_code) + "\r\n";
+
+	std::string response_string = create_status_line(status_code);
 	if (cgi_response == "")
 	{
 		response_string += "Content-Type: " + content_type + "\r\n";
@@ -180,12 +189,10 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	
 	if (conf_response)
 		std::cout << "Response: " << to_string(*conf_response) << std::endl;
-	if (cgi_response != "")
-		return new CGIResponse();
-	return new Response(response_string);
+	return new SimpleResponse(response_string);
 }
 
-Response::Response(const std::string& response_string) : response_string(response_string)
+Response::Response()
 {
 
 }
@@ -203,10 +210,4 @@ std::string			Response::get_reason_phrase(int status_code)
 	if (it == g_response_code_to_reason_phrase.end())
 		return ("ERROR");
 	return (it->second);
-}
-
-bool			Response::get_response_string(std::string &response_string) const
-{
-	response_string = this->response_string;
-	return true;
 }

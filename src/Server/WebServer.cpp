@@ -8,6 +8,9 @@
 #include "CGIRunner.hpp"
 #include "ConfigFileResponse.hpp"
 
+#include "SimpleResponse.hpp"
+#include "CGIResponse.hpp"
+
 WebServer::WebServer(int domain, int service, int protocol, int port, u_long interface, int bklg) : configuration(NULL)
 {
 	ServerSocket *newsocket = new ServerSocket(domain, service, protocol, port, interface, bklg);
@@ -101,6 +104,7 @@ bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 
 bool	WebServer::connectionResponder(ClientSocket *conn_socket)
 {
+	// only return true if send() returns true AND the last call to appendResponse() ALSO return true
 	return (conn_socket->send());
 }
 
@@ -152,13 +156,36 @@ int	WebServer::launch()
 		}
 		for (size_t count = 0; count < read_sockets.size(); count++) 
 		{
+			Response *http_response = read_sockets[count]->get_http_response();
+			if (http_response)
+			{
+				if (CGIResponse* CGIResponsePtr = dynamic_cast<CGIResponse*>(http_response))
+				{
+					if (FD_ISSET(CGIResponsePtr->get_cgi_runner()->OutputFD, &read_fds) && read_sockets[count]->appendResponse())	// WHY C++?
+					{
+						// Now we have read everything from the CGI script
+						FD_CLR(CGIResponsePtr->get_cgi_runner()->OutputFD, &save_read_fds);
+						// ???
+					}
+				}
+			}
+			
 			if (FD_ISSET(read_sockets[count]->get_sock(), &read_fds))
 			{
 				try {
 					if (connectionHandler(read_sockets[count]))
 					{
 						read_sockets[count]->createResponse();
-						// Response *http_response = read_sockets[count]->get_http_response();
+						Response *http_response = read_sockets[count]->get_http_response();
+						if (dynamic_cast<SimpleResponse*>(http_response))
+						{
+							bool end = read_sockets[count]->appendResponse();
+							assert(end == true);
+						}
+						else if (CGIResponse* CGIResponsePtr = dynamic_cast<CGIResponse*>(http_response))
+						{
+							FD_SET(CGIResponsePtr->get_cgi_runner()->OutputFD, &save_read_fds);
+						}
 						FD_SET(read_sockets[count]->get_sock(), &save_write_fds);
 					}
 				} catch (std::exception &e) {

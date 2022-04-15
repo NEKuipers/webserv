@@ -14,7 +14,7 @@
 #include "CGIRunner.hpp"
 
 // Constructor
-ClientSocket::ClientSocket(struct sockaddr_in address, int sock, struct sockaddr_in sock_adr) : SimpleSocket(address, sock), headers_complete(false), written_size(0), conf_response(NULL)
+ClientSocket::ClientSocket(struct sockaddr_in address, int sock, struct sockaddr_in sock_adr) : SimpleSocket(address, sock), headers_complete(false), written_size(0), http_response(), conf_response(NULL)
 {
 	socket_address = sock_adr;
 }
@@ -24,10 +24,14 @@ ClientSocket::~ClientSocket()
 	delete conf_response;
 }
 
+bool	ClientSocket::appendResponse()
+{
+	return (http_response->get_response_string(to_write));
+}
+
 void 	ClientSocket::createResponse()
 {
 	http_response = Response::generate_response(conf_response, request);
-	http_response->get_response_string(to_write);
 }
 
 Request					ClientSocket::get_request()

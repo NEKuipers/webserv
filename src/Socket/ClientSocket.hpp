@@ -32,6 +32,7 @@ class ClientSocket: public SimpleSocket
 		Response			*get_http_response() const;
 		bool				send();
 		void				read();
+		bool				appendResponse();
 		bool				check_body();
 		bool				check_headers();
 				
