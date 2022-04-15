@@ -26,6 +26,10 @@ class Selector {
 		
 		int Start();
 	private:
+		static bool DefaultOnAcceptFunction(void* Arg, int ClientFD, struct sockaddr Address, socklen_t AddressLen);
+		static bool DefaultOnReadFunction(void* Arg, bool LastRead, const std::string& Read);
+		static bool DefaultOnWriteFunction(void* Arg, bool LastWrite, int StartByte, int NumBytes);
+
 		Selector(const Selector& From);
 		Selector& operator = (const Selector& From);
 		void DecrementMaxFD();

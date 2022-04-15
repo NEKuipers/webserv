@@ -5,9 +5,9 @@
 
 #define BUFFER_SIZE 1024
 
-Selector::AcceptData::AcceptData(int fd, void* Arg, OnAcceptFunction AcceptFunc) : fd(fd), Arg(Arg), AcceptFunc(AcceptFunc) {}
-Selector::ReadData::ReadData(int fd, void* Arg, OnReadFunction ReadFunc) : fd(fd), Arg(Arg), ReadFunc(ReadFunc) {}
-Selector::WriteData::WriteData(int fd, std::string ToWrite, void* Arg, OnWriteFunction WriteFunc) : fd(fd), ToWrite(ToWrite), Arg(Arg), WriteFunc(WriteFunc), Written(0), Next() {}
+Selector::AcceptData::AcceptData(int fd, void* Arg, OnAcceptFunction AcceptFunc) : fd(fd), Arg(Arg), AcceptFunc(AcceptFunc ? AcceptFunc : DefaultOnAcceptFunction) {}
+Selector::ReadData::ReadData(int fd, void* Arg, OnReadFunction ReadFunc) : fd(fd), Arg(Arg), ReadFunc(ReadFunc ? ReadFunc : DefaultOnReadFunction) {}
+Selector::WriteData::WriteData(int fd, std::string ToWrite, void* Arg, OnWriteFunction WriteFunc) : fd(fd), ToWrite(ToWrite), Arg(Arg), WriteFunc(WriteFunc ? WriteFunc : DefaultOnWriteFunction), Written(0), Next() {}
 
 Selector::Selector() : MaxFd(0)
 {
@@ -145,3 +145,7 @@ int Selector::Start()
 		DecrementMaxFD();
 	}
 }
+
+bool Selector::DefaultOnAcceptFunction(void* Arg, int ClientFD, struct sockaddr Address, socklen_t AddressLen) { return false; }
+bool Selector::DefaultOnReadFunction(void* Arg, bool LastRead, const std::string& Read) { return false; }
+bool Selector::DefaultOnWriteFunction(void* Arg, bool LastWrite, int StartByte, int NumBytes) { return false; }
