@@ -26,8 +26,9 @@ ClientSocket::~ClientSocket()
 
 void 	ClientSocket::createResponse()
 {
-	Response http_response = Response(conf_response, request);
-	to_write = http_response.get_response_string();
+	http_response = Response::generate_response(conf_response, request);
+	http_response->get_response_string(to_write);
+
 }
 
 Request					ClientSocket::get_request()

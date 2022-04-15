@@ -8,6 +8,7 @@
 #include "SimpleSocket.hpp"
 #include "Request.hpp"
 #include "ConfigResponse.hpp"
+#include "Response.hpp"
 
 class ClientSocket: public SimpleSocket
 {
@@ -17,10 +18,10 @@ class ClientSocket: public SimpleSocket
 	std::string			to_write;
 	ssize_t				written_size;
 	struct sockaddr_in	socket_address;
+	Response			*http_response;
 
 	public:
-		ConfigResponse*	conf_response;
-		Request*			response;
+		ConfigResponse*		conf_response;
 
 		// Constructor
 		ClientSocket(struct sockaddr_in address, int sock, struct sockaddr_in sock_adr);
