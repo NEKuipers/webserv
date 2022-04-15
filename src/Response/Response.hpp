@@ -12,14 +12,18 @@ class Response
 		std::string response_string;
 
     public:
-        Response(ConfigResponse *conf_response, Request &request);
+        Response(const std::string& response_string);
         ~Response();
         Response(const Response &src);
 
-		static void	InitContentTypes();
-		std::string	get_response_string();
-		std::string	get_reason_phrase(int status_code);
-		std::string create_headers(ConfigResponse *conf_response, Request &request, int status_code);
+		static void			InitContentTypes();
+		static Response*	generate_response(ConfigResponse *conf_response, Request &request);
+		bool				is_response_complete();
+		bool				cgi_write_available();
+		bool				cgi_read_available();
+		std::string			get_response_string() const;
+		static std::string	get_reason_phrase(int status_code);
+		static std::string	create_headers(ConfigResponse *conf_response, Request &request, int status_code);
 };
 
 #endif

@@ -105,7 +105,7 @@ std::string Response::create_headers(ConfigResponse *conf_response, Request &req
 	return (headers_string);
 }
 
-Response::Response(ConfigResponse *conf_response, Request &request)
+Response	*Response::generate_response(ConfigResponse *conf_response, Request &request)
 {
 	assert(g_response_code_to_reason_phrase.size() != 0);
 	
@@ -161,7 +161,7 @@ Response::Response(ConfigResponse *conf_response, Request &request)
 	}
 
 	std::string http_version = "HTTP/1.1";
-	response_string = http_version + " " + to_string(status_code) + " " + get_reason_phrase(status_code) + "\r\n";
+	std::string response_string = http_version + " " + to_string(status_code) + " " + get_reason_phrase(status_code) + "\r\n";
 	if (cgi_response == "")
 	{
 		response_string += "Content-Type: " + content_type + "\r\n";
@@ -172,6 +172,13 @@ Response::Response(ConfigResponse *conf_response, Request &request)
 		response_string += cgi_response;
 	else	
 		response_string += "\r\n" + body;
+	
+	return new Response(response_string);
+}
+
+Response::Response(const std::string& response_string) : response_string(response_string)
+{
+
 }
 
 Response::~Response(){}
@@ -189,7 +196,7 @@ std::string			Response::get_reason_phrase(int status_code)
 	return (it->second);
 }
 
-std::string			Response::get_response_string()
+std::string			Response::get_response_string() const
 {
 	return response_string;
 }

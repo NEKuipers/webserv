@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include "ToString.hpp"
+#include "CGIRunner.hpp"
 #include "FileResponse.hpp"
 
 WebServer::WebServer(int domain, int service, int protocol, int port, u_long interface, int bklg) : configuration(NULL)
@@ -30,6 +31,8 @@ WebServer::WebServer(Config &config) : configuration(&config)
 		ServerSocket *newsocket = new ServerSocket(AF_INET, SOCK_STREAM, 0, iter->second, iter->first, 10);
 		accept_sockets.push_back(newsocket);
 	}
+
+
 	
 	launch();
 }
@@ -173,6 +176,7 @@ int	WebServer::launch()
 				}
 			}
 		}
+
 	}
 	return (0);
 }
