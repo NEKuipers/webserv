@@ -91,7 +91,7 @@ void Selector::DecrementMaxFD()
 		MaxFd--;
 }
 
-#include <iostream>	// a
+//#include <iostream>
 int Selector::Start()
 {
 	char Buffer[BUFFER_SIZE];
@@ -103,71 +103,78 @@ int Selector::Start()
 		int Ret = select(MaxFd + 1, &CurrReadSet, &CurrWriteSet, NULL, NULL);
 		if (Ret < 0)
 			return Ret;
-		std::cout << "There are " << Ret << " FD's ready!" << std::endl;
+		//std::cout << "There are " << Ret << " FD's ready!" << std::endl;
 
-		for (std::vector<AcceptData>::iterator it = AcceptVector.begin(); it != AcceptVector.end();)
+		for (size_t i = 0; i < AcceptVector.size(); i++)
 		{
-			if (FD_ISSET(it->fd, &CurrReadSet))
+			const AcceptData& Curr = AcceptVector[i];
+
+			if (FD_ISSET(Curr.fd, &CurrReadSet))
 			{
-				std::cout << "\taccept fd: " << it->fd << std::endl;
+				//std::cout << "\taccept fd: " << Curr.fd << std::endl;
 				struct sockaddr Address;
 				socklen_t AddressLen = sizeof(Address);
-				int ClientFD = accept(it->fd, &Address, &AddressLen);
-				std::cout << "\t\tNew client: " << ClientFD << std::endl;
-				if (it->AcceptFunc(it->Arg, ClientFD, Address, AddressLen))
+				int ClientFD = accept(Curr.fd, &Address, &AddressLen);
+				//std::cout << "\t\tNew client: " << ClientFD << std::endl;
+				if (Curr.AcceptFunc(Curr.Arg, ClientFD, Address, AddressLen))
 				{
-					FD_CLR(it->fd, &ReadSet);
-					it = AcceptVector.erase(it);
+					const AcceptData& Curr = AcceptVector[i];
+
+					FD_CLR(Curr.fd, &ReadSet);
+					AcceptVector.erase(AcceptVector.begin() + i--);
 					continue;
 				}
 			}
-			it++;
 		}
 
-		for (std::vector<ReadData>::iterator it = ReadVector.begin(); it != ReadVector.end();)
+		for (size_t i = 0; i < ReadVector.size(); i++)
 		{
-			if (FD_ISSET(it->fd, &CurrReadSet))
+			const ReadData& Curr = ReadVector[i];
+			if (FD_ISSET(Curr.fd, &CurrReadSet))
 			{
-				std::cout << "\tread fd: " << it->fd << std::endl;
-				ssize_t ReadChars = read(it->fd, Buffer, BUFFER_SIZE);
+				//std::cout << "\tread fd: " << Curr.fd << std::endl;
+				ssize_t ReadChars = read(Curr.fd, Buffer, BUFFER_SIZE);
 				bool End = ReadChars <= 0;
-				if (it->ReadFunc(it->Arg, ReadChars <= 0, std::string(Buffer, End ? 0 : ReadChars)) || End)
+				if (Curr.ReadFunc(Curr.Arg, ReadChars <= 0, std::string(Buffer, End ? 0 : ReadChars)) || End)
 				{
-					FD_CLR(it->fd, &ReadSet);
-					it = ReadVector.erase(it);
+					const ReadData& Curr = ReadVector[i];
+
+					FD_CLR(Curr.fd, &ReadSet);
+					ReadVector.erase(ReadVector.begin() + i--);
 					continue;
 				}
 			}
-			it++;
 		}
 
-		for (std::vector<WriteData>::iterator it = WriteVector.begin(); it != WriteVector.end();)
+		for (size_t i = 0; i < WriteVector.size(); i++)
 		{
-			if (FD_ISSET(it->fd, &CurrWriteSet))
+			WriteData& Curr = WriteVector[i];
+			if (FD_ISSET(Curr.fd, &CurrWriteSet))
 			{
-				std::cout << "\twrite fd: " << it->fd << std::endl;
+				//std::cout << "\twrite fd: " << Curr.fd << std::endl;
 
-				ssize_t Start = it->Written;
+				ssize_t Start = Curr.Written;
 
-				ssize_t WroteBytes = write(it->fd, it->ToWrite.c_str() + it->Written, it->ToWrite.length() - it->Written);
-				it->Written += WroteBytes;
+				ssize_t WroteBytes = write(Curr.fd, Curr.ToWrite.c_str() + Curr.Written, Curr.ToWrite.length() - Curr.Written);
+				Curr.Written += WroteBytes;
 
-				bool End = it->Written >= it->ToWrite.length() || WroteBytes < 0;
-				if (it->WriteFunc(it->Arg, End, Start, WroteBytes) || End)
+				bool End = Curr.Written >= Curr.ToWrite.length() || WroteBytes < 0;
+				if (Curr.WriteFunc(Curr.Arg, End, Start, WroteBytes) || End)
 				{
-					WriteData* Next = it->Next;
+					WriteData& Curr = WriteVector[i];
+
+					WriteData* Next = Curr.Next;
 					if (!Next)
 					{
-						FD_CLR(it->fd, &WriteSet);
-						it = WriteVector.erase(it);
+						FD_CLR(Curr.fd, &WriteSet);
+						WriteVector.erase(WriteVector.begin() + i--);
 						continue;
 					}
 
-					*it = *Next;
+					Curr = *Next;
 					delete Next;
 				}
 			}
-			it++;
 		}
 
 		DecrementMaxFD();
