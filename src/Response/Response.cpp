@@ -138,18 +138,7 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	{
 		std::map<std::string, std::string> map;
 		CgiResponsePtr->MakeEnvMap(map, request);
-		CGIRunner *runner = new CGIRunner(CgiResponsePtr->GetCgiFile(), map);
-
-		//runner->QueuePartialBodyForWrite(request.get_body());	// NOTE: Considering this is CGI, it does not need to be started AFTER the whole body has been read, it can be done in sections, so the CGI program can be started earlier
-
-		//while (!runner->Write()) {  }			// TODO: Non-Blocking read loop via select
-		//while (!runner->Read(cgi_response)) { }	// TODO: Non-Blocking read loop via select
-
-		//std::cout << "cgi_response = " << cgi_response << std::endl;
-		status_code = 200;
-		// TODO: Magic stuff
-		// NOTE: cgi_response is [headers]\n\r[body] without the http line
-		return new CGIResponse(runner);
+		return new CGIResponse(new CGIRunner(CgiResponsePtr->GetCgiFile(), map));
 	}
 	else if (!conf_response || dynamic_cast<ConfigErrorResponse*>(conf_response))
 	{
