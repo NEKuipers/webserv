@@ -21,6 +21,7 @@ ClientSocket::ClientSocket(struct sockaddr_in address, int sock, struct sockaddr
 ClientSocket::~ClientSocket()
 {
 	delete conf_response;
+	delete http_response;
 }
 
 void 	ClientSocket::createResponse()
@@ -28,7 +29,7 @@ void 	ClientSocket::createResponse()
 	http_response = Response::generate_response(conf_response, request);
 }
 
-Request					ClientSocket::get_request()
+Request&				ClientSocket::get_request()
 {
 	return request;
 }

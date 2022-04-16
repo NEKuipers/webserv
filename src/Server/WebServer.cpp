@@ -133,37 +133,55 @@ bool	WebServer::onRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead,
 
 	if (CGIResponse* CgiResponsePtr = dynamic_cast<CGIResponse*>(Response))
 	{
-		// TODO: Have some sort of OnCgiRead & OnCgiWrite function, Call OnRead(Cgi->OutputFD, Arg->second, OnCgiRead)
-		// OnCgiRead will call Selector.Write() with what it read, if it was the last bit that it should read, pass onWriteCloseAfterComplete as the function
-		// Also call Selector.Write() with the body, that will do the entire writing thing too!
+		// Write the body to the CGI program
+		Arg->first->selector.Write(CgiResponsePtr->get_cgi_runner()->InputFD, Arg->second->get_request().get_body(), NULL, NULL);
 
-		Arg->first->selector.Write(CgiResponsePtr->get_cgi_runner()->InputFD, Arg->second->get_request().get_body(), NULL, (Selector::OnWriteFunction)onWriteCloseAfterComplete);
+		// The CGI Programs output does not write most of the headers, so write it here
+		const int status_code = 200;
+		std::string BaseResponse = Response::create_status_line(status_code);
+		BaseResponse += Response::create_headers(Arg->second->conf_response, Arg->second->get_request(), status_code);
+		Arg->first->selector.Write(Arg->second->get_sock(), BaseResponse, NULL, NULL);
 
-		(void)CgiResponsePtr;
-		Arg->first->selector.Write(Arg->second->get_sock(), "HTTP/1.1 200 OK\r\n\r\ncgi thing\r\n", Arg->second, (Selector::OnWriteFunction)onWriteCloseAfterComplete);
-		//Arg->first->selector.OnRead(CgiResponsePtr->get_cgi_runner()->OutputFD, Arg, (Selector::OnWriteFunction)onCgiRead);
+		// Read from the CGI program's output, The onCgiRead function will call write() on the client socket with whatever it read
+		Arg->first->selector.OnRead(CgiResponsePtr->get_cgi_runner()->OutputFD, Arg, (Selector::OnReadFunction)onCgiRead);
+
+		// Do not delete arg, it is used as a new Arg in OnRead, and that will delete if after
 		return true;
 	}
-	else
+	else if (SimpleResponse* SimpleResponsePtr = dynamic_cast<SimpleResponse*>(Response))
 	{
-		std::string Message;
-		bool Complete = Response->get_response_string(Message);
-		assert(Complete);
+		std::string Message = SimpleResponsePtr->get_response_string();
 
 		Arg->first->selector.Write(Arg->second->get_sock(), Message, Arg->second, (Selector::OnWriteFunction)onWriteCloseAfterComplete);
+
+		// Last time we read from the client
+		delete Arg;
+		return true;
 	}
 
-	// Last time we read from the client
-	delete Arg;
-	return true;
+	throw "Unreachable";
 }
 bool	WebServer::onCgiRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead, const std::string& Read)
 {
+	//std::cout << "Read from CGI: " << Read << std::endl;
+	//if (LastRead)
+	//	std::cout << "Last!" << std::endl;
 	(void)LastRead;
 	(void)Read;
-	Arg->first->selector.Write(Arg->second->get_sock(), "HTTP/1.1 200 OK\r\n\r\ncgi thing\r\n", Arg->second, (Selector::OnWriteFunction)onWriteCloseAfterComplete);
-	
-	return false;
+
+
+	Arg->first->selector.Write(Arg->second->get_sock(), Read, Arg->second, LastRead ? (Selector::OnWriteFunction)onWriteCloseAfterComplete : NULL);
+
+	// TODO: read the "Content-Length" header if it exists, and then make sure we do not read more than that
+	// Actually, what happens if it EOF's and we have read less than the content length?
+
+	if (LastRead)
+	{
+		//std::cout << "Closing!" << std::endl;
+		close(static_cast<CGIResponse*>(Arg->second->get_http_response())->get_cgi_runner()->OutputFD);
+		delete Arg;
+	}
+	return LastRead;
 }
 bool	WebServer::onWriteCloseAfterComplete(ClientSocket* Arg, bool LastWrite, int StartByte, int NumBytes)
 {
@@ -180,7 +198,7 @@ int	WebServer::launch()
 	signal(SIGINT, sigintHandler);
 
 	for (std::vector<ServerSocket*>::iterator it = server_sockets.begin(); it != server_sockets.end(); it++)
-	 	selector.OnAccept((*it)->get_sock(), new std::pair<WebServer*, ServerSocket*>(this, *it), (Selector::OnAcceptFunction)onAccept);	// NOTE: These pairs are leaked when selector ends
+	 	selector.OnAccept((*it)->get_sock(), new std::pair<WebServer*, ServerSocket*>(this, *it), (Selector::OnAcceptFunction)onAccept);	// NOTE: These pairs are leaked when selector ends, only possible if select() returns -1
 
 	return selector.Start();
 }

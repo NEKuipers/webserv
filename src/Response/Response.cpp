@@ -125,8 +125,8 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	int status_code = 400;
 	std::string cgi_response = "";
 
-	if (conf_response)
-		std::cout << conf_response->GetErrorReasons() << std::endl;
+	//if (conf_response)
+	//	std::cout << conf_response->GetErrorReasons() << std::endl;
 
 	if (ConfigFileResponse* FileResponsePtr = dynamic_cast<ConfigFileResponse*>(conf_response))
 	{

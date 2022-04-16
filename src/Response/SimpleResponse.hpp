@@ -7,16 +7,16 @@ class SimpleResponse;	// For include loops
 
 class SimpleResponse : public Response
 {
-	public: 
+	public:
 		SimpleResponse(const std::string &http_response);
 
-		~SimpleResponse();
+		virtual ~SimpleResponse();
 
 
-		virtual bool		get_response_string(std::string &response_string);
+		const std::string&		get_response_string();
 		// Public functions
 		friend std::ostream& operator<<(std::ostream& Stream, const SimpleResponse& SimpleResponse);
-		
+
 	private:
 		// Class variables
 		std::string response_string;

@@ -26,13 +26,13 @@ class ClientSocket: public SimpleSocket
 		ClientSocket(struct sockaddr_in address, int sock, struct sockaddr_in sock_adr);
 		virtual ~ClientSocket();
 		void 				createResponse();
-		Request				get_request();
+		Request				&get_request();
 		Response			*get_http_response() const;
-		
+
 		void				read(const std::string& read);
 		bool				check_body();
 		bool				check_headers();
-				
+
 };
 
 #endif

@@ -12,7 +12,7 @@ class Response
 
     public:
         Response();
-        ~Response();
+        virtual ~Response();
         Response(const Response &src);
 
 		static void			InitStatusCodes();
@@ -20,9 +20,6 @@ class Response
 		static std::string	get_reason_phrase(int status_code);
 		static std::string	create_status_line(int status_code);
 		static std::string	create_headers(ConfigResponse *conf_response, Request &request, int status_code);
-		
-
-		virtual bool		get_response_string(std::string &response_string) = 0;
 };
 
 #endif

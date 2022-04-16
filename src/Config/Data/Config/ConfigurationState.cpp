@@ -195,7 +195,7 @@ ConfigurationState::PathType ConfigurationState::IsPathValid(const std::string& 
 		Ret = (ConfigurationState::PathType)(Ret | PathType_ExactFileNonExistent);	// Why can't i 'Ret |= PathType_ExactFileNonExistent', Why must it be casted, why C++, WHY!?
 
 	}
-	std::cout << "Path " << Path << " => " << std::string(buff) << std::endl;
+	//std::cout << "Path " << Path << " => " << std::string(buff) << std::endl;
 
 	if (strncmp(buff, CombinedRoot.c_str(), CombinedRoot.length()))
 	{

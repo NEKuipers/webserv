@@ -3,8 +3,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <iostream>
-#include "WriteException.hpp"
-#include "ReadException.hpp"
 
 #define BUFFER_SIZE 10
 
@@ -55,9 +53,9 @@ CGIRunner::CGIRunner(const std::string& PathName, const std::map<std::string, st
 		Args[0] = PathName.c_str();
 		Args[1] = NULL;
 		execv(PathName.c_str(), const_cast<char *const *>(Args));	// I mean, i COULD make a env string, but duplicates and there is no %100 to list all env variables, only getenv is in the standard, so just set it instead
-		
+
 		// TODO: Get response code from the big block somewhere
-		std::string Message = "HTTP/1.1 500 Internal server error\nContent-Type: text/html\n\n<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>Default error page<br>You seem to have made a invalid request!</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>";
+		std::string Message = "HTTP/1.1 500 Internal server error\nContent-Type: text/html\n\n<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>Default error page<br>CGI failed to run!</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>";
 		std::cout << Message << std::endl;
 		exit(1);
 	}
@@ -77,35 +75,6 @@ CGIRunner::~CGIRunner()
 
 std::ostream& operator<<(std::ostream& Stream, const CGIRunner& CGIRunner)
 {
-	Stream << "CGI Runner, InFD: " << CGIRunner.InputFD << " OutFD: " << CGIRunner.OutputFD << ", To write: " << CGIRunner.ToWritePartialBody << std::endl;	
+	Stream << "CGI Runner, InFD: " << CGIRunner.InputFD << " OutFD: " << CGIRunner.OutputFD;
 	return Stream;
-}
-
-void CGIRunner::QueuePartialBodyForWrite(const std::string& PartialBody)
-{
-	ToWritePartialBody += PartialBody;
-}
-
-bool CGIRunner::Write()
-{
-	ssize_t WrittenBytes = write(InputFD, ToWritePartialBody.c_str(), ToWritePartialBody.length());
-	if (WrittenBytes < 0)
-		throw WriteException();
-	ToWritePartialBody.erase(0, WrittenBytes);
-
-	return ToWritePartialBody.length() == 0;
-}
-
-bool CGIRunner::Read(std::string& ReadPart)
-{
-	char Buffer[BUFFER_SIZE];
-	ssize_t ReadBytes = read(OutputFD, Buffer, BUFFER_SIZE);
-	if (ReadBytes < 0)
-		throw ReadException();
-	ReadPart += std::string(Buffer, ReadBytes);
-
-	// TODO: read the "Content-Length" header if it exists, and then make sure we do not read more than that
-	// Actually, what happens if it EOF's and we have read less than the content length?
-
-	return ReadBytes == 0;
 }
