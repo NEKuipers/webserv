@@ -2,6 +2,7 @@
 #include <sys/select.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <cassert>	// linux assert()
 
 #define BUFFER_SIZE 1024
 
@@ -17,7 +18,7 @@ Selector::Selector() : MaxFd(0)
 
 Selector::~Selector()
 {
-	
+
 }
 
 std::ostream& operator<<(std::ostream& Stream, const Selector& Selector)
@@ -73,8 +74,9 @@ void Selector::Write(int fd, const std::string& ToWrite, void* Arg, OnWriteFunct
 				Data->Next = new WriteData(fd, ToWrite, Arg, OnWrite);
 				return;
 			}
-		
-		_LIBCPP_UNREACHABLE();
+
+		//_LIBCPP_UNREACHABLE();
+		throw "unreachable";
 	}
 
 	WriteVector.push_back(WriteData(fd, ToWrite, Arg, OnWrite));
@@ -102,7 +104,7 @@ int Selector::Start()
 		if (Ret < 0)
 			return Ret;
 		std::cout << "There are " << Ret << " FD's ready!" << std::endl;
-		
+
 		for (std::vector<AcceptData>::iterator it = AcceptVector.begin(); it != AcceptVector.end();)
 		{
 			if (FD_ISSET(it->fd, &CurrReadSet))
@@ -138,7 +140,7 @@ int Selector::Start()
 			}
 			it++;
 		}
-		
+
 		for (std::vector<WriteData>::iterator it = WriteVector.begin(); it != WriteVector.end();)
 		{
 			if (FD_ISSET(it->fd, &CurrWriteSet))
@@ -146,7 +148,7 @@ int Selector::Start()
 				std::cout << "\twrite fd: " << it->fd << std::endl;
 
 				ssize_t Start = it->Written;
-				
+
 				ssize_t WroteBytes = write(it->fd, it->ToWrite.c_str() + it->Written, it->ToWrite.length() - it->Written);
 				it->Written += WroteBytes;
 

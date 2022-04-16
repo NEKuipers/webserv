@@ -9,6 +9,7 @@
 #include "ConfigFileResponse.hpp"
 #include "SimpleResponse.hpp"
 #include "CGIResponse.hpp"
+#include <cassert>	// linux assert()
 
 WebServer::WebServer(int domain, int service, int protocol, int port, u_long interface, int bklg) : selector(), configuration(NULL)
 {
@@ -33,7 +34,7 @@ WebServer::WebServer(Config &config) : selector(), configuration(&config)
 		ServerSocket *newsocket = new ServerSocket(AF_INET, SOCK_STREAM, 0, iter->second, iter->first, 10);
 		server_sockets.push_back(newsocket);
 	}
-	
+
 	launch();
 }
 
@@ -105,7 +106,7 @@ bool	WebServer::onAccept(std::pair<WebServer*, ServerSocket*>* Arg, int ClientFD
 {
 	if (ClientFD == -1)
 		return false;
-	
+
 	struct sockaddr_in addr;
 	memcpy(&addr, &Address, AddressLen);	// What
 	ClientSocket *socket = new ClientSocket(Arg->second->get_address(), ClientFD, addr);
@@ -158,7 +159,11 @@ bool	WebServer::onRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead,
 }
 bool	WebServer::onCgiRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead, const std::string& Read)
 {
+	(void)LastRead;
+	(void)Read;
 	Arg->first->selector.Write(Arg->second->get_sock(), "HTTP/1.1 200 OK\r\n\r\ncgi thing\r\n", Arg->second, (Selector::OnWriteFunction)onWriteCloseAfterComplete);
+	
+	return false;
 }
 bool	WebServer::onWriteCloseAfterComplete(ClientSocket* Arg, bool LastWrite, int StartByte, int NumBytes)
 {

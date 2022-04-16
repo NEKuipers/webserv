@@ -7,6 +7,8 @@
 #include <iostream>
 #include "ToString.hpp"
 #include <cstring>	// Linux strncmp
+#include <cassert>	// linux assert()
+#include <limits.h>	// Linux PATH_MAX
 
 ConfigurationState::ConfigurationState() : AcceptedMethods(), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), Root(""), LocationRoot(""), RedirectBase(NULL) { UpdateCombinedRoot(); }
 ConfigurationState::ConfigurationState(ConfigBase* RedirectBase) : AcceptedMethods(), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), Root(""), LocationRoot(""), RedirectBase(RedirectBase) { UpdateCombinedRoot(); }
@@ -163,7 +165,7 @@ std::string ConfigurationState::RemoveLocationRoot(const std::string& Uri) const
 	std::string RemovedSlash = RawLocationRoot.substr(1);
 	if (Uri == RemovedSlash)
 		return "";
-	
+
 	assert(Uri.rfind(RemovedSlash + "/", 0) != std::string::npos);	// Remove first slash, and move it to the end
 	return Uri.substr(RawLocationRoot.size());
 }
@@ -182,11 +184,11 @@ void ConfigurationState::UpdateCombinedRoot()
 ConfigurationState::PathType ConfigurationState::IsPathValid(const std::string& Path, const ConfigRequest& Request, std::string* ErrorPath) const
 {
 	ConfigurationState::PathType Ret = PathType_ValidFile;
-	
+
 	// Check if the cgi is inside the Root directory, Small problem: If you symlink outside, it still fails, why is checked? Well, you dont want someone asking for cgi "../../Makecgi" or whatever other cgi
 	char buff[PATH_MAX];
 	char* ptr = realpath(Path.c_str(), buff);
-	
+
 	if (!ptr)
 	{
 		if (ErrorPath) *ErrorPath = std::string(buff);
@@ -200,7 +202,7 @@ ConfigurationState::PathType ConfigurationState::IsPathValid(const std::string& 
 		std::cerr << Request << ": Asked for '" << Path << "', But was not inside the combined root directory: '" << CombinedRoot << "'!" << std::endl;
 		Ret = (ConfigurationState::PathType)(Ret | PathType_Invalid);
 	}
-	
+
 	return Ret;
 }
 

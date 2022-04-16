@@ -1,5 +1,6 @@
 #include "ConfigFileResponse.hpp"
 #include <map>
+#include <cassert>	// linux assert()
 
 // Why does c++98 NOT have a hashmap!?
 std::map<std::string, std::string> g_extension_to_content_type;
@@ -104,10 +105,10 @@ const std::string& ConfigFileResponse::GetFileName()
 }
 
 const static std::string DefaultContentType = "application/octet-stream";
-const std::string& ConfigFileResponse::GetContentType() const 
+const std::string& ConfigFileResponse::GetContentType() const
 {
 	assert(g_extension_to_content_type.size() != 0);
-	
+
 	size_t Dot = FileName.rfind(".");
 	if (Dot != std::string::npos)
 	{

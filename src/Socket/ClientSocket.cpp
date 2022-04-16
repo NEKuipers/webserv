@@ -41,7 +41,7 @@ void					ClientSocket::read(const std::string& read)
 bool					ClientSocket::check_body()
 {
 	std::string content_length = request.get_header_value("Content-Length");
-	if (content_length == "" || int(buffer.size()) >= std::stoi(content_length))
+	if (content_length == "" || buffer.size() >= std::strtoul(content_length.c_str(), NULL, 10))	// NOTE: std::stoi() is C++11
 	{
 		request.set_request_body(buffer);
 		return true;
@@ -53,13 +53,13 @@ bool					ClientSocket::check_headers()
 {
 	if (headers_complete)
 		return true;
-	
+
 	while (true)
 	{
 		size_t found_line = buffer.find("\n");
 		if (found_line == std::string::npos)
 			break;
-		
+
 		std::string line = buffer.substr(0, found_line);
 		buffer.erase(0, found_line + 1);
 

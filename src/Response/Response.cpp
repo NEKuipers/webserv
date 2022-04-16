@@ -12,6 +12,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <cassert>	// linux assert()
 
 #define BUFFER_SIZE 1024
 
@@ -90,7 +91,7 @@ static std::string get_date_header()
 std::string Response::create_headers(ConfigResponse *conf_response, Request &request, int status_code)
 {
 	(void)request;
-	
+
 	std::string headers_string = "";
 	headers_string += "Date: " + get_date_header() + "\r\n";
 	headers_string += "Server: webserv\r\n";
@@ -117,7 +118,7 @@ std::string	Response::create_status_line(int status_code)
 Response	*Response::generate_response(ConfigResponse *conf_response, Request &request)
 {
 	assert(g_response_code_to_reason_phrase.size() != 0);
-	
+
 	(void)request;
 	std::string body = "";
 	std::string content_type = "";
@@ -138,9 +139,9 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 		std::map<std::string, std::string> map;
 		CgiResponsePtr->MakeEnvMap(map, request);
 		CGIRunner *runner = new CGIRunner(CgiResponsePtr->GetCgiFile(), map);
-		
+
 		//runner->QueuePartialBodyForWrite(request.get_body());	// NOTE: Considering this is CGI, it does not need to be started AFTER the whole body has been read, it can be done in sections, so the CGI program can be started earlier
-		
+
 		//while (!runner->Write()) {  }			// TODO: Non-Blocking read loop via select
 		//while (!runner->Read(cgi_response)) { }	// TODO: Non-Blocking read loop via select
 
@@ -160,7 +161,7 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 			else if (conf_response->GetErrorReasons().GetWasBodyTooBig())
 				status_code = 413;
 		}
-		
+
 		content_type = "text/html";
 		body = "<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>Default error page<br>You seem to have made a invalid request!</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>";
 	}
@@ -179,14 +180,14 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	if (cgi_response == "")
 	{
 		response_string += "Content-Type: " + content_type + "\r\n";
-		response_string += "Content-Length: " + to_string(body.length()) + "\r\n";	
+		response_string += "Content-Length: " + to_string(body.length()) + "\r\n";
 	}
 	response_string += create_headers(conf_response, request, status_code);//TODO add headers here
 	if (cgi_response != "")
 		response_string += cgi_response;
-	else	
+	else
 		response_string += "\r\n" + body;
-	
+
 	if (conf_response)
 		std::cout << "Response: " << to_string(*conf_response) << std::endl;
 	return new SimpleResponse(response_string);

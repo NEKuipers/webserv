@@ -8,9 +8,10 @@ class ConfigCgiResponse;	// For include loops
 #include "ConfigResponse.hpp"
 #include <map>
 #include "Request.hpp"
+#include <netinet/in.h>	// linux in_port_t
 
 class ConfigCgiResponse : public ConfigResponse {
-	public: 
+	public:
 		ConfigCgiResponse(const std::string& CgiFile, const std::string& FullPath, const ConfigErrorReasons& ErrorReasons);
 		virtual ~ConfigCgiResponse();
 
@@ -63,7 +64,7 @@ class ConfigCgiResponse : public ConfigResponse {
 		// Output: Stdout, contains header
 
 		// Class functions
-		
+
 };
 
 #endif

@@ -10,7 +10,7 @@ struct ParseRequestException : public std::exception
 
 	ParseRequestException(const std::string& Message);
 
-	virtual ~ParseRequestException() _NOEXCEPT;
+	virtual ~ParseRequestException() throw();
 
 	const char* what () const throw ();
 };

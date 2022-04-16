@@ -2,6 +2,7 @@
 #include "ConvertException.hpp"
 
 #include "ToString.hpp"
+#include <limits.h>	// Linux INT_MAX
 
 ConfigLine_location::ConfigLine_location() {}
 ConfigLine_location::ConfigLine_location(const std::string& Location, const ConfigBlock& Block, const ConfigurationState &Configuration) : ConfigListBase(Configuration), Location(Location)

@@ -2,7 +2,7 @@
 
 ParseRequestException::ParseRequestException(const std::string& Message) : Message(Message) {}
 
-ParseRequestException::~ParseRequestException() _NOEXCEPT {}
+ParseRequestException::~ParseRequestException() throw() {}
 
 const char* ParseRequestException::what () const throw () {
 	return Message.c_str();
