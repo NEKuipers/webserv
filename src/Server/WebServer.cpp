@@ -104,46 +104,52 @@ static void	clear_socket(std::vector<T*> &sockets, fd_set &save_read_fds, fd_set
 
 bool	WebServer::onAccept(std::pair<WebServer*, ServerSocket*>* Arg, int ClientFD, struct sockaddr Address, socklen_t AddressLen)
 {
+	WebServer* Server = Arg->first;
+	ServerSocket* Socket = Arg->second;
+
 	if (ClientFD == -1)
 		return false;
 
 	struct sockaddr_in addr;
 	memcpy(&addr, &Address, AddressLen);	// What
-	ClientSocket *socket = new ClientSocket(Arg->second->get_address(), ClientFD, addr);
+	ClientSocket *NewSocket = new ClientSocket(Socket->get_address(), ClientFD, addr);
 
-	Arg->first->selector.OnRead(ClientFD, new std::pair<WebServer*, ClientSocket*>(Arg->first, socket), (Selector::OnReadFunction)onRead);
+	Server->selector.OnRead(ClientFD, new std::pair<WebServer*, ClientSocket*>(Server, NewSocket), (Selector::OnReadFunction)onRead);
 
 	return false;
 }
 bool	WebServer::onRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead, const std::string& Read)
 {
-	Arg->second->read(Read);
+	WebServer* Server = Arg->first;
+	ClientSocket* Client = Arg->second;
 
-	if (!Arg->first->IsRequestComplete(Arg->second))
+	Client->read(Read);
+
+	if (!Server->IsRequestComplete(Client))
 	{
 		if (LastRead)
 			delete Arg;
 		return false;
 	}
 
-	Arg->second->createResponse();
+	Client->createResponse();
 
 
-	Response* Response = Arg->second->get_http_response();
+	Response* Response = Client->get_http_response();
 
 	if (CGIResponse* CgiResponsePtr = dynamic_cast<CGIResponse*>(Response))
 	{
 		// Write the body to the CGI program
-		Arg->first->selector.Write(CgiResponsePtr->get_cgi_runner()->InputFD, Arg->second->get_request().get_body(), NULL, NULL);
+		Server->selector.Write(CgiResponsePtr->get_cgi_runner()->InputFD, Client->get_request().get_body(), NULL, NULL);
 
 		// The CGI Programs output does not write most of the headers, so write it here
 		const int status_code = 200;
 		std::string BaseResponse = Response::create_status_line(status_code);
-		BaseResponse += Response::create_headers(Arg->second->conf_response, Arg->second->get_request(), status_code);
-		Arg->first->selector.Write(Arg->second->get_sock(), BaseResponse, NULL, NULL);
+		BaseResponse += Response::create_headers(Client->conf_response, Client->get_request(), status_code);
+		Server->selector.Write(Client->get_sock(), BaseResponse, NULL, NULL);
 
 		// Read from the CGI program's output, The onCgiRead function will call write() on the client socket with whatever it read
-		Arg->first->selector.OnRead(CgiResponsePtr->get_cgi_runner()->OutputFD, Arg, (Selector::OnReadFunction)onCgiRead);
+		Server->selector.OnRead(CgiResponsePtr->get_cgi_runner()->OutputFD, Arg, (Selector::OnReadFunction)onCgiRead);
 
 		// Do not delete arg, it is used as a new Arg in OnRead, and that will delete if after
 		return true;
@@ -152,7 +158,7 @@ bool	WebServer::onRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead,
 	{
 		std::string Message = SimpleResponsePtr->get_response_string();
 
-		Arg->first->selector.Write(Arg->second->get_sock(), Message, Arg->second, (Selector::OnWriteFunction)onWriteCloseAfterComplete);
+		Server->selector.Write(Client->get_sock(), Message, Client, (Selector::OnWriteFunction)onWriteCloseAfterComplete);
 
 		// Last time we read from the client
 		delete Arg;
@@ -163,6 +169,9 @@ bool	WebServer::onRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead,
 }
 bool	WebServer::onCgiRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead, const std::string& Read)
 {
+	WebServer* Server = Arg->first;
+	ClientSocket* Client = Arg->second;
+
 	//std::cout << "Read from CGI: " << Read << std::endl;
 	//if (LastRead)
 	//	std::cout << "Last!" << std::endl;
@@ -170,7 +179,7 @@ bool	WebServer::onCgiRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRe
 	(void)Read;
 
 
-	Arg->first->selector.Write(Arg->second->get_sock(), Read, Arg->second, LastRead ? (Selector::OnWriteFunction)onWriteCloseAfterComplete : NULL);
+	Server->selector.Write(Client->get_sock(), Read, Client, LastRead ? (Selector::OnWriteFunction)onWriteCloseAfterComplete : NULL);
 
 	// TODO: read the "Content-Length" header if it exists, and then make sure we do not read more than that
 	// Actually, what happens if it EOF's and we have read less than the content length?
@@ -178,7 +187,7 @@ bool	WebServer::onCgiRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRe
 	if (LastRead)
 	{
 		//std::cout << "Closing!" << std::endl;
-		close(static_cast<CGIResponse*>(Arg->second->get_http_response())->get_cgi_runner()->OutputFD);
+		close(static_cast<CGIResponse*>(Client->get_http_response())->get_cgi_runner()->OutputFD);
 		delete Arg;
 	}
 	return LastRead;
