@@ -118,7 +118,7 @@ std::string	Response::create_status_line(int status_code)
 
 int	Response::delete_method(Request &request)
 {
-	std::string prefix = "http/default";
+	std::string prefix = "http/default"; //TODO this prefix should always be used to make the full path point to the target file's relative location to the executable
 	std::string fullpath = prefix + request.get_request_line().target;
 	//if (PathUtils::pathType(request.get_request_line().target) == PathUtils::FILE)
 	if (PathUtils::pathType(fullpath) == PathUtils::FILE)
