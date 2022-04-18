@@ -5,7 +5,7 @@ bool PathUtils::IsDirectory(const std::string& Path)
 {
 	if (Path.length() == 0)
 		return true;
-	
+
 	char endChar = Path.at(Path.length() - 1);
 	if (endChar == '\\' || endChar == '/')
 		return true;
@@ -21,7 +21,7 @@ bool PathUtils::IsDirectory(const std::string& Path)
 	{
 		// Not a valid file? So no directory then?
 	}
-	
+
 
 
 	// Hmmm, probably not a directory then?
@@ -34,10 +34,10 @@ bool PathUtils::IsFile(const std::string& Path)
 	return !IsDirectory(Path);
 }
 
-int PathUtils::pathType(const std::string& Path)
+PathUtils::FileType PathUtils::pathType(const std::string& Path)
 {
 	struct stat buffer;
-	
+
 	if (stat(Path.c_str(), &buffer) == 0)
 	{
 		if (S_ISREG(buffer.st_mode))
