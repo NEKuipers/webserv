@@ -28,7 +28,23 @@ bool PathUtils::IsDirectory(const std::string& Path)
 
 	return false;
 }
+
 bool PathUtils::IsFile(const std::string& Path)
 {
 	return !IsDirectory(Path);
+}
+
+int PathUtils::pathType(const std::string& Path)
+{
+	struct stat buffer;
+	
+	if (stat(Path.c_str(), &buffer) == 0)
+	{
+		if (S_ISREG(buffer.st_mode))
+			return (FILE);
+		else
+			return (DIRECTORY);
+	}
+	else
+		return (DOES_NOT_EXIST);
 }

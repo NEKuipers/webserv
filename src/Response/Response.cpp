@@ -25,7 +25,7 @@ void Response::InitStatusCodes()
 	g_response_code_to_reason_phrase[100] = "Continue";
 	g_response_code_to_reason_phrase[101] = "Switching Protocols";
 	g_response_code_to_reason_phrase[200] = "OK";
-	g_response_code_to_reason_phrase[201] = "Created";
+	g_response_code_to_reason_phrase[201] = "Created"; // For POST method: use stat() to find out if target resource already exists, if not, open(with O_CREAT flag) and return 201
 	g_response_code_to_reason_phrase[202] = "Accepted";
 	g_response_code_to_reason_phrase[203] = "Non-Authoritative Information";
 	g_response_code_to_reason_phrase[204] = "No Content";
@@ -43,7 +43,7 @@ void Response::InitStatusCodes()
 	g_response_code_to_reason_phrase[402] = "Payment Required";
 	g_response_code_to_reason_phrase[403] = "Forbidden";
 	g_response_code_to_reason_phrase[404] = "Not Found";
-	g_response_code_to_reason_phrase[405] = "Method Not Allowed";
+	g_response_code_to_reason_phrase[405] = "Method Not Allowed"; // implemented
 	g_response_code_to_reason_phrase[406] = "Not Acceptable";
 	g_response_code_to_reason_phrase[407] = "Proxy Authentication Required";
 	g_response_code_to_reason_phrase[408] = "Request Timeout";

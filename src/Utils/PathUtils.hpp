@@ -8,8 +8,16 @@ class PathUtils;	// For include loops
 
 class PathUtils {
 	public: 
+		enum filetype
+		{
+			DOES_NOT_EXIST,
+			FILE,
+			DIRECTORY
+		};
+		
 		static bool IsDirectory(const std::string& Path);
 		static bool IsFile(const std::string& Path);
+		int			pathType(const std::string& Path);
 		
 	private:
 		PathUtils();
