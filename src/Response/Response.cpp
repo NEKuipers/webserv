@@ -118,9 +118,12 @@ std::string	Response::create_status_line(int status_code)
 
 int	Response::delete_method(Request &request)
 {
-	if (PathUtils::pathType(request.get_request_line().target) == PathUtils::FILE)
+	std::string prefix = "http/default";
+	std::string fullpath = prefix + request.get_request_line().target;
+	//if (PathUtils::pathType(request.get_request_line().target) == PathUtils::FILE)
+	if (PathUtils::pathType(fullpath) == PathUtils::FILE)
 	{
-		unlink(request.get_request_line().target.c_str());
+		unlink(fullpath.c_str());
 		return 200;
 	}
 	return 404;
@@ -142,7 +145,8 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	{
 		status_code = delete_method(request);
 		std::string response_string = create_status_line(status_code);
-		response_string += create_headers(conf_response, request, status_code);	
+		response_string += create_headers(conf_response, request, status_code);
+		// std::cerr<<status_code<<"\n";
 		return new SimpleResponse(response_string);
 	}
 	if (ConfigFileResponse* FileResponsePtr = dynamic_cast<ConfigFileResponse*>(conf_response))

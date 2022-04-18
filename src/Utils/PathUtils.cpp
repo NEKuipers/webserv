@@ -1,5 +1,6 @@
 #include "PathUtils.hpp"
 #include <sys/stat.h>
+#include <iostream>
 
 bool PathUtils::IsDirectory(const std::string& Path)
 {
