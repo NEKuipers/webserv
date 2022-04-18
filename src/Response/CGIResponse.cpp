@@ -7,12 +7,13 @@ CGIResponse::CGIResponse(CGIRunner *cgiRunner) : cgiRunner(cgiRunner)
 
 CGIResponse::~CGIResponse()
 {
-	// TODO: Implement destructor
+	delete cgiRunner;
 }
 
 bool			CGIResponse::get_response_string(std::string &response_string)
 {
-	return cgiRunner->Read(response_string);
+	(void)response_string;
+	return true;
 }
 
 const CGIRunner			*CGIResponse::get_cgi_runner() const

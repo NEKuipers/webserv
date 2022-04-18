@@ -1,5 +1,6 @@
 #include "Request.hpp"
 #include "ParseRequestException.hpp"
+//#include <algorithm>	// linux std::find()
 
 std::vector<std::string> Request::content_to_lines(std::string req)
 {
@@ -30,7 +31,7 @@ bool   Request::parse_single_header_field(const std::string &line)
 	if (line == "\r" || line.length() == 0)
 		return (true);
 	size_t pos = line.find(':');
-	if (pos == std::string::npos) 
+	if (pos == std::string::npos)
 		throw ParseRequestException("Incorrect formatting found in header.");
 	std::string header_key = line.substr(0, pos);
 	pos++;
@@ -73,9 +74,12 @@ static int validate_http_version(const std::string& http_version)
 
 int     Request::validate_request()
 {
-	std::string methods[]={"GET", "POST", "DELETE"};
-	if (std::find(std::begin(methods), std::end(methods), req_line.method) == std::end(methods))
-		return (1);
+	std::string methods[] = { "GET", "POST", "DELETE" };
+	//if (std::find(std::begin(methods), std::end(methods), req_line.method) == std::end(methods))	// std::begin() is C++11
+	//	return (1);
+	for (size_t i = 0; i < sizeof(methods) / sizeof(methods[0]); i++)
+		if (methods[i] == req_line.method)
+			return 1;
 	if (req_line.target[0] != '/')
 		return (1);
 	if (validate_http_version(req_line.http_version))
@@ -157,7 +161,7 @@ std::ostream                                &operator<<(std::ostream &Stream, co
 
 	for (std::map<std::string, std::string>::const_iterator it = request.header_fields.begin(); it != request.header_fields.end(); it++)
 		Stream << "[" << it->first << "] : [" << it->second << "]" << std::endl;
-	
+
 	if (request.body.size() > 1) {
 		Stream << "Body: " << std::endl;
 		Stream << request.body << std::endl;

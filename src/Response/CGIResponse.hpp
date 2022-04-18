@@ -8,10 +8,10 @@ class CGIResponse;	// For include loops
 
 class CGIResponse : public Response
 {
-	public: 
+	public:
 		CGIResponse(CGIRunner *cgiRunner);
 
-		~CGIResponse();
+		virtual ~CGIResponse();
 
 
 		// Public functions
@@ -19,7 +19,7 @@ class CGIResponse : public Response
 		const CGIRunner			*get_cgi_runner() const;
 
 		friend std::ostream& operator<<(std::ostream& Stream, const CGIResponse& CGIResponse);
-		
+
 	private:
 		// Class variables
 		CGIRunner *cgiRunner;

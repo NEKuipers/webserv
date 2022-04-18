@@ -7,49 +7,35 @@
 #include "ToString.hpp"
 #include "CGIRunner.hpp"
 #include "ConfigFileResponse.hpp"
-
 #include "SimpleResponse.hpp"
 #include "CGIResponse.hpp"
+#include <cassert>	// linux assert()
 
-WebServer::WebServer(int domain, int service, int protocol, int port, u_long interface, int bklg) : configuration(NULL)
+WebServer::WebServer(int domain, int service, int protocol, int port, u_long interface, int bklg) : selector(), configuration(NULL)
 {
 	ServerSocket *newsocket = new ServerSocket(domain, service, protocol, port, interface, bklg);
-	accept_sockets.push_back(newsocket);
+	server_sockets.push_back(newsocket);
 	launch();
 }
 
-WebServer::WebServer() : configuration(NULL)
+WebServer::WebServer() : selector(), configuration(NULL)
 {
 	ServerSocket *newsocket = new ServerSocket(AF_INET, SOCK_STREAM,0,20480,INADDR_ANY,10);
-	accept_sockets.push_back(newsocket);
+	server_sockets.push_back(newsocket);
 	launch();
 }
 
-WebServer::WebServer(Config &config) : configuration(&config)
+WebServer::WebServer(Config &config) : selector(), configuration(&config)
 {
 	std::vector<std::pair<in_addr_t, in_port_t> > *Vec = config.GetListenConnections();
 
 	for (std::vector<std::pair<in_addr_t, in_port_t> >::iterator iter = Vec->begin(); iter != Vec->end(); iter++)
 	{
 		ServerSocket *newsocket = new ServerSocket(AF_INET, SOCK_STREAM, 0, iter->second, iter->first, 10);
-		accept_sockets.push_back(newsocket);
+		server_sockets.push_back(newsocket);
 	}
 
-
-	
 	launch();
-}
-
-
-WebServer::WebServer(const WebServer &src)
-{
-    *this = src;
-}
-
-WebServer		&WebServer::operator=(const WebServer &rhs)
-{
-	this->accept_sockets = rhs.accept_sockets;
-	return (*this);
 }
 
 WebServer::~WebServer(){}
@@ -65,12 +51,8 @@ ClientSocket*	WebServer::connectionAccepter(ServerSocket *conn_socket)
 	return (socket);
 }
 
-
-
-bool		WebServer::connectionHandler(ClientSocket *conn_socket)
+bool		WebServer::IsRequestComplete(ClientSocket *conn_socket)
 {
-	conn_socket->read();
-
 	bool status = conn_socket->check_headers();
 	if (status == false)
 		return false;
@@ -102,12 +84,6 @@ bool		WebServer::connectionHandler(ClientSocket *conn_socket)
 	return (true);
 }
 
-bool	WebServer::connectionResponder(ClientSocket *conn_socket)
-{
-	// only return true if send() returns true AND the last call to appendResponse() ALSO return true
-	return (conn_socket->send());
-}
-
 
 static void	sigintHandler(int signum)
 {
@@ -125,108 +101,118 @@ static void	clear_socket(std::vector<T*> &sockets, fd_set &save_read_fds, fd_set
 	sockets.erase(sockets.begin() + count--);
 }
 
-int	WebServer::launch()
-{ 
-	fd_set save_read_fds = this->get_socket_fd_set();
- 	fd_set save_write_fds;
-	FD_ZERO(&save_write_fds);
-	int max_fd = this->get_highest_fd();
-	signal(SIGINT, sigintHandler);
-	std::cout << "Server is running!"<<std::endl;
-	while(true)
-	{
-		fd_set read_fds = save_read_fds;
-		fd_set write_fds = save_write_fds;
-		if (select(max_fd + 1, &read_fds, &write_fds, NULL, NULL) == -1)
-			throw SelectErrorException();
-		for (size_t count = 0; count < accept_sockets.size(); count++) 
-		{
-			if (FD_ISSET(accept_sockets[count]->get_sock(), &read_fds)) 
-			{
-				try {
-					ClientSocket *new_socket = connectionAccepter(accept_sockets[count]);
-					FD_SET(new_socket->get_sock(), &save_read_fds);
-					max_fd = std::max(max_fd, new_socket->get_sock());
-					read_sockets.push_back(new_socket);
-				} catch (std::exception &e) {
-					std::cout << e.what() << std::endl;
-					clear_socket(read_sockets, save_read_fds, save_write_fds, count);
-				}
-			}
-		}
-		for (size_t count = 0; count < read_sockets.size(); count++) 
-		{
-			Response *http_response = read_sockets[count]->get_http_response();
-			if (http_response)
-			{
-				if (CGIResponse* CGIResponsePtr = dynamic_cast<CGIResponse*>(http_response))
-				{
-					if (FD_ISSET(CGIResponsePtr->get_cgi_runner()->OutputFD, &read_fds) && read_sockets[count]->appendResponse())	// WHY C++?
-					{
-						// Now we have read everything from the CGI script
-						FD_CLR(CGIResponsePtr->get_cgi_runner()->OutputFD, &save_read_fds);
-						// ???
-					}
-				}
-			}
-			
-			if (FD_ISSET(read_sockets[count]->get_sock(), &read_fds))
-			{
-				try {
-					if (connectionHandler(read_sockets[count]))
-					{
-						read_sockets[count]->createResponse();
-						Response *http_response = read_sockets[count]->get_http_response();
-						if (dynamic_cast<SimpleResponse*>(http_response))
-						{
-							bool end = read_sockets[count]->appendResponse();
-							assert(end == true);
-						}
-						else if (CGIResponse* CGIResponsePtr = dynamic_cast<CGIResponse*>(http_response))
-						{
-							FD_SET(CGIResponsePtr->get_cgi_runner()->OutputFD, &save_read_fds);
-						}
-						FD_SET(read_sockets[count]->get_sock(), &save_write_fds);
-					}
-				} catch (std::exception &e) {
-					std::cout << e.what() << std::endl;
-					clear_socket(read_sockets, save_read_fds, save_write_fds, count);
-				}
-			}
-			if (FD_ISSET(read_sockets[count]->get_sock(), &write_fds))
-			{
-				try {
-					if (connectionResponder(read_sockets[count]))
-						clear_socket(read_sockets, save_read_fds, save_write_fds, count);
-				} catch (std::exception &e) {
-					std::cout << e.what() << std::endl;
-					clear_socket(read_sockets, save_read_fds, save_write_fds, count);
-				}
-			}
-		}
 
+bool	WebServer::onAccept(std::pair<WebServer*, ServerSocket*>* Arg, int ClientFD, struct sockaddr Address, socklen_t AddressLen)
+{
+	WebServer* Server = Arg->first;
+	ServerSocket* Socket = Arg->second;
+
+	if (ClientFD == -1)
+		return false;
+
+	struct sockaddr_in addr;
+	memcpy(&addr, &Address, AddressLen);	// What
+	ClientSocket *NewSocket = new ClientSocket(Socket->get_address(), ClientFD, addr);
+
+	Server->selector.OnRead(ClientFD, new std::pair<WebServer*, ClientSocket*>(Server, NewSocket), (Selector::OnReadFunction)onRead);
+
+	return false;
+}
+bool	WebServer::onRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead, const std::string& Read)
+{
+	WebServer* Server = Arg->first;
+	ClientSocket* Client = Arg->second;
+
+	Client->read(Read);
+
+	if (!Server->IsRequestComplete(Client))
+	{
+		if (LastRead)
+			delete Arg;
+		return false;
 	}
-	return (0);
+
+	Client->createResponse();
+
+
+	Response* Response = Client->get_http_response();
+
+	if (CGIResponse* CgiResponsePtr = dynamic_cast<CGIResponse*>(Response))
+	{
+		// Write the body to the CGI program
+		Server->selector.Write(CgiResponsePtr->get_cgi_runner()->InputFD, Client->get_request().get_body(), NULL, NULL);
+
+		// The CGI Programs output does not write most of the headers, so write it here
+		const int status_code = 200;
+		std::string BaseResponse = Response::create_status_line(status_code);
+		BaseResponse += Response::create_headers(Client->conf_response, Client->get_request(), status_code);
+		Server->selector.Write(Client->get_sock(), BaseResponse, NULL, NULL);
+
+		// Read from the CGI program's output, The onCgiRead function will call write() on the client socket with whatever it read
+		Server->selector.OnRead(CgiResponsePtr->get_cgi_runner()->OutputFD, Arg, (Selector::OnReadFunction)onCgiRead);
+
+		// Do not delete arg, it is used as a new Arg in OnRead, and that will delete if after
+		return true;
+	}
+	else if (SimpleResponse* SimpleResponsePtr = dynamic_cast<SimpleResponse*>(Response))
+	{
+		std::string Message = SimpleResponsePtr->get_response_string();
+
+		Server->selector.Write(Client->get_sock(), Message, Client, (Selector::OnWriteFunction)onWriteCloseAfterComplete);
+
+		// Last time we read from the client
+		delete Arg;
+		return true;
+	}
+
+	throw "Unreachable";
+}
+bool	WebServer::onCgiRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead, const std::string& Read)
+{
+	WebServer* Server = Arg->first;
+	ClientSocket* Client = Arg->second;
+
+	//std::cout << "Read from CGI: " << Read << std::endl;
+	//if (LastRead)
+	//	std::cout << "Last!" << std::endl;
+	(void)LastRead;
+	(void)Read;
+
+
+	Server->selector.Write(Client->get_sock(), Read, Client, LastRead ? (Selector::OnWriteFunction)onWriteCloseAfterComplete : NULL);
+
+	// TODO: read the "Content-Length" header if it exists, and then make sure we do not read more than that
+	// Actually, what happens if it EOF's and we have read less than the content length?
+
+	if (LastRead)
+	{
+		//std::cout << "Closing!" << std::endl;
+		close(static_cast<CGIResponse*>(Client->get_http_response())->get_cgi_runner()->OutputFD);
+		delete Arg;
+	}
+	return LastRead;
+}
+bool	WebServer::onWriteCloseAfterComplete(ClientSocket* Arg, bool LastWrite, int StartByte, int NumBytes)
+{
+	(void)StartByte;
+	(void)NumBytes;
+
+	if (LastWrite)
+		delete Arg;
+	return false;
+}
+
+int	WebServer::launch()
+{
+	signal(SIGINT, sigintHandler);
+
+	for (std::vector<ServerSocket*>::iterator it = server_sockets.begin(); it != server_sockets.end(); it++)
+	 	selector.OnAccept((*it)->get_sock(), new std::pair<WebServer*, ServerSocket*>(this, *it), (Selector::OnAcceptFunction)onAccept);	// NOTE: These pairs are leaked when selector ends, only possible if select() returns -1
+
+	return selector.Start();
 }
 
 std::vector<ServerSocket *>		WebServer::get_sockets()
 {
-	return this->accept_sockets;
-}
-
-fd_set							WebServer::get_socket_fd_set()
-{
-	fd_set	socket_fd_set;
-
-	FD_ZERO(&socket_fd_set);
-	for (std::vector<ServerSocket *>::iterator it = this->accept_sockets.begin(); it != this->accept_sockets.end(); it++)
-	{
-		FD_SET((*it)->get_sock(), &socket_fd_set);
-	}
-	return (socket_fd_set);
-}
-
-int							WebServer::get_highest_fd()
-{
-	return ((*(this->accept_sockets.end() - 1))->get_sock());
+	return this->server_sockets;
 }
