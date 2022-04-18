@@ -5,6 +5,7 @@
 #include "ConfigCgiResponse.hpp"
 #include "CGIResponse.hpp"
 #include "SimpleResponse.hpp"
+#include "PathUtils.hpp"
 #include <map>
 #include "CGIRunner.hpp"
 #include "ToString.hpp"
@@ -115,6 +116,16 @@ std::string	Response::create_status_line(int status_code)
 	return status_line;
 }
 
+int	Response::delete_method(Request &request)
+{
+	if (PathUtils::pathType(request.get_request_line().target) == PathUtils::FILE)
+	{
+		unlink(request.get_request_line().target.c_str());
+		return 200;
+	}
+	return 404;
+}
+
 Response	*Response::generate_response(ConfigResponse *conf_response, Request &request)
 {
 	assert(g_response_code_to_reason_phrase.size() != 0);
@@ -127,7 +138,13 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 
 	//if (conf_response)
 	//	std::cout << conf_response->GetErrorReasons() << std::endl;
-
+	if (request.get_request_line().method == "DELETE")
+	{
+		status_code = delete_method(request);
+		std::string response_string = create_status_line(status_code);
+		response_string += create_headers(conf_response, request, status_code);	
+		return new SimpleResponse(response_string);
+	}
 	if (ConfigFileResponse* FileResponsePtr = dynamic_cast<ConfigFileResponse*>(conf_response))
 	{
 		status_code = 200;
