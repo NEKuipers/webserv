@@ -10,14 +10,15 @@ class PathUtils {
 	public:
 		enum FileType
 		{
-			DOES_NOT_EXIST,
-			FILE,
-			DIRECTORY
+			DOES_NOT_EXIST = 1 << 1,
+			FILE = 1 << 2,
+			DIRECTORY = 1 << 3
 		};
 
-		static bool 	IsDirectory(const std::string& Path);
-		static bool 	IsFile(const std::string& Path);
-		static FileType	pathType(const std::string& Path);
+		static bool 		IsDirectory(const std::string& Path);
+		static bool 		IsFile(const std::string& Path);
+		static FileType		pathType(const std::string& Path);
+		static std::string	combine(const std::string& WorkingDir, const std::string& Relative);
 
 	private:
 		PathUtils();
