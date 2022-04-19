@@ -51,10 +51,13 @@ $(PREREQS): $(PREREQ_DIR)%.d: $(SRC_DIR)%.cpp Makefile Settings.mk | $(PREREQ_DI
 	@$(CXX) -MM $(patsubst $(PREREQ_DIR)%.d,$(SRC_DIR)%.cpp,$@) $(CFLAGS) >> $@
 
 # general management
-.PHONY: clean
-clean:
-	rm -rf $(OBJ_DIR)
+.PHONY: pclean
+pclean:
 	rm -rf $(PREREQ_DIR)
+
+.PHONY: clean
+clean: pclean
+	rm -rf $(OBJ_DIR)
 
 .PHONY: fclean
 fclean: clean
