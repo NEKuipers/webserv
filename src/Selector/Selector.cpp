@@ -2,6 +2,8 @@
 #include <sys/select.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <iostream>
+
 #include <cassert>	// linux assert()
 
 #define BUFFER_SIZE 1024
@@ -91,7 +93,46 @@ void Selector::DecrementMaxFD()
 		MaxFd--;
 }
 
-//#include <iostream>
+bool Selector::RunAccept(const AcceptData& AcceptData, int ClientFD, const struct sockaddr& Address, socklen_t AddressLen)
+{
+	try {
+		return AcceptData.AcceptFunc(AcceptData.Arg, ClientFD, Address, AddressLen);
+	} catch (const std::exception& Exception) {
+		std::cerr << "OnAccept(" << AcceptData.fd << ") threw an exception: " << Exception.what();
+	} catch (const std::string& Message) {
+		std::cerr << "OnAccept(" << AcceptData.fd << ") threw an exception string: " << Message;
+	} catch (...) {
+		std::cerr << "OnAccept(" << AcceptData.fd << ") threw an exception of unknown type!";	// Too bad i can't use std::current_exception BECAUSE THATS TOO FANCY FOR CODAM (C++11)
+	}
+	return true;
+}
+bool Selector::RunRead(const ReadData& ReadData, bool LastRead, const std::string& Read)
+{
+	try {
+		return ReadData.ReadFunc(ReadData.Arg, LastRead, Read);
+	} catch (const std::exception& Exception) {
+		std::cerr << "OnRead(" << ReadData.fd << ") threw an exception: " << Exception.what();
+	} catch (const std::string& Message) {
+		std::cerr << "OnRead(" << ReadData.fd << ") threw an exception string: " << Message;
+	} catch (...) {
+		std::cerr << "OnRead(" << ReadData.fd << ") threw an exception of unknown type!";	// Too bad i can't use std::current_exception BECAUSE THATS TOO FANCY FOR CODAM (C++11)
+	}
+	return true;
+}
+bool Selector::RunWrite(const WriteData& WriteData, bool LastWrite, int StartByte, int NumBytes)
+{
+	try {
+		return WriteData.WriteFunc(WriteData.Arg, LastWrite, StartByte, NumBytes);
+	} catch (const std::exception& Exception) {
+		std::cerr << "OnWrite(" << WriteData.fd << ") threw an exception: " << Exception.what();
+	} catch (const std::string& Message) {
+		std::cerr << "OnWrite(" << WriteData.fd << ") threw an exception string: " << Message;
+	} catch (...) {
+		std::cerr << "OnWrite(" << WriteData.fd << ") threw an exception of unknown type!";	// Too bad i can't use std::current_exception BECAUSE THATS TOO FANCY FOR CODAM (C++11)
+	}
+	return true;
+}
+
 int Selector::Start()
 {
 	char Buffer[BUFFER_SIZE];
@@ -116,7 +157,7 @@ int Selector::Start()
 				socklen_t AddressLen = sizeof(Address);
 				int ClientFD = accept(Curr.fd, &Address, &AddressLen);
 				//std::cout << "\t\tNew client: " << ClientFD << std::endl;
-				if (Curr.AcceptFunc(Curr.Arg, ClientFD, Address, AddressLen))
+				if (RunAccept(Curr, ClientFD, Address, AddressLen))
 				{
 					const AcceptData& Curr = AcceptVector[i];
 
@@ -135,7 +176,7 @@ int Selector::Start()
 				//std::cout << "\tread fd: " << Curr.fd << std::endl;
 				ssize_t ReadChars = read(Curr.fd, Buffer, BUFFER_SIZE);
 				bool End = ReadChars <= 0;
-				if (Curr.ReadFunc(Curr.Arg, ReadChars <= 0, std::string(Buffer, End ? 0 : ReadChars)) || End)
+				if (RunRead(Curr, ReadChars <= 0, std::string(Buffer, End ? 0 : ReadChars)) || End)
 				{
 					const ReadData& Curr = ReadVector[i];
 
@@ -159,7 +200,7 @@ int Selector::Start()
 				Curr.Written += WroteBytes;
 
 				bool End = Curr.Written >= Curr.ToWrite.length() || WroteBytes < 0;
-				if (Curr.WriteFunc(Curr.Arg, End, Start, WroteBytes) || End)
+				if (RunWrite(Curr, End, Start, WroteBytes) || End)
 				{
 					WriteData& Curr = WriteVector[i];
 
@@ -181,6 +222,6 @@ int Selector::Start()
 	}
 }
 
-bool Selector::DefaultOnAcceptFunction(void* Arg, int ClientFD, struct sockaddr Address, socklen_t AddressLen) { (void)Arg; (void)ClientFD; (void)Address; (void)AddressLen; return false; }
+bool Selector::DefaultOnAcceptFunction(void* Arg, int ClientFD, const struct sockaddr& Address, socklen_t AddressLen) { (void)Arg; (void)ClientFD; (void)Address; (void)AddressLen; return false; }
 bool Selector::DefaultOnReadFunction(void* Arg, bool LastRead, const std::string& Read) { (void)Arg; (void)LastRead; (void)Read; return false; }
 bool Selector::DefaultOnWriteFunction(void* Arg, bool LastWrite, int StartByte, int NumBytes) { (void)Arg; (void)LastWrite; (void)StartByte; (void)NumBytes; return false; }

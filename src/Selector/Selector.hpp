@@ -10,7 +10,7 @@ class Selector;	// For include loops
 class Selector {
 	public: 
 		// All these should return true when the FD should be cleared
-		typedef bool (*OnAcceptFunction)(void* Arg, int ClientFD, struct sockaddr Address, socklen_t AddressLen);
+		typedef bool (*OnAcceptFunction)(void* Arg, int ClientFD, const struct sockaddr& Address, socklen_t AddressLen);
 		typedef bool (*OnReadFunction)(void* Arg, bool LastRead, const std::string& Read);
 		typedef bool (*OnWriteFunction)(void* Arg, bool LastWrite, int StartByte, int NumBytes);
 
@@ -26,9 +26,6 @@ class Selector {
 		
 		int Start();
 	private:
-		static bool DefaultOnAcceptFunction(void* Arg, int ClientFD, struct sockaddr Address, socklen_t AddressLen);
-		static bool DefaultOnReadFunction(void* Arg, bool LastRead, const std::string& Read);
-		static bool DefaultOnWriteFunction(void* Arg, bool LastWrite, int StartByte, int NumBytes);
 
 		Selector(const Selector& From);
 		Selector& operator = (const Selector& From);
@@ -74,7 +71,15 @@ class Selector {
 		
 		
 		// Class functions
-		
+
+		// If only there where parameter packs, i'd only have 2 functions!
+		static bool DefaultOnAcceptFunction(void* Arg, int ClientFD, const struct sockaddr& Address, socklen_t AddressLen);
+		static bool DefaultOnReadFunction(void* Arg, bool LastRead, const std::string& Read);
+		static bool DefaultOnWriteFunction(void* Arg, bool LastWrite, int StartByte, int NumBytes);
+
+		static bool RunAccept(const AcceptData& AcceptData, int ClientFD, const struct sockaddr& Address, socklen_t AddressLen);
+		static bool RunRead(const ReadData& ReadData, bool LastRead, const std::string& Read);
+		static bool RunWrite(const WriteData& WriteData, bool LastWrite, int StartByte, int NumBytes);
 };
 
 #endif
