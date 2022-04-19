@@ -1,12 +1,5 @@
 #include "ConfigLine_try_file.hpp"
-
-#include <fstream>
-#include <iostream>
 #include "ConfigFileResponse.hpp"
-#include "MethodException.hpp"
-#include "PathUtils.hpp"
-
-#include <stdlib.h>	// realpath
 
 static std::string* AcceptedMethods[] = {
 	new std::string("GET"),

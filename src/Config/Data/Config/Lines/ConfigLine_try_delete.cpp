@@ -1,12 +1,5 @@
 #include "ConfigLine_try_delete.hpp"
-
-#include <fstream>
-#include <iostream>
 #include "ConfigDeleteResponse.hpp"
-#include "MethodException.hpp"
-#include "PathUtils.hpp"
-
-#include <stdlib.h>	// realpath
 
 static std::string* AcceptedMethods[] = {
 	new std::string("DELETE"),

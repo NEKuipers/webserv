@@ -1,12 +1,5 @@
 #include "ConfigLine_try_cgi.hpp"
-
-#include <fstream>
-#include <iostream>
 #include "ConfigCgiResponse.hpp"
-#include "MethodException.hpp"
-#include "PathUtils.hpp"
-
-#include <stdlib.h>	// realpath
 
 static std::string* AcceptedMethods[] = {
 	new std::string("GET"),
