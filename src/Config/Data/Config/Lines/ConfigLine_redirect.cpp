@@ -8,7 +8,7 @@ ConfigLine_redirect::ConfigLine_redirect(const ConfigLine_redirect& From)
 {
 	this->operator=(From);
 }
-ConfigLine_redirect::ConfigLine_redirect(const std::string& NewUri, const ConfigurationState& Configuration) : ConfigBase(Configuration), NewUri(NewUri)
+ConfigLine_redirect::ConfigLine_redirect(const std::string& NewPath, const ConfigurationState& Configuration) : ConfigBase(Configuration), NewPath(NewPath)
 {
 
 }
@@ -21,7 +21,7 @@ ConfigLine_redirect::~ConfigLine_redirect()
 ConfigLine_redirect& ConfigLine_redirect::operator = (const ConfigLine_redirect& From)
 {
 	static_cast<ConfigBase*>(this)->operator=(From);
-	NewUri = From.NewUri;
+	NewPath = From.NewPath;
 
 	// return the existing object so we can chain this operator
 	return *this;
@@ -35,7 +35,7 @@ std::ostream& operator<<(std::ostream& Stream, const ConfigLine_redirect& Config
 
 void ConfigLine_redirect::Print(std::ostream& Stream) const
 {
-	Stream << "Redirect " << NewUri;
+	Stream << "Redirect " << NewPath;
 }
 
 ConfigLine_redirect* ConfigLine_redirect::TryParse(const ConfigLine& Line, const ConfigurationState& Configuration)
@@ -52,5 +52,5 @@ ConfigLine_redirect* ConfigLine_redirect::TryParse(const ConfigLine& Line, const
 
 ConfigResponse* ConfigLine_redirect::GetBaseResponse(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const
 {
-	return Configuration.Redirect(Request, NewUri, ErrorReasons);
+	return Configuration.Redirect(Request, NewPath, ErrorReasons);
 }

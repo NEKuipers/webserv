@@ -57,10 +57,10 @@ class ConfigBase {
 // listen (host:[port ?? 80])[1..];		listens to this host and port combination
 // server_name [name][1..];				When multiple servers are listening to the same host&port, use the server name header to choose what server will process the request
 // client_max_body_size [size];			The maximum content length in a header
-// redirect [new_uri];					Changes the URI of the request
+// redirect [new_path];					Changes the PATH of the request
 // return [code] [text];				Returns code with text
 // directory [what];					Sets directory listing on/off/file
-// error_page [new_uri]					If we did not find a response, redirect to new_uri
+// error_page [new_path]					If we did not find a response, redirect to new_path
 
 
 #endif

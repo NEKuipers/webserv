@@ -73,20 +73,17 @@ ConfigResponse* ConfigLine_base_try_file::GetBaseResponse(const ConfigRequest& R
 	for (std::vector<std::string>::const_iterator It = Files.begin(); It != Files.end(); It++)
 	{
 		bool MustValidate = false;
-		std::string File = Configuration.GetCombinedRoot() + "/" + Configuration.InterperetEnvVariableUserVariables(*It, &Request, MustValidate);	// Isn't there a utility function that combines paths?
+		std::string File = PathUtils::combine(Configuration.GetCombinedRoot(), Configuration.InterperetEnvVariableUserVariables(*It, &Request, MustValidate));
 		if (!PathUtils::IsFile(File))
 			continue;
 
-		std::string PartialPath;
 		if (AcceptsPartialPath())
 		{
-			ConfigurationState::PathType PathType = Configuration.IsPathValid(File, Request, &PartialPath);
-			std::cout << "Get '" << File << "' => " << PartialPath << ", With pathtype: " << PathType << std::endl;
+			ConfigurationState::PathType PathType = Configuration.IsPathValid(File, Request, &File);
+			//std::cout << "Get '" << File << "' => " << PartialPath << ", With pathtype: " << PathType << std::endl;
 			
 			if (MustValidate && (PathType & ConfigurationState::PathType_Invalid))
 				continue;
-			if (!(PathType & ConfigurationState::PathType_ExactFileNonExistent))
-				PartialPath = File;
 		}
 		else
 		{
@@ -94,7 +91,7 @@ ConfigResponse* ConfigLine_base_try_file::GetBaseResponse(const ConfigRequest& R
 				continue;
 		}
 
-		ConfigResponse* Response = GetResponseForFile(File, PartialPath, ErrorReasons);
+		ConfigResponse* Response = GetResponseForFile(Request, File, ErrorReasons);
 		if (Response)
 		{
 			ErrorReasons.AddAllowedMethods(Configuration.AcceptedMethods);

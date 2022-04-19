@@ -44,7 +44,7 @@ class ConfigurationState {
 
 		void AppendLocationRoot(const std::string& Location);
 
-		ConfigResponse* Redirect(const ConfigRequest& Request, std::string NewUri, ConfigErrorReasons& ErrorReasons) const;
+		ConfigResponse* Redirect(const ConfigRequest& Request, std::string NewPath, ConfigErrorReasons& ErrorReasons) const;
 		ConfigResponse* Error(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const;
 
 		const std::string& GetRoot() const;
@@ -52,12 +52,12 @@ class ConfigurationState {
 		const std::string& GetRawLocationRoot() const;
 		const std::string& GetLocationRoot() const;
 
-		std::string RemoveLocationRoot(const std::string& Uri) const;
+		std::string RemoveLocationRoot(const std::string& Path) const;
 
 		// Public functions
 		std::vector<std::string> AcceptedMethods;
 
-		std::string ErrorUri;
+		std::string ErrorPath;
 		size_t MaxBodySize;
 
 		PathType IsPathValid(const std::string& Path, const ConfigRequest& Request, std::string* ErrorPath) const;

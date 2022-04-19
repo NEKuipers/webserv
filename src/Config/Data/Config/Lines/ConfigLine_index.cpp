@@ -42,16 +42,16 @@ ConfigLine_index* ConfigLine_index::TryParse(const ConfigLine& Line, const Confi
 
 EnterResult ConfigLine_index::Enters(const ConfigRequest& Request) const
 {
-	const std::string& URI = Request.GetUri();
+	const std::string& PATH = Request.GetPath();
 
-	// URI must be equal to [ExpectedRootExtension]
+	// PATH must be equal to [ExpectedRootExtension]
 
-	// URI can be "" or "test/"
+	// PATH can be "" or "test/"
 	// ExpectedRootExtension can be "" or "/data"
 	// We dont care about the slashes
 	
-	if (Configuration.GetLocationRoot() == URI	// If both are empty
-	|| Configuration.GetLocationRoot() + "/" == "/" + URI)	// Or both are filled
+	if (Configuration.GetLocationRoot() == PATH	// If both are empty
+	|| Configuration.GetLocationRoot() + "/" == "/" + PATH)	// Or both are filled
 		return EnterResult_EnterAndError;
 
 	return EnterResult_No;

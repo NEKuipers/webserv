@@ -2,7 +2,7 @@
 #include "Request.hpp"
 #include "ToString.hpp"
 
-ConfigCgiResponse::ConfigCgiResponse(const std::string& CgiFile, const std::string& FullPath, const ConfigErrorReasons& ErrorReasons) : ConfigResponse(ErrorReasons), CgiFile(CgiFile), FullPath(FullPath)
+ConfigCgiResponse::ConfigCgiResponse(const std::string& CgiFile, const std::string& PathInfo, const std::string& ScriptName, const ConfigErrorReasons& ErrorReasons) : ConfigResponse(ErrorReasons), CgiFile(CgiFile), PathInfo(PathInfo), ScriptName(ScriptName)
 {
 	
 }
@@ -38,12 +38,12 @@ void ConfigCgiResponse::MakeEnvMap(std::map<std::string, std::string>& Map, cons
 	Map["SERVER_PROTOCOL"] = "HTTP/1.1";
 	Map["SERVER_PORT"] = to_string(ntohs(RequestPort));
 	Map["REQUEST_METHOD"] = Request.get_request_line().method;
-	if (PATH_INFO != "")
+	if (PathInfo != "")
 	{
-		Map["PATH_INFO"] = PATH_INFO;
-		Map["PATH_TRANSLATED"] = CgiFile + PATH_INFO;
+		Map["PATH_INFO"] = PathInfo;
+		Map["PATH_TRANSLATED"] = CgiFile + PathInfo;
 	}
-	Map["SCRIPT_NAME"] = CgiFile;	// TODO: This is wrong, it should be the URI to the script, not the absolute path to the script
+	Map["SCRIPT_NAME"] = ScriptName;
 	Map["QUERY_STRING"] = QUERY_STRING;
 	//Map["REMOTE_HOST"] = ?
 	Map["REMOTE_ADDR"] = "127.0.0.1";	// TODO: Get adress from Request

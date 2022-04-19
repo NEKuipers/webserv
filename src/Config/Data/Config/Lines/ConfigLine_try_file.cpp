@@ -47,9 +47,10 @@ ConfigLine_try_file* ConfigLine_try_file::TryParse(const ConfigLine& Line, const
 	return new ConfigLine_try_file(New, Configuration);
 }
 
-ConfigResponse* ConfigLine_try_file::GetResponseForFile(const std::string& FullPath, const std::string& PartialPath, const ConfigErrorReasons &ErrorReasons) const
+ConfigResponse* ConfigLine_try_file::GetResponseForFile(const ConfigRequest& Request, const std::string& FullPath, const ConfigErrorReasons &ErrorReasons) const
 {
-	(void)PartialPath;
+	(void)Request;
+	
 	std::ifstream* Stream = new std::ifstream(FullPath.c_str());	// Annoyingly, linux does not have a string contructor
 	if (!Stream->is_open() || !Stream->good())
 	{

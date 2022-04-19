@@ -11,7 +11,7 @@ class ConfigLine_redirect : public ConfigBase {
 	public: 
 		ConfigLine_redirect();
 		ConfigLine_redirect(const ConfigLine_redirect& From);
-		ConfigLine_redirect(const std::string& NewUri, const ConfigurationState& Configuration);
+		ConfigLine_redirect(const std::string& NewPath, const ConfigurationState& Configuration);
 
 		virtual ~ConfigLine_redirect();
 
@@ -27,7 +27,7 @@ class ConfigLine_redirect : public ConfigBase {
 
 	private:
 		// Class variables
-		std::string NewUri;
+		std::string NewPath;
 		
 		// Class functions
 		

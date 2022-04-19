@@ -20,7 +20,7 @@ class ConfigLine_base_try_file : public ConfigBase {
 		friend std::ostream& operator<<(std::ostream& Stream, const ConfigLine_base_try_file& ConfigLine_base_try_file);
 		virtual void Print(std::ostream& Stream) const;		
 	protected:
-		virtual ConfigResponse* GetResponseForFile(const std::string& FullPath, const std::string& PartialPath, const ConfigErrorReasons &ErrorReasons) const = 0;
+		virtual ConfigResponse* GetResponseForFile(const ConfigRequest& Request, const std::string& FullPath, const ConfigErrorReasons &ErrorReasons) const = 0;
 		virtual bool AcceptsPartialPath() const;
 
 		virtual ConfigResponse* GetBaseResponse(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const;

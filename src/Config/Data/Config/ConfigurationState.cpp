@@ -10,8 +10,8 @@
 #include <cassert>	// linux assert()
 #include <limits.h>	// Linux PATH_MAX
 
-ConfigurationState::ConfigurationState() : AcceptedMethods(), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), Root(""), LocationRoot(""), RedirectBase(NULL) { UpdateCombinedRoot(); }
-ConfigurationState::ConfigurationState(ConfigBase* RedirectBase) : AcceptedMethods(), ErrorUri(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), Root(""), LocationRoot(""), RedirectBase(RedirectBase) { UpdateCombinedRoot(); }
+ConfigurationState::ConfigurationState() : AcceptedMethods(), ErrorPath(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), Root(""), LocationRoot(""), RedirectBase(NULL) { UpdateCombinedRoot(); }
+ConfigurationState::ConfigurationState(ConfigBase* RedirectBase) : AcceptedMethods(), ErrorPath(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), Root(""), LocationRoot(""), RedirectBase(RedirectBase) { UpdateCombinedRoot(); }
 
 ConfigurationState::ConfigurationState(const ConfigurationState& From)
 {
@@ -29,7 +29,7 @@ ConfigurationState& ConfigurationState::operator = (const ConfigurationState& Fr
 	CombinedRoot = From.CombinedRoot;
 	RawLocationRoot = From.RawLocationRoot;
 	LocationRoot = From.LocationRoot;
-	ErrorUri = From.ErrorUri;
+	ErrorPath = From.ErrorPath;
 	MaxBodySize = From.MaxBodySize;
 	RedirectBase = From.RedirectBase;
 	AcceptedMethods = From.AcceptedMethods;
@@ -92,12 +92,12 @@ bool ConfigurationState::EatLine(const ConfigLine& Line)
 
 		return true;
 	}
-	else if (Args.at(0) == "error_uri")
+	else if (Args.at(0) == "error_path")
 	{
 		if (Args.size() > 2)
-			throw ConvertException("ConfigLine", "error_uri", "too many arguments");
+			throw ConvertException("ConfigLine", "error_path", "too many arguments");
 
-		ErrorUri = Args.size() > 1 ? Args.at(1) : "";
+		ErrorPath = Args.size() > 1 ? Args.at(1) : "";
 		return true;
 	}
 	else if (Args.at(0) == "client_max_body_size")
@@ -129,12 +129,12 @@ void ConfigurationState::AppendLocationRoot(const std::string& Location)
 	UpdateCombinedRoot();
 }
 
-ConfigResponse* ConfigurationState::Redirect(const ConfigRequest& Request, std::string Uri, ConfigErrorReasons& ErrorReasons) const
+ConfigResponse* ConfigurationState::Redirect(const ConfigRequest& Request, std::string Path, ConfigErrorReasons& ErrorReasons) const
 {
 	if (!RedirectBase)
 		return NULL;
 
-	ConfigRequest* NewRequest = Request.RedirectUri(Uri);
+	ConfigRequest* NewRequest = Request.RedirectPath(Path);
 	if (!NewRequest)
 		return NULL;
 
@@ -146,8 +146,8 @@ ConfigResponse* ConfigurationState::Redirect(const ConfigRequest& Request, std::
 
 ConfigResponse* ConfigurationState::Error(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const
 {
-	if (ErrorUri != "")
-		return Redirect(Request, ErrorUri, ErrorReasons);
+	if (ErrorPath != "")
+		return Redirect(Request, ErrorPath, ErrorReasons);
 	return new ConfigErrorResponse(ErrorReasons);
 }
 
@@ -156,18 +156,18 @@ const std::string& ConfigurationState::GetCombinedRoot() const { return Combined
 const std::string& ConfigurationState::GetRawLocationRoot() const { return RawLocationRoot; }
 const std::string& ConfigurationState::GetLocationRoot() const { return LocationRoot; }
 
-std::string ConfigurationState::RemoveLocationRoot(const std::string& Uri) const
+std::string ConfigurationState::RemoveLocationRoot(const std::string& Path) const
 {
 	if (RawLocationRoot.size() == 0)
-		return Uri;
+		return Path;
 
-	//std::cout << "Removing " << RawLocationRoot << " From URI: " << Uri << std::endl;
+	//std::cout << "Removing " << RawLocationRoot << " From PATH: " << Path << std::endl;
 	std::string RemovedSlash = RawLocationRoot.substr(1);
-	if (Uri == RemovedSlash)
+	if (Path == RemovedSlash)
 		return "";
 
-	assert(Uri.rfind(RemovedSlash + "/", 0) != std::string::npos);	// Remove first slash, and move it to the end
-	return Uri.substr(RawLocationRoot.size());
+	assert(Path.rfind(RemovedSlash + "/", 0) != std::string::npos);	// Remove first slash, and move it to the end
+	return Path.substr(RawLocationRoot.size());
 }
 
 void ConfigurationState::UpdateCombinedRoot()
@@ -191,7 +191,7 @@ ConfigurationState::PathType ConfigurationState::IsPathValid(const std::string& 
 
 	if (!ptr)
 	{
-		if (ErrorPath) *ErrorPath = std::string(buff);	// TODO: This may not actually do what i want
+		if (ErrorPath) *ErrorPath = std::string(buff);	// Note: This may override the value of Path
 		Ret = (ConfigurationState::PathType)(Ret | PathType_ExactFileNonExistent);	// Why can't i 'Ret |= PathType_ExactFileNonExistent', Why must it be casted, why C++, WHY!?
 	}
 	//std::cout << "Path " << Path << " => " << std::string(buff) << std::endl;
@@ -235,8 +235,8 @@ std::string ConfigurationState::InterperetEnvVariableUserVariables(const std::st
 {
 	std::string Copy = InterperetEnvVariable(String);
 
-	MustValidate |= ReplaceAll(Copy, "$auri", Request->GetUri());
-	MustValidate |= ReplaceAll(Copy, "$uri", RemoveLocationRoot(Request->GetUri()));
+	MustValidate |= ReplaceAll(Copy, "$apath", Request->GetPath());
+	MustValidate |= ReplaceAll(Copy, "$path", RemoveLocationRoot(Request->GetPath()));
 
 	return Copy;
 }

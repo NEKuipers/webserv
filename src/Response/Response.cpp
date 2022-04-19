@@ -4,6 +4,7 @@
 #include "ConfigErrorResponse.hpp"
 #include "ConfigCgiResponse.hpp"
 #include "ConfigDeleteResponse.hpp"
+#include "ConfigUploadFileResponse.hpp"
 #include "CGIResponse.hpp"
 #include "SimpleResponse.hpp"
 #include "PathUtils.hpp"
@@ -14,6 +15,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <fstream>
 #include <cassert>	// linux assert()
 
 #define BUFFER_SIZE 1024
@@ -126,25 +128,38 @@ int	Response::delete_method(const std::string& fullpath)
 	return 404;
 }
 
+#include <fstream>
+int	Response::create_method(const std::string& fullpath, const std::string& contents)
+{
+	std::ofstream file;
+	file.open(fullpath);
+	if (file.bad())
+		return 500;	// Odd
+	
+	file << contents;
+	return 201;
+}
+
 Response	*Response::generate_response(ConfigResponse *conf_response, Request &request)
 {
 	assert(g_response_code_to_reason_phrase.size() != 0);
 
 	(void)request;
 	std::string body = "";
-	std::string content_type = "";
+	std::string content_type = "text/html";
 	int status_code = 400;
-	std::string cgi_response = "";
 
 	//if (conf_response)
 	//	std::cout << conf_response->GetErrorReasons() << std::endl;
-	if (ConfigDeleteResponse* DeleteResponsePtr = dynamic_cast<ConfigDeleteResponse*>(conf_response))
+	if (ConfigUploadFileResponse* UploadFileResponsePtr = dynamic_cast<ConfigUploadFileResponse*>(conf_response))
+	{
+		status_code = create_method(UploadFileResponsePtr->GetFileName(), request.get_body());
+		// TODO: Correct response
+	}
+	else if (ConfigDeleteResponse* DeleteResponsePtr = dynamic_cast<ConfigDeleteResponse*>(conf_response))
 	{
 		status_code = delete_method(DeleteResponsePtr->GetDeleteFile());
-		std::string response_string = create_status_line(status_code);
-		response_string += create_headers(conf_response, request, status_code);
-		// std::cerr<<status_code<<"\n";
-		return new SimpleResponse(response_string);
+		// TODO: Correct response
 	}
 	else if (ConfigFileResponse* FileResponsePtr = dynamic_cast<ConfigFileResponse*>(conf_response))
 	{
@@ -182,18 +197,12 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 		body.append("</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>");
 	}
 
-
 	std::string response_string = create_status_line(status_code);
-	if (cgi_response == "")
-	{
+	if (body != "")
 		response_string += "Content-Type: " + content_type + "\r\n";
-		response_string += "Content-Length: " + to_string(body.length()) + "\r\n";
-	}
+	response_string += "Content-Length: " + to_string(body.length()) + "\r\n";
 	response_string += create_headers(conf_response, request, status_code);//TODO add headers here
-	if (cgi_response != "")
-		response_string += cgi_response;
-	else
-		response_string += "\r\n" + body;
+	response_string += "\r\n" + body;
 
 	if (conf_response)
 		std::cout << "Response: " << to_string(*conf_response) << std::endl;

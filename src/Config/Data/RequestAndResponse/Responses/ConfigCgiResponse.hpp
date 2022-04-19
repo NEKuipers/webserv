@@ -12,7 +12,7 @@ class ConfigCgiResponse;	// For include loops
 
 class ConfigCgiResponse : public ConfigResponse {
 	public:
-		ConfigCgiResponse(const std::string& CgiFile, const std::string& FullPath, const ConfigErrorReasons& ErrorReasons);
+		ConfigCgiResponse(const std::string& CgiFile, const std::string& PathInfo, const std::string& ScriptName, const ConfigErrorReasons& ErrorReasons);
 		virtual ~ConfigCgiResponse();
 
 		// Public functions
@@ -32,14 +32,15 @@ class ConfigCgiResponse : public ConfigResponse {
 
 		// Class variables
 		std::string CgiFile;
-		std::string FullPath;
+		std::string PathInfo;
+		std::string ScriptName;
 
 		in_port_t RequestPort;
 
 		// Input:
 		//	if via POST, data is send via stdin
 		//		Env variables:
-		std::string PATH_INFO;
+		//			PATH_INFO
 		std::string QUERY_STRING;
 		//		Server specific:
 		//			SERVER_SOFTWARE: name/version of HTTP server.

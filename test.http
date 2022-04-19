@@ -1,0 +1,32 @@
+GET http://localhost:80
+###
+GET http://localhost:80/index.html
+###
+
+
+GET http://localhost:80/add
+###
+POST http://localhost:80/cgi/add.cgi
+###
+POST http://localhost:80/cgi/add.cgi
+
+num1=123&num2=432
+###
+
+GET http://localhost:80/cgi
+###
+GET http://localhost:80/cgi/
+###
+GET http://localhost:80/test/file1
+###
+GET http://localhost:80/test_same/file1
+###
+
+
+DELETE http://localhost:80/upload/test2
+###
+
+POST http://localhost:80/upload/test2
+
+file thingy woot woot
+###

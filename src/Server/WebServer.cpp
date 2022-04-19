@@ -66,7 +66,7 @@ bool		WebServer::IsRequestComplete(ClientSocket *conn_socket)
 				conn_socket->get_address().sin_addr.s_addr,
 				conn_socket->get_address().sin_port,
 				"Unknown",	// TODO: Probabily in a header field
-				conn_socket->get_request().get_request_line().target,
+				conn_socket->get_request().get_request_line().target,	// TODO: This is the URI, but we want just the path part
 				0,	// TODO: Get Content-length
 				conn_socket->get_request().get_request_line().method
 			));
@@ -118,6 +118,17 @@ bool	WebServer::onAccept(std::pair<WebServer*, ServerSocket*>* Arg, int ClientFD
 
 	return false;
 }
+
+static bool CloseInput(const CGIRunner *Runner, bool LastWrite, int StartByte, int NumBytes)
+{
+	if (LastWrite)
+		close(Runner->InputFD);
+	(void)StartByte;
+	(void)NumBytes;
+	
+	return LastWrite;
+}
+
 bool	WebServer::onRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead, const std::string& Read)
 {
 	WebServer* Server = Arg->first;
@@ -141,13 +152,13 @@ bool	WebServer::onRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead,
 
 	Client->createResponse();
 
-
 	Response* Response = Client->get_http_response();
 
 	if (CGIResponse* CgiResponsePtr = dynamic_cast<CGIResponse*>(Response))
 	{
 		// Write the body to the CGI program
-		Server->selector.Write(CgiResponsePtr->get_cgi_runner()->InputFD, Client->get_request().get_body(), NULL, NULL);
+		//std::cout << "Writing body: " << Client->get_request().get_body() << std::endl;
+		Server->selector.Write(CgiResponsePtr->get_cgi_runner()->InputFD, Client->get_request().get_body(), (void*)CgiResponsePtr->get_cgi_runner(), (Selector::OnWriteFunction)CloseInput);
 
 		// The CGI Programs output does not write most of the headers, so write it here
 		const int status_code = 200;

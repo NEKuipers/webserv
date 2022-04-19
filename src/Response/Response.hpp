@@ -21,6 +21,7 @@ class Response
 		static std::string	create_status_line(int status_code);
 		static std::string	create_headers(ConfigResponse *conf_response, Request &request, int status_code);
 		static int			delete_method(const std::string& fullpath);
+		static int			create_method(const std::string& fullpath, const std::string& contents);
 };
 
 #endif

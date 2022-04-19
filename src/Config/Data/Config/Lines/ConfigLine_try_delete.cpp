@@ -50,8 +50,8 @@ ConfigLine_try_delete* ConfigLine_try_delete::TryParse(const ConfigLine& Line, c
 	return new ConfigLine_try_delete(New, Configuration);
 }
 
-ConfigResponse* ConfigLine_try_delete::GetResponseForFile(const std::string& FullPath, const std::string& PartialPath, const ConfigErrorReasons &ErrorReasons) const
+ConfigResponse* ConfigLine_try_delete::GetResponseForFile(const ConfigRequest& Request, const std::string& FullPath, const ConfigErrorReasons &ErrorReasons) const
 {
-	(void)PartialPath;
+	(void)Request;
 	return new ConfigDeleteResponse(FullPath, ErrorReasons);
 }

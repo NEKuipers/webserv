@@ -23,7 +23,7 @@ class ConfigLine_try_cgi : public ConfigLine_base_try_file {
 		
 		static ConfigLine_try_cgi* TryParse(const ConfigLine& Line, const ConfigurationState& Configuration);
 	protected:
-		virtual ConfigResponse* GetResponseForFile(const std::string& FullPath, const std::string& PartialPath, const ConfigErrorReasons &ErrorReasons) const;
+		virtual ConfigResponse* GetResponseForFile(const ConfigRequest& Request, const std::string& FullPath, const ConfigErrorReasons &ErrorReasons) const;
 		virtual bool AcceptsPartialPath() const;
 };
 
