@@ -27,7 +27,7 @@ class WebServer
 		bool						connectionResponder(ClientSocket *conn_socket);
 
 
-		static bool					onAccept(std::pair<WebServer*, ServerSocket*>* Arg, int ClientFD, struct sockaddr Address, socklen_t AddressLen);
+		static bool					onAccept(std::pair<WebServer*, ServerSocket*>* Arg, int ClientFD, const struct sockaddr& Address, socklen_t AddressLen);
 		static bool					onRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead, const std::string& Read);
 		static bool					onCgiRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead, const std::string& Read);
 		static bool					onWriteCloseAfterComplete(ClientSocket* Arg, bool LastWrite, int StartByte, int NumBytes);

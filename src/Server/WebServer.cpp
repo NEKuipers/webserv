@@ -102,7 +102,7 @@ static void	clear_socket(std::vector<T*> &sockets, fd_set &save_read_fds, fd_set
 }
 
 
-bool	WebServer::onAccept(std::pair<WebServer*, ServerSocket*>* Arg, int ClientFD, struct sockaddr Address, socklen_t AddressLen)
+bool	WebServer::onAccept(std::pair<WebServer*, ServerSocket*>* Arg, int ClientFD, const struct sockaddr& Address, socklen_t AddressLen)
 {
 	WebServer* Server = Arg->first;
 	ServerSocket* Socket = Arg->second;
@@ -125,10 +125,17 @@ bool	WebServer::onRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead,
 
 	Client->read(Read);
 
+
 	if (!Server->IsRequestComplete(Client))
 	{
 		if (LastRead)
+		{
+			std::cerr << "Somehow the last message the client send was not a complete request!" << std::endl;
+
+			// Just send a Bad request response, i dunno
+			Server->selector.Write(Client->get_sock(), Response::create_status_line(400) + Response::create_headers(NULL, Client->get_request(), 400) + "\r\n", Client, (Selector::OnWriteFunction)onWriteCloseAfterComplete);
 			delete Arg;
+		}
 		return false;
 	}
 
