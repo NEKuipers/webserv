@@ -20,7 +20,7 @@ class Response
 		static std::string	get_reason_phrase(int status_code);
 		static std::string	create_status_line(int status_code);
 		static std::string	create_headers(ConfigResponse *conf_response, Request &request, int status_code);
-		static int			delete_method(Request &request);
+		static int			delete_method(const std::string& fullpath);
 };
 
 #endif

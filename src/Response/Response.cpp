@@ -3,6 +3,7 @@
 #include "ConfigFileResponse.hpp"
 #include "ConfigErrorResponse.hpp"
 #include "ConfigCgiResponse.hpp"
+#include "ConfigDeleteResponse.hpp"
 #include "CGIResponse.hpp"
 #include "SimpleResponse.hpp"
 #include "PathUtils.hpp"
@@ -116,16 +117,12 @@ std::string	Response::create_status_line(int status_code)
 	return status_line;
 }
 
-int	Response::delete_method(Request &request)
+int	Response::delete_method(const std::string& fullpath)
 {
-	std::string prefix = "http/default"; //TODO this prefix should always be used to make the full path point to the target file's relative location to the executable
-	std::string fullpath = prefix + request.get_request_line().target;
-	//if (PathUtils::pathType(request.get_request_line().target) == PathUtils::FILE)
-	if (PathUtils::pathType(fullpath) == PathUtils::FILE)
-	{
-		unlink(fullpath.c_str());
+	// Note: Due to only being called via the config, the file should always be there, and *should* not be a directory
+	if (PathUtils::pathType(fullpath) == PathUtils::FILE
+	 && unlink(fullpath.c_str()) == 0)
 		return 200;
-	}
 	return 404;
 }
 
@@ -141,15 +138,15 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 
 	//if (conf_response)
 	//	std::cout << conf_response->GetErrorReasons() << std::endl;
-	if (request.get_request_line().method == "DELETE")
+	if (ConfigDeleteResponse* DeleteResponsePtr = dynamic_cast<ConfigDeleteResponse*>(conf_response))
 	{
-		status_code = delete_method(request);
+		status_code = delete_method(DeleteResponsePtr->GetDeleteFile());
 		std::string response_string = create_status_line(status_code);
 		response_string += create_headers(conf_response, request, status_code);
 		// std::cerr<<status_code<<"\n";
 		return new SimpleResponse(response_string);
 	}
-	if (ConfigFileResponse* FileResponsePtr = dynamic_cast<ConfigFileResponse*>(conf_response))
+	else if (ConfigFileResponse* FileResponsePtr = dynamic_cast<ConfigFileResponse*>(conf_response))
 	{
 		status_code = 200;
 		content_type = FileResponsePtr->GetContentType();
