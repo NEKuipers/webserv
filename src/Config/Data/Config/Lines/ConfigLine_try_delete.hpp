@@ -7,31 +7,25 @@ class ConfigLine_try_delete;	// For include loops
 #include "ConfigBase.hpp"
 #include <vector>
 #include "ConfigErrorReasons.hpp"
+#include "ConfigLine_base_try_file.hpp"
 
-class ConfigLine_try_delete : public ConfigBase {
+class ConfigLine_try_delete : public ConfigLine_base_try_file {
 	public: 
 		ConfigLine_try_delete();
 		ConfigLine_try_delete(const ConfigLine_try_delete& From);
 		ConfigLine_try_delete(const std::vector<std::string>& Files, const ConfigurationState& Configuration);
 
-		virtual  ~ConfigLine_try_delete();
+		virtual ~ConfigLine_try_delete();
 
 		ConfigLine_try_delete& operator = (const ConfigLine_try_delete& From);
 
 		// Public functions
 		friend std::ostream& operator<<(std::ostream& Stream, const ConfigLine_try_delete& ConfigLine_try_delete);
-		void Print(std::ostream& Stream) const;
+		virtual void Print(std::ostream& Stream) const;
 		
 		static ConfigLine_try_delete* TryParse(const ConfigLine& Line, const ConfigurationState& Configuration);
 	protected:
-		virtual ConfigResponse* GetBaseResponse(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const;
-		virtual bool WouldHaveResponded(const ConfigRequest& Request) const;
-	private:
-		std::vector<std::string> Files;
-		// Class variables
-		
-		// Class functions
-		
+		virtual ConfigResponse* GetResponseForFile(const std::string& FullPath, const std::string& PartialPath, const ConfigErrorReasons &ErrorReasons) const;
 };
 
 #endif

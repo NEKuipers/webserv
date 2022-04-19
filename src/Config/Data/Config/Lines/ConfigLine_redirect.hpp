@@ -19,7 +19,7 @@ class ConfigLine_redirect : public ConfigBase {
 
 		// Public functions
 		friend std::ostream& operator<<(std::ostream& Stream, const ConfigLine_redirect& ConfigLine_redirect);
-		void Print(std::ostream& Stream) const;
+		virtual void Print(std::ostream& Stream) const;
 		
 		static ConfigLine_redirect* TryParse(const ConfigLine& Line, const ConfigurationState& Configuration);
 	protected:

@@ -16,7 +16,7 @@ class ConfigLine_location : public ConfigListBase {
 
 		// Public functions
 		friend std::ostream& operator<<(std::ostream& Stream, const ConfigLine_location& ConfigLine_location);
-		void Print(std::ostream& Stream) const;
+		virtual void Print(std::ostream& Stream) const;
 
 		static ConfigLine_location* TryParse(const ConfigLine& Line, const ConfigurationState& Configuration);
 

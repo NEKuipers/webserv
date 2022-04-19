@@ -20,7 +20,7 @@ class ConfigLine_server : public ConfigListBase {
 
 		// Public functions
 		friend std::ostream& operator<<(std::ostream& Stream, const ConfigLine_server& ConfigLine_server);
-		void Print(std::ostream& Stream) const;
+		virtual void Print(std::ostream& Stream) const;
 
 		static ConfigLine_server* TryParse(const ConfigLine& Line, const ConfigurationState& Configuration);
 

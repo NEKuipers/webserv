@@ -8,25 +8,18 @@
 
 #include <stdlib.h>	// realpath
 
-ConfigLine_try_cgi::ConfigLine_try_cgi() : cgis() { }
-ConfigLine_try_cgi::ConfigLine_try_cgi(const ConfigLine_try_cgi& From) : cgis()
+static std::string* AcceptedMethods[] = {
+	new std::string("GET"),
+	new std::string("POST"),
+	NULL
+};
+
+ConfigLine_try_cgi::ConfigLine_try_cgi() { }
+ConfigLine_try_cgi::ConfigLine_try_cgi(const ConfigLine_try_cgi& From)
 {
 	this->operator=(From);
 }
-ConfigLine_try_cgi::ConfigLine_try_cgi(const std::vector<std::string>& cgis, const ConfigurationState& _Configuration) : ConfigBase(_Configuration), cgis(cgis)
-{
-	bool AcceptsGet = Configuration.AcceptsMethod("GET");
-	bool AcceptsPost = Configuration.AcceptsMethod("POST");
-	if (!AcceptsGet && !AcceptsPost)
-		throw MethodException("try_cgi", "GET/POST");
-
-	// We only accept those 2 requests
-	Configuration.AcceptedMethods.clear();
-	if (AcceptsGet)
-		Configuration.AcceptedMethods.push_back("GET");
-	if (AcceptsPost)
-		Configuration.AcceptedMethods.push_back("POST");
-}
+ConfigLine_try_cgi::ConfigLine_try_cgi(const std::vector<std::string>& cgis, const ConfigurationState& _Configuration) : ConfigLine_base_try_file(cgis, "try_cgi", AcceptedMethods, _Configuration) { }
 
 ConfigLine_try_cgi::~ConfigLine_try_cgi()
 {
@@ -36,7 +29,6 @@ ConfigLine_try_cgi::~ConfigLine_try_cgi()
 ConfigLine_try_cgi& ConfigLine_try_cgi::operator = (const ConfigLine_try_cgi& From)
 {
 	static_cast<ConfigBase*>(this)->operator=(From);
-	cgis = From.cgis;
 
 	// return the existing object so we can chain this operator
 	return *this;
@@ -51,14 +43,10 @@ std::ostream& operator<<(std::ostream& Stream, const ConfigLine_try_cgi& ConfigL
 void ConfigLine_try_cgi::Print(std::ostream& Stream) const
 {
 	Stream << "Try cgis: ";
-	for (std::vector<std::string>::const_iterator It = cgis.begin(); It != cgis.end(); It++)
-	{
-		if (It != cgis.begin())
-			Stream << " ";
-		Stream << *It;
-	}
+	static_cast<const ConfigLine_base_try_file*>(this)->Print(Stream);
 }
 
+/*
 ConfigResponse* ConfigLine_try_cgi::GetBaseResponse(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const
 {
 	for (std::vector<std::string>::const_iterator It = cgis.begin(); It != cgis.end(); It++)
@@ -96,6 +84,7 @@ bool ConfigLine_try_cgi::WouldHaveResponded(const ConfigRequest& Request) const
 
 	return false;
 }
+*/
 
 ConfigLine_try_cgi* ConfigLine_try_cgi::TryParse(const ConfigLine& Line, const ConfigurationState& Configuration)
 {
@@ -107,4 +96,15 @@ ConfigLine_try_cgi* ConfigLine_try_cgi::TryParse(const ConfigLine& Line, const C
 	std::vector<std::string> New;
 	New.insert(New.begin(), Args.begin() + 1, Args.end());
 	return new ConfigLine_try_cgi(New, Configuration);
+}
+
+
+bool ConfigLine_try_cgi::AcceptsPartialPath() const
+{
+	return true;
+}
+
+ConfigResponse* ConfigLine_try_cgi::GetResponseForFile(const std::string& FullPath, const std::string& PartialPath, const ConfigErrorReasons &ErrorReasons) const
+{
+	return new ConfigCgiResponse(PartialPath, FullPath, ErrorReasons);
 }

@@ -7,8 +7,9 @@ class ConfigLine_try_file;	// For include loops
 #include "ConfigBase.hpp"
 #include <vector>
 #include "ConfigErrorReasons.hpp"
+#include "ConfigLine_base_try_file.hpp"
 
-class ConfigLine_try_file : public ConfigBase {
+class ConfigLine_try_file : public ConfigLine_base_try_file {
 	public: 
 		ConfigLine_try_file();
 		ConfigLine_try_file(const ConfigLine_try_file& From);
@@ -20,18 +21,11 @@ class ConfigLine_try_file : public ConfigBase {
 
 		// Public functions
 		friend std::ostream& operator<<(std::ostream& Stream, const ConfigLine_try_file& ConfigLine_try_file);
-		void Print(std::ostream& Stream) const;
+		virtual void Print(std::ostream& Stream) const;
 		
 		static ConfigLine_try_file* TryParse(const ConfigLine& Line, const ConfigurationState& Configuration);
 	protected:
-		virtual ConfigResponse* GetBaseResponse(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const;
-		virtual bool WouldHaveResponded(const ConfigRequest& Request) const;
-	private:
-		std::vector<std::string> Files;
-		// Class variables
-		
-		// Class functions
-		
+		virtual ConfigResponse* GetResponseForFile(const std::string& FullPath, const std::string& PartialPath, const ConfigErrorReasons &ErrorReasons) const;
 };
 
 #endif

@@ -15,7 +15,7 @@ class ConfigLine_index : public ConfigListBase {
 
 		// Public functions
 		friend std::ostream& operator<<(std::ostream& Stream, const ConfigLine_index& ConfigLine_index);
-		void Print(std::ostream& Stream) const;
+		virtual void Print(std::ostream& Stream) const;
 
 		static ConfigLine_index* TryParse(const ConfigLine& Line, const ConfigurationState& Configuration);
 	protected:
