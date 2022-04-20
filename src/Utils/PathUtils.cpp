@@ -18,8 +18,9 @@ PathUtils::FileType PathUtils::pathType(const std::string& Path)
 
 	if (stat(Path.c_str(), &buffer) == 0)
 	{
-		if (S_ISREG(buffer.st_mode))
+		if (S_ISREG(buffer.st_mode)) {
 			return (FILE);
+		}
 		else
 			return (DIRECTORY);
 	}

@@ -106,8 +106,8 @@ std::string Response::create_headers(ConfigResponse *conf_response, Request &req
 	headers_string += "\r\n";
 	if (status_code == 201)
 	{
-		headers_string += "Location: ";
-		//dynamic_cast<PostResponse*>(conf_response)->created_uri;
+	// 	headers_string += "Location: ";
+	// 	// dynamic_cast<ConfigUploadFileResponse*>(conf_response)->; //TODO add URI here!
 	}
 	return (headers_string);
 }
@@ -133,12 +133,11 @@ int	Response::create_method(const std::string& fullpath, const std::string& cont
 {
 	//status code here is 200 if file is appended and 201 if file is created
 	int return_value = PathUtils::pathType(fullpath);
-	return_value = (return_value == 1) ? 200 : 201;
+	return_value = (return_value == PathUtils::FILE) ? 200 : 201;
 	std::ofstream file;
 	file.open(fullpath, std::ofstream::out | std::ofstream::app);
 	if (file.bad())
 		return 500;	// Odd
-	
 	file << contents;
 	return return_value;
 }
@@ -206,7 +205,6 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	response_string += "Content-Length: " + to_string(body.length()) + "\r\n";
 	response_string += create_headers(conf_response, request, status_code);//TODO add headers here
 	response_string += "\r\n" + body;
-
 	if (conf_response)
 		std::cout << "Response: " << to_string(*conf_response) << std::endl;
 	return new SimpleResponse(response_string);
