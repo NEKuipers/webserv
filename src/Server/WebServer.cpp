@@ -223,7 +223,6 @@ bool	WebServer::onWriteCloseAfterComplete(ClientSocket* Arg, bool LastWrite, int
 int	WebServer::launch()
 {
 	signal(SIGINT, sigintHandler);
-
 	for (std::vector<ServerSocket*>::iterator it = server_sockets.begin(); it != server_sockets.end(); it++)
 	 	selector.OnAccept((*it)->get_sock(), new std::pair<WebServer*, ServerSocket*>(this, *it), (Selector::OnAcceptFunction)onAccept);	// NOTE: These pairs are leaked when selector ends, only possible if select() returns -1
 

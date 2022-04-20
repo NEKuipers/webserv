@@ -121,7 +121,7 @@ std::string	Response::create_status_line(int status_code)
 
 int	Response::delete_method(const std::string& fullpath)
 {
-	// Note: Due to only being called via the config, the file should always be there, and *should* not be a directory
+	// Note: Due to only being called via the config, the file should always be there, and *should* not be a directory 
 	if (PathUtils::pathType(fullpath) == PathUtils::FILE
 	 && unlink(fullpath.c_str()) == 0)
 		return 200;
@@ -131,13 +131,16 @@ int	Response::delete_method(const std::string& fullpath)
 #include <fstream>
 int	Response::create_method(const std::string& fullpath, const std::string& contents)
 {
+	//status code here is 200 if file is appended and 201 if file is created
+	int return_value = PathUtils::pathType(fullpath);
+	return_value = (return_value == 1) ? 200 : 201;
 	std::ofstream file;
-	file.open(fullpath);
+	file.open(fullpath, std::ofstream::out | std::ofstream::app);
 	if (file.bad())
 		return 500;	// Odd
 	
 	file << contents;
-	return 201;
+	return return_value;
 }
 
 Response	*Response::generate_response(ConfigResponse *conf_response, Request &request)
@@ -159,7 +162,7 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	else if (ConfigDeleteResponse* DeleteResponsePtr = dynamic_cast<ConfigDeleteResponse*>(conf_response))
 	{
 		status_code = delete_method(DeleteResponsePtr->GetDeleteFile());
-		// TODO: Correct response
+		//TODO: correct response
 	}
 	else if (ConfigFileResponse* FileResponsePtr = dynamic_cast<ConfigFileResponse*>(conf_response))
 	{

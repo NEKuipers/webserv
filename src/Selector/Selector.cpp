@@ -55,6 +55,7 @@ void Selector::OnAccept(int fd, void* Arg, OnAcceptFunction OnAccept)
 	FD_SET(fd, &ReadSet);
 	MaxFd = std::max(MaxFd, fd);
 }
+
 void Selector::OnRead(int fd, void* Arg, OnReadFunction OnRead)
 {
 	assert (FD_ISSET(fd, &ReadSet) == false);
@@ -63,6 +64,7 @@ void Selector::OnRead(int fd, void* Arg, OnReadFunction OnRead)
 	FD_SET(fd, &ReadSet);
 	MaxFd = std::max(MaxFd, fd);
 }
+
 void Selector::Write(int fd, const std::string& ToWrite, void* Arg, OnWriteFunction OnWrite)
 {
 	if (FD_ISSET(fd, &WriteSet))
