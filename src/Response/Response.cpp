@@ -103,12 +103,12 @@ std::string Response::create_headers(ConfigResponse *conf_response, Request &req
 	if (conf_response)
 		for (std::vector<std::string>::const_iterator it = conf_response->GetErrorReasons().GetAllowedMethods().begin(); it != conf_response->GetErrorReasons().GetAllowedMethods().end(); it++)
 			headers_string += " " + *it;
-	headers_string += "\r\n";
 	if (status_code == 201)
 	{
 	// 	headers_string += "Location: ";
 	// 	// dynamic_cast<ConfigUploadFileResponse*>(conf_response)->; //TODO add URI here!
 	}
+	headers_string += "\r\n";
 	return (headers_string);
 }
 
