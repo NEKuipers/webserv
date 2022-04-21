@@ -66,8 +66,8 @@ bool		WebServer::IsRequestComplete(ClientSocket *conn_socket)
 				conn_socket->get_address().sin_addr.s_addr,
 				conn_socket->get_address().sin_port,
 				"Unknown",	// TODO: Probabily in a header field
-				conn_socket->get_request().get_request_line().target,	// TODO: This is the URI, but we want just the path part
-				0,	// TODO: Get Content-length
+				conn_socket->get_request().get_request_line().path,	// TODO: This is the URI, but we want just the path part
+				atoi(conn_socket->get_request().get_header_value("Content-Length").c_str()), //TODO make c++
 				conn_socket->get_request().get_request_line().method
 			));
 		}

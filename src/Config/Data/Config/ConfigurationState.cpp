@@ -146,6 +146,8 @@ ConfigResponse* ConfigurationState::Redirect(const ConfigRequest& Request, std::
 
 ConfigResponse* ConfigurationState::Error(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const
 {
+	ErrorReasons.Err_ErrorPage();
+	
 	if (ErrorPath != "")
 		return Redirect(Request, ErrorPath, ErrorReasons);
 	return new ConfigErrorResponse(ErrorReasons);

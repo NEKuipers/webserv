@@ -67,7 +67,8 @@ ConfigResponse* ConfigLine_upload::GetBaseResponse(const ConfigRequest& Request,
 	ConfigurationState::PathType PathType = Configuration.IsPathValid(File, Request, &File);
 	if (MustValidate && (PathType & ConfigurationState::PathType_Invalid))
 		return NULL;
-	
+
+	ErrorReasons.AddAllowedMethods(Configuration.AcceptedMethods);	
 	return new ConfigUploadFileResponse(File, ErrorReasons);
 }
 

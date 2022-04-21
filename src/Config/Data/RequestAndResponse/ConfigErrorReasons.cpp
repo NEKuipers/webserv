@@ -8,7 +8,6 @@ ConfigErrorReasons::ConfigErrorReasons(const ConfigErrorReasons& From) : Allowed
 
 ConfigErrorReasons::~ConfigErrorReasons()
 {
-	// TODO: Implement destructor
 }
 
 ConfigErrorReasons& ConfigErrorReasons::operator = (const ConfigErrorReasons& From)
@@ -16,6 +15,7 @@ ConfigErrorReasons& ConfigErrorReasons::operator = (const ConfigErrorReasons& Fr
 	AllowedMethods = From.AllowedMethods;
 	WasWrongMethod = From.WasWrongMethod;
 	WasBodyTooBig = From.WasBodyTooBig;
+	WasErrorPage = From.WasErrorPage;
 
 	// return the existing object so we can chain this operator
 	return *this;
@@ -28,6 +28,7 @@ std::ostream& operator<<(std::ostream& Stream, const ConfigErrorReasons& ConfigE
 		Stream << " " << *it;
 	if (ConfigErrorReasons.WasWrongMethod) Stream << "\n\tWrong method!";
 	if (ConfigErrorReasons.WasBodyTooBig) Stream << "\n\tBody too big!";
+	if (ConfigErrorReasons.WasErrorPage) Stream << "\n\tError page returned!";
 	return Stream;
 }
 
@@ -46,8 +47,13 @@ void ConfigErrorReasons::AddAllowedMethods(const std::vector<std::string>& Metho
 		AddAllowedMethod(*it);
 }
 
+
+
 void ConfigErrorReasons::Err_WrongMethod() { WasWrongMethod = true; }
 void ConfigErrorReasons::Err_BodyTooBig() { WasBodyTooBig = true; }
+void ConfigErrorReasons::Err_ErrorPage() { WasErrorPage = true; }
+
 
 bool ConfigErrorReasons::GetWasWrongMethod() const { return WasWrongMethod; }
 bool ConfigErrorReasons::GetWasBodyTooBig() const { return WasBodyTooBig; }
+bool ConfigErrorReasons::GetWasErrorPage() const { return WasErrorPage; }

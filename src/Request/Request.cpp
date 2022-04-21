@@ -17,13 +17,33 @@ std::vector<std::string> Request::content_to_lines(std::string req)
 	return lines;
 }
 
+static std::string split_untill(std::string& base, char split)
+{
+	size_t found = base.find(split);
+	if (found == std::string::npos)
+		found = base.length();
+	
+	std::string ret = base.substr(0, found);
+	base.erase(0, found + 1);
+	return ret;
+}
+
 void    Request::parse_requestline(std::string line)
 {
 	this->req_line.method = line.substr(0, line.find(' '));
 	line.erase(0, this->req_line.method.length() + 1);
-	this->req_line.target = line.substr(0, line.find(' '));
-	line.erase(0, this->req_line.target.length() + 1);
+	std::string target = line.substr(0, line.find(' '));
+	line.erase(0, this->req_line.path.length() + 1);
 	this->req_line.http_version = line.substr(0, line.find_first_of("\r\n "));
+
+	std::cerr << "target is " << target << std::endl;
+
+	this->req_line.path = split_untill(target, '?');
+	this->req_line.query = target;
+
+	std::cerr << "Path is " <<req_line.path << "\n"
+			<< "Query is " <<req_line.query << "\n"
+			<<std::endl;
 }
 
 bool   Request::parse_single_header_field(const std::string &line)
@@ -80,7 +100,7 @@ int     Request::validate_request()
 	for (size_t i = 0; i < sizeof(methods) / sizeof(methods[0]); i++)
 		if (methods[i] == req_line.method)
 			return 1;
-	if (req_line.target[0] != '/')
+	if (req_line.path[0] != '/')
 		return (1);
 	if (validate_http_version(req_line.http_version))
 		return (1);
@@ -93,24 +113,6 @@ void	Request::set_request_body(const std::string &buffer)
 }
 
 Request::Request() {}
-
-Request::Request(const std::string &request_content)
-{
-	plain_request = request_content;
-	std::vector<std::string> lines = content_to_lines(plain_request);
-	if (lines.size() < 1)
-		throw ParseRequestException("Empty request.");
-	parse_requestline(lines[0]);
-	size_t i = parse_header_fields(lines);
-	while (i < lines.size() && (lines[i] == "\r" || lines[i].length() == 0))
-		i++;
-	std::string f2body;
-	for (std::vector<std::string>::const_iterator it = lines.begin() + i; it != lines.end(); ++it)
-		f2body += *it;
-	set_request_body(f2body);
-	if (validate_request())
-		throw ParseRequestException("Invalid header content.");
-}
 
 Request::Request(const Request &src)
 {
@@ -155,7 +157,7 @@ const std::string                         &Request::get_header_value(const std::
 std::ostream                                &operator<<(std::ostream &Stream, const Request &request)
 {
 	Stream << "Request method is " << request.req_line.method << std::endl;
-	Stream << "Requested file is " << request.req_line.target << std::endl;
+	Stream << "Requested file is " << request.req_line.path << std::endl;
 	Stream << "HTTP version is " << request.req_line.http_version << std::endl;
 	Stream << "Other header fields: " << std::endl;
 

@@ -3,6 +3,7 @@
 #include "ConfigLine_redirect.hpp"
 #include "ConfigLine_server.hpp"
 #include "ConvertException.hpp"
+#include "ConfigErrorResponse.hpp"
 
 Config::Config(const ConfigFile& File)
 {
@@ -29,7 +30,11 @@ EnterResult Config::Enters(const ConfigRequest& Request) const
 ConfigResponse* Config::GetResponse(const ConfigRequest& Request) const
 {
 	ConfigErrorReasons ErrorReasons;	// Why C++, Why can't i do 'ConfigErrorReasons ErrorReasons()' WHATS THE DIFFERENCE!?
-	return ConfigListBase::GetResponse(Request, ErrorReasons);
+	ConfigResponse* Response = ConfigListBase::GetResponse(Request, ErrorReasons);
+
+	if (!Response)
+		Response = new ConfigErrorResponse(ErrorReasons);
+	return Response;
 }
 
 static void AddIfNew(std::vector<std::pair<in_addr_t, in_port_t> >* Vec, std::pair<in_addr_t, in_port_t> Pair)

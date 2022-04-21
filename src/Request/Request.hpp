@@ -11,7 +11,8 @@ class Request
 		struct request_line
 		{
 			std::string method;
-			std::string target;
+			std::string path;
+			std::string query;
 			std::string http_version;
 		};
 
@@ -25,7 +26,6 @@ class Request
 
 	public:
 		Request();
-		Request(const std::string &request_content);
 		~Request();
 		Request(const Request &src);
 		Request										&operator=(const Request &rhs);

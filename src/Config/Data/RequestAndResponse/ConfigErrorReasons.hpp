@@ -25,14 +25,17 @@ class ConfigErrorReasons {
 
 		void Err_WrongMethod();
 		void Err_BodyTooBig();
+		void Err_ErrorPage();
 
 		bool GetWasWrongMethod() const;
 		bool GetWasBodyTooBig() const;
+		bool GetWasErrorPage() const;
 	private:
 		// Class variables
 		std::vector<std::string> AllowedMethods;
 		bool WasWrongMethod;
 		bool WasBodyTooBig;
+		bool WasErrorPage;
 		// Class functions
 		
 };

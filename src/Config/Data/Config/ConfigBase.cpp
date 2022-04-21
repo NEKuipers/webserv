@@ -20,7 +20,6 @@ ConfigBase::~ConfigBase()
 	
 }
 
-#include <iostream>
 ConfigResponse* ConfigBase::GetResponse(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const
 {
 	ConfigurationState::ValidRequestReason Reason = ConfigurationState::ValidRequestReason_Valid;
@@ -33,7 +32,7 @@ ConfigResponse* ConfigBase::GetResponse(const ConfigRequest& Request, ConfigErro
 	{
 		ErrorReasons.AddAllowedMethods(Configuration.AcceptedMethods);
 		if (Reason & ConfigurationState::ValidRequestReason_WrongMethod)	ErrorReasons.Err_WrongMethod();
-		if (Reason & ConfigurationState::ValidRequestReason_BodyTooBig)	ErrorReasons.Err_BodyTooBig();
+		if (Reason & ConfigurationState::ValidRequestReason_BodyTooBig)		ErrorReasons.Err_BodyTooBig();
 	}
 	return NULL;
 }
