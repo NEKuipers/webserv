@@ -13,6 +13,7 @@
 #include "ToString.hpp"
 #include <cstdlib>
 #include <sys/time.h>
+#include <fstream>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fstream>
@@ -124,7 +125,6 @@ int	Response::delete_method(const std::string& fullpath)
 	return 404;
 }
 
-#include <fstream>
 int	Response::create_method(const std::string& fullpath, const std::string& contents)
 {
 	//status code here is 200 if file is appended and 201 if file is created
@@ -133,9 +133,18 @@ int	Response::create_method(const std::string& fullpath, const std::string& cont
 	std::ofstream file;
 	file.open(fullpath, std::ofstream::out | std::ofstream::app);
 	if (file.bad())
-		return 500;	// Odd
+		return 403;	// Odd
 	file << contents;
 	return return_value;
+}
+
+std::string	Response::create_directory_listing(const std::string& directory_path)
+{
+	std::string dir_listing = "";
+
+	std::ofstream file;//TODO Nick: maak hier een correcte directory listing van
+	file.open(directory_path);
+	return dir_listing;
 }
 
 Response	*Response::generate_response(ConfigResponse *conf_response, Request &request)
