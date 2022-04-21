@@ -27,47 +27,47 @@ void Response::InitStatusCodes()
 {
 	assert(g_response_code_to_reason_phrase.size() == 0);
 
-	g_response_code_to_reason_phrase[100] = "Continue";
-	g_response_code_to_reason_phrase[101] = "Switching Protocols";
-	g_response_code_to_reason_phrase[200] = "OK";
-	g_response_code_to_reason_phrase[201] = "Created"; // For POST method: use stat() to find out if target resource already exists, if not, open(with O_CREAT flag) and return 201
-	g_response_code_to_reason_phrase[202] = "Accepted";
-	g_response_code_to_reason_phrase[203] = "Non-Authoritative Information";
-	g_response_code_to_reason_phrase[204] = "No Content";
-	g_response_code_to_reason_phrase[205] = "Reset Content";
-	g_response_code_to_reason_phrase[206] = "Partial Content";
-	g_response_code_to_reason_phrase[300] = "Multiple Choices";
-	g_response_code_to_reason_phrase[301] = "Moved Permanently";
-	g_response_code_to_reason_phrase[302] = "Found";
-	g_response_code_to_reason_phrase[303] = "See Other";
-	g_response_code_to_reason_phrase[304] = "Not Modified";
-	g_response_code_to_reason_phrase[305] = "Use Proxy";
-	g_response_code_to_reason_phrase[307] = "Temporary Redirect";
-	g_response_code_to_reason_phrase[400] = "Bad Request";
-	g_response_code_to_reason_phrase[401] = "Unauthorized";
-	g_response_code_to_reason_phrase[402] = "Payment Required";
-	g_response_code_to_reason_phrase[403] = "Forbidden";
-	g_response_code_to_reason_phrase[404] = "Not Found";
-	g_response_code_to_reason_phrase[405] = "Method Not Allowed"; // implemented
-	g_response_code_to_reason_phrase[406] = "Not Acceptable";
-	g_response_code_to_reason_phrase[407] = "Proxy Authentication Required";
-	g_response_code_to_reason_phrase[408] = "Request Timeout";
-	g_response_code_to_reason_phrase[409] = "Conflict";
-	g_response_code_to_reason_phrase[410] = "Gone";
-	g_response_code_to_reason_phrase[411] = "Length Required";
-	g_response_code_to_reason_phrase[412] = "Precondition Failed";
-	g_response_code_to_reason_phrase[413] = "Payload Too Large";
-	g_response_code_to_reason_phrase[414] = "URI Too Long";
-	g_response_code_to_reason_phrase[415] = "Unsupported Media Type";
-	g_response_code_to_reason_phrase[416] = "Range Not Satisfiable";
-	g_response_code_to_reason_phrase[417] = "Expectation Failed";
-	g_response_code_to_reason_phrase[426] = "Upgrade Required";
-	g_response_code_to_reason_phrase[500] = "Internal Server Error";
-	g_response_code_to_reason_phrase[501] = "Not Implemented";
-	g_response_code_to_reason_phrase[502] = "Bad Gateway";
-	g_response_code_to_reason_phrase[503] = "Service Unavailable";
-	g_response_code_to_reason_phrase[504] = "Gateway Timeout";
-	g_response_code_to_reason_phrase[505] = "HTTP Version Not Supported";
+	g_response_code_to_reason_phrase[100] = "Continue"; //-
+	g_response_code_to_reason_phrase[101] = "Switching Protocols"; //-
+	g_response_code_to_reason_phrase[200] = "OK"; //Werkt (na correcte get/overige requests)
+	g_response_code_to_reason_phrase[201] = "Created"; //Werkt (na post request op niet-bestaande file)
+	g_response_code_to_reason_phrase[202] = "Accepted";  //-
+	g_response_code_to_reason_phrase[203] = "Non-Authoritative Information";  //-
+	g_response_code_to_reason_phrase[204] = "No Content"; //Werkt (na delete request)
+	g_response_code_to_reason_phrase[205] = "Reset Content";  //-
+	g_response_code_to_reason_phrase[206] = "Partial Content";  //-
+	g_response_code_to_reason_phrase[300] = "Multiple Choices";  //-
+	g_response_code_to_reason_phrase[301] = "Moved Permanently"; //Moet nog: Redirects vanuit config (?)
+	g_response_code_to_reason_phrase[302] = "Found";  //-
+	g_response_code_to_reason_phrase[303] = "See Other";  //-
+	g_response_code_to_reason_phrase[304] = "Not Modified";  //-
+	g_response_code_to_reason_phrase[305] = "Use Proxy";  //-
+	g_response_code_to_reason_phrase[307] = "Temporary Redirect";  //-
+	g_response_code_to_reason_phrase[400] = "Bad Request"; // Moet nog!
+	g_response_code_to_reason_phrase[401] = "Unauthorized";  //-
+	g_response_code_to_reason_phrase[402] = "Payment Required";  //-
+	g_response_code_to_reason_phrase[403] = "Forbidden"; // Moet nog!
+	g_response_code_to_reason_phrase[404] = "Not Found"; // Deze spreekt voor zich maar werkt op het moment niet goed. 
+	g_response_code_to_reason_phrase[405] = "Method Not Allowed"; // Moet nog!
+	g_response_code_to_reason_phrase[406] = "Not Acceptable";  //-
+	g_response_code_to_reason_phrase[407] = "Proxy Authentication Required";  //-
+	g_response_code_to_reason_phrase[408] = "Request Timeout";  //-
+	g_response_code_to_reason_phrase[409] = "Conflict";  //-
+	g_response_code_to_reason_phrase[410] = "Gone";  //-
+	g_response_code_to_reason_phrase[411] = "Length Required";  //-
+	g_response_code_to_reason_phrase[412] = "Precondition Failed";  //-
+	g_response_code_to_reason_phrase[413] = "Payload Too Large"; // Moet nog!
+	g_response_code_to_reason_phrase[414] = "URI Too Long";  //-
+	g_response_code_to_reason_phrase[415] = "Unsupported Media Type";  //-
+	g_response_code_to_reason_phrase[416] = "Range Not Satisfiable";  //-
+	g_response_code_to_reason_phrase[417] = "Expectation Failed";  //-
+	g_response_code_to_reason_phrase[426] = "Upgrade Required";  //-
+	g_response_code_to_reason_phrase[500] = "Internal Server Error"; // Werkt (denk ik?)
+	g_response_code_to_reason_phrase[501] = "Not Implemented";  //-
+	g_response_code_to_reason_phrase[502] = "Bad Gateway";  //-
+	g_response_code_to_reason_phrase[503] = "Service Unavailable";  //-
+	g_response_code_to_reason_phrase[504] = "Gateway Timeout";  //-
+	g_response_code_to_reason_phrase[505] = "HTTP Version Not Supported";  //-
 }
 
 static std::string format_timestamp(time_t timestamp)
@@ -124,7 +124,7 @@ int	Response::delete_method(const std::string& fullpath)
 	// Note: Due to only being called via the config, the file should always be there, and *should* not be a directory 
 	if (PathUtils::pathType(fullpath) == PathUtils::FILE
 	 && unlink(fullpath.c_str()) == 0)
-		return 200;
+		return 204; //204 No Content is the correct status code for a successful delete request (yes, really)
 	return 404;
 }
 

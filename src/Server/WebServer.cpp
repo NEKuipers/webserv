@@ -141,7 +141,7 @@ bool	WebServer::onRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead,
 	{
 		if (LastRead)
 		{
-			std::cerr << "Somehow the last message the client send was not a complete request!" << std::endl;
+			std::cerr << "Somehow, the last message the client sent was not a complete request!" << std::endl;
 
 			// Just send a Bad request response, i dunno
 			Server->selector.Write(Client->get_sock(), Response::create_status_line(400) + Response::create_headers(NULL, Client->get_request(), 400) + "\r\n", Client, (Selector::OnWriteFunction)onWriteCloseAfterComplete);
