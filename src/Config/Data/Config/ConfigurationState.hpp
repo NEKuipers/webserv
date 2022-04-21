@@ -45,6 +45,7 @@ class ConfigurationState {
 		void AppendLocationRoot(const std::string& Location);
 
 		ConfigResponse* Redirect(const ConfigRequest& Request, std::string NewPath, ConfigErrorReasons& ErrorReasons) const;
+		ConfigResponse* GetDirectoryResponse(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const;
 		ConfigResponse* Error(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const;
 
 		const std::string& GetRoot() const;
@@ -63,7 +64,7 @@ class ConfigurationState {
 		PathType IsPathValid(const std::string& Path, const ConfigRequest& Request, std::string* ErrorPath) const;
 
 		std::string InterperetEnvVariable(const std::string& String) const;
-		std::string InterperetEnvVariableUserVariables(const std::string& String, const ConfigRequest* Request, bool& MustValidate) const;
+		std::string InterperetEnvVariableUserVariables(const std::string& String, const ConfigRequest& Request, bool& MustValidate) const;
 	private:
 		void UpdateCombinedRoot();
 
@@ -72,6 +73,7 @@ class ConfigurationState {
 		std::string RawLocationRoot;	// This is the actual location in the config
 		std::string LocationRoot;	// This can be modified by the location_root directive
 		std::string CombinedRoot;
+		bool DirectoryListing;
 
 		ConfigBase* RedirectBase;
 		// Class variables

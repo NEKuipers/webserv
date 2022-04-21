@@ -27,23 +27,25 @@ static std::string split_untill(std::string& base, char split)
 	base.erase(0, found + 1);
 	return ret;
 }
+static std::string split_untill_first(std::string& base, const std::string& split)
+{
+	size_t found = base.find_first_of(split);
+	if (found == std::string::npos)
+		found = base.length();
+	
+	std::string ret = base.substr(0, found);
+	base.erase(0, found + 1);
+	return ret;
+}
 
 void    Request::parse_requestline(std::string line)
 {
-	this->req_line.method = line.substr(0, line.find(' '));
-	line.erase(0, this->req_line.method.length() + 1);
-	std::string target = line.substr(0, line.find(' '));
-	line.erase(0, this->req_line.path.length() + 1);
-	this->req_line.http_version = line.substr(0, line.find_first_of("\r\n "));
-
-	std::cerr << "target is " << target << std::endl;
-
+	this->req_line.method = split_untill(line, ' ');
+	std::string target = split_untill(line, ' ');
+	this->req_line.http_version = split_untill_first(line, "\r\n ");
+	
 	this->req_line.path = split_untill(target, '?');
 	this->req_line.query = target;
-
-	std::cerr << "Path is " <<req_line.path << "\n"
-			<< "Query is " <<req_line.query << "\n"
-			<<std::endl;
 }
 
 bool   Request::parse_single_header_field(const std::string &line)

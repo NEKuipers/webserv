@@ -1,5 +1,6 @@
 #include "ConfigLine_redirect.hpp"
 #include "ConvertException.hpp"
+#include "ConfigRedirectResponse.hpp"
 
 #include "ToString.hpp"
 
@@ -8,7 +9,7 @@ ConfigLine_redirect::ConfigLine_redirect(const ConfigLine_redirect& From)
 {
 	this->operator=(From);
 }
-ConfigLine_redirect::ConfigLine_redirect(const std::string& NewPath, const ConfigurationState& Configuration) : ConfigBase(Configuration), NewPath(NewPath)
+ConfigLine_redirect::ConfigLine_redirect(int Code, const std::string& NewPath, const ConfigurationState& Configuration) : ConfigBase(Configuration), Code(Code), NewPath(NewPath)
 {
 
 }
@@ -44,13 +45,24 @@ ConfigLine_redirect* ConfigLine_redirect::TryParse(const ConfigLine& Line, const
 	if (Args.at(0) != "redirect")
 		return NULL;
 
-	if (Args.size() != 2)
-		throw ConvertException("ConfigLine", "ConfigLine_redirect", "Bad argument count! Expected 2, Got " + to_string(Args.size()));
+	if (Args.size() != 3)
+		throw ConvertException("ConfigLine", "ConfigLine_redirect", "Bad argument count! Expected 3, Got " + to_string(Args.size()));
 
-	return new ConfigLine_redirect(Args.at(1), Configuration);
+	char* End;
+	unsigned long ULCode = std::strtoul(Args.at(1).c_str(), &End, 10);
+	int Code = ULCode;
+
+	if ((unsigned long)Code != ULCode)
+		throw ConvertException("ConfigLine", "ConfigLine_redirect code", "Code too big");
+	else if (End != &Args.at(1).c_str()[Args.at(1).length()])
+		throw ConvertException("ConfigLine", "ConfigLine_redirect code", "Code contained more than just a number");
+
+	return new ConfigLine_redirect(Code, Args.at(2), Configuration);
 }
 
 ConfigResponse* ConfigLine_redirect::GetBaseResponse(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const
 {
-	return Configuration.Redirect(Request, NewPath, ErrorReasons);
+	bool MustValidate = false;
+	ErrorReasons.AddAllowedMethods(Configuration.AcceptedMethods);
+	return new ConfigRedirectResponse(Code, Configuration.InterperetEnvVariableUserVariables(NewPath, Request, MustValidate), ErrorReasons);
 }

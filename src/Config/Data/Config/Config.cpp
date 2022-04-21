@@ -1,6 +1,6 @@
 #include "Config.hpp"
 #include "ConfigLine_try_file.hpp"
-#include "ConfigLine_redirect.hpp"
+#include "ConfigLine_internal_redirect.hpp"
 #include "ConfigLine_server.hpp"
 #include "ConvertException.hpp"
 #include "ConfigErrorResponse.hpp"

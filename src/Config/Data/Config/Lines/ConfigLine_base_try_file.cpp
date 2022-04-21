@@ -73,7 +73,7 @@ ConfigResponse* ConfigLine_base_try_file::GetBaseResponse(const ConfigRequest& R
 	for (std::vector<std::string>::const_iterator It = Files.begin(); It != Files.end(); It++)
 	{
 		bool MustValidate = false;
-		std::string File = PathUtils::combine(Configuration.GetCombinedRoot(), Configuration.InterperetEnvVariableUserVariables(*It, &Request, MustValidate));
+		std::string File = PathUtils::combine(Configuration.GetCombinedRoot(), Configuration.InterperetEnvVariableUserVariables(*It, Request, MustValidate));
 		if (!PathUtils::IsFile(File))
 			continue;
 
@@ -106,7 +106,7 @@ bool ConfigLine_base_try_file::WouldHaveResponded(const ConfigRequest& Request) 
 	for (std::vector<std::string>::const_iterator It = Files.begin(); It != Files.end(); It++)
 	{
 		bool MustValidate = false;
-		std::string File = Configuration.InterperetEnvVariableUserVariables(*It, &Request, MustValidate);
+		std::string File = Configuration.InterperetEnvVariableUserVariables(*It, Request, MustValidate);
 		File = Configuration.GetCombinedRoot() + "/" + File;	// Isn't there a utility function that combines paths?
 
 		if (MustValidate)

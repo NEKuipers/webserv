@@ -4,7 +4,7 @@
 #include "ConvertException.hpp"
 
 #include "ConfigLine_try_file.hpp"
-#include "ConfigLine_redirect.hpp"
+#include "ConfigLine_internal_redirect.hpp"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
