@@ -48,7 +48,7 @@ void Response::InitStatusCodes()
 	g_response_code_to_reason_phrase[402] = "Payment Required";  //-
 	g_response_code_to_reason_phrase[403] = "Forbidden";  //TODO implement
 	g_response_code_to_reason_phrase[404] = "Not Found"; //TODO Deze spreekt voor zich maar werkt op het moment niet goed. 
-	g_response_code_to_reason_phrase[405] = "Method Not Allowed"; //TODO implement
+	g_response_code_to_reason_phrase[405] = "Method Not Allowed"; //Werkt
 	g_response_code_to_reason_phrase[406] = "Not Acceptable";  //-
 	g_response_code_to_reason_phrase[407] = "Proxy Authentication Required";  //-
 	g_response_code_to_reason_phrase[408] = "Request Timeout";  //-
@@ -56,7 +56,7 @@ void Response::InitStatusCodes()
 	g_response_code_to_reason_phrase[410] = "Gone";  //-
 	g_response_code_to_reason_phrase[411] = "Length Required";  //-
 	g_response_code_to_reason_phrase[412] = "Precondition Failed";  //-
-	g_response_code_to_reason_phrase[413] = "Payload Too Large"; //TODO implement
+	g_response_code_to_reason_phrase[413] = "Payload Too Large"; //Werkt
 	g_response_code_to_reason_phrase[414] = "URI Too Long";  //-
 	g_response_code_to_reason_phrase[415] = "Unsupported Media Type";  //-
 	g_response_code_to_reason_phrase[416] = "Range Not Satisfiable";  //-
