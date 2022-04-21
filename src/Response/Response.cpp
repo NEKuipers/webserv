@@ -40,7 +40,7 @@ void Response::InitStatusCodes()
 	g_response_code_to_reason_phrase[205] = "Reset Content";  //-
 	g_response_code_to_reason_phrase[206] = "Partial Content";  //-
 	g_response_code_to_reason_phrase[300] = "Multiple Choices";  //-
-	g_response_code_to_reason_phrase[301] = "Moved Permanently"; //TODO Redirects vanuit config (?)
+	g_response_code_to_reason_phrase[301] = "Moved Permanently"; //-
 	g_response_code_to_reason_phrase[302] = "Found";  //-
 	g_response_code_to_reason_phrase[303] = "See Other";  //-
 	g_response_code_to_reason_phrase[304] = "Not Modified";  //-
@@ -216,7 +216,7 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 		response_string += "Content-Type: " + content_type + "\r\n";
 		response_string += "Content-Length: " + to_string(body.length()) + "\r\n";
 	}
-	response_string += create_headers(conf_response, request, status_code);//TODO add headers here
+	response_string += create_headers(conf_response, request, status_code);
 	response_string += "\r\n" + body;
 	std::cerr << response_string << std::endl;
 	std::cout << "Response: " << to_string(*conf_response) << std::endl;
