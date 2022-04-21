@@ -21,7 +21,7 @@ class ConfigErrorReasons {
 		
 		const std::vector<std::string>& GetAllowedMethods() const;
 		void AddAllowedMethod(const std::string& Method);
-		void AddAllowedMethods(const std::vector<std::string>& Methods);
+		void AddAllowedMethods(const std::vector<std::string>& Methods);	// TODO: When calling AddAllowedMethods(Configuration.AcceptedMethods), The AcceptedMethods can be "Empty", indicating that every method is accepted, Giving a in-accurate AllowedMethods list
 
 		void Err_WrongMethod();
 		void Err_BodyTooBig();

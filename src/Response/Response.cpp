@@ -6,6 +6,7 @@
 #include "ConfigDeleteResponse.hpp"
 #include "ConfigUploadFileResponse.hpp"
 #include "ConfigDirectoryResponse.hpp"
+#include "ConfigRedirectResponse.hpp"
 #include "CGIResponse.hpp"
 #include "SimpleResponse.hpp"
 #include "PathUtils.hpp"
@@ -105,8 +106,11 @@ std::string Response::create_headers(ConfigResponse *conf_response, Request &req
 	for (std::vector<std::string>::const_iterator it = conf_response->GetErrorReasons().GetAllowedMethods().begin(); it != conf_response->GetErrorReasons().GetAllowedMethods().end(); it++)
 		headers_string += " " + *it;
 	headers_string += "\r\n";
-	if (status_code == 201)
-	 	headers_string += "Location: " + request.get_request_line().path + "\r\n";
+
+	if (ConfigRedirectResponse* RedirectResponsePtr = dynamic_cast<ConfigRedirectResponse*>(conf_response))
+		headers_string += "Location: " + RedirectResponsePtr->GetNewPath() + "\r\n";
+	else if (status_code == 201)
+	 	headers_string += "Location: " + request.get_request_line().path + "\r\n";		
 	return (headers_string);
 }
 
@@ -141,7 +145,7 @@ int	Response::create_method(const std::string& fullpath, const std::string& cont
 
 std::string	Response::create_directory_listing(const std::string& directory_path)
 {
-	std::string dir_listing = "";
+	std::string dir_listing = "<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>Directory response not implemented yet!</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>";
 
 	std::ofstream file;//TODO Nick: maak hier een correcte directory listing van
 	file.open(directory_path);
@@ -171,8 +175,10 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	else if (ConfigDirectoryResponse* DirectoryResponsePtr = dynamic_cast<ConfigDirectoryResponse*>(conf_response))
 	{
 		status_code = 501;
-		body = "<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>Directory response not implemented yet!</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>";
+		body = create_directory_listing(DirectoryResponsePtr->GetDirectory());
 	}
+	else if (ConfigRedirectResponse* RedirectResponsePtr = dynamic_cast<ConfigRedirectResponse*>(conf_response))
+		status_code = RedirectResponsePtr->GetCode();
 	else if (ConfigUploadFileResponse* UploadFileResponsePtr = dynamic_cast<ConfigUploadFileResponse*>(conf_response))
 		status_code = create_method(UploadFileResponsePtr->GetFileName(), request.get_body());
 	else if (ConfigDeleteResponse* DeleteResponsePtr = dynamic_cast<ConfigDeleteResponse*>(conf_response))

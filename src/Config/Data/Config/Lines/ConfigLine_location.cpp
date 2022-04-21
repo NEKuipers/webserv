@@ -4,6 +4,8 @@
 #include "ToString.hpp"
 #include <limits.h>	// Linux INT_MAX
 
+// NOTE: File names are case-insensitive, locations are case-sensitive, Is this correct behaviour or do i need to fix it?
+
 ConfigLine_location::ConfigLine_location() {}
 ConfigLine_location::ConfigLine_location(const std::string& Location, const ConfigBlock& Block, const ConfigurationState &Configuration) : ConfigListBase(Configuration), Location(Location)
 {

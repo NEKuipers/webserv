@@ -9,6 +9,7 @@
 #include "ConfigLine_index.hpp"
 #include "ConfigLine_try_delete.hpp"
 #include "ConfigLine_upload.hpp"
+#include "ConfigLine_redirect.hpp"
 
 #include "ConvertException.hpp"
 
@@ -22,6 +23,7 @@ ConfigListBase::TryParseLineFunc ConfigListBase::BaseLines[] = {
 	(ConfigListBase::TryParseLineFunc) ConfigLine_try_cgi			::TryParse,
 	(ConfigListBase::TryParseLineFunc) ConfigLine_try_delete		::TryParse,
 	(ConfigListBase::TryParseLineFunc) ConfigLine_upload			::TryParse,
+	(ConfigListBase::TryParseLineFunc) ConfigLine_redirect			::TryParse,
 	NULL
 };
 
