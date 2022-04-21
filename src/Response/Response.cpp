@@ -37,7 +37,7 @@ void Response::InitStatusCodes()
 	g_response_code_to_reason_phrase[205] = "Reset Content";  //-
 	g_response_code_to_reason_phrase[206] = "Partial Content";  //-
 	g_response_code_to_reason_phrase[300] = "Multiple Choices";  //-
-	g_response_code_to_reason_phrase[301] = "Moved Permanently"; //Moet nog: Redirects vanuit config (?)
+	g_response_code_to_reason_phrase[301] = "Moved Permanently"; //TODO Redirects vanuit config (?)
 	g_response_code_to_reason_phrase[302] = "Found";  //-
 	g_response_code_to_reason_phrase[303] = "See Other";  //-
 	g_response_code_to_reason_phrase[304] = "Not Modified";  //-
@@ -48,7 +48,7 @@ void Response::InitStatusCodes()
 	g_response_code_to_reason_phrase[402] = "Payment Required";  //-
 	g_response_code_to_reason_phrase[403] = "Forbidden";  //TODO implement
 	g_response_code_to_reason_phrase[404] = "Not Found"; //TODO Deze spreekt voor zich maar werkt op het moment niet goed. 
-	g_response_code_to_reason_phrase[405] = "Method Not Allowed"; //Werkt
+	g_response_code_to_reason_phrase[405] = "Method Not Allowed"; //TODO zorg dat dit werkt.
 	g_response_code_to_reason_phrase[406] = "Not Acceptable";  //-
 	g_response_code_to_reason_phrase[407] = "Proxy Authentication Required";  //-
 	g_response_code_to_reason_phrase[408] = "Request Timeout";  //-
@@ -56,7 +56,7 @@ void Response::InitStatusCodes()
 	g_response_code_to_reason_phrase[410] = "Gone";  //-
 	g_response_code_to_reason_phrase[411] = "Length Required";  //-
 	g_response_code_to_reason_phrase[412] = "Precondition Failed";  //-
-	g_response_code_to_reason_phrase[413] = "Payload Too Large"; //Werkt
+	g_response_code_to_reason_phrase[413] = "Payload Too Large"; //TODO dit werkt nog niet
 	g_response_code_to_reason_phrase[414] = "URI Too Long";  //-
 	g_response_code_to_reason_phrase[415] = "Unsupported Media Type";  //-
 	g_response_code_to_reason_phrase[416] = "Range Not Satisfiable";  //-
@@ -180,9 +180,9 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 		status_code = 404;
 		if (conf_response)
 		{
-			if (conf_response->GetErrorReasons().GetWasWrongMethod())
+			if (conf_response->GetErrorReasons().GetWasWrongMethod())//TODO dit werkt nog niet
 				status_code = 405;
-			else if (conf_response->GetErrorReasons().GetWasBodyTooBig())
+			else if (conf_response->GetErrorReasons().GetWasBodyTooBig())//TODO dit ook niet
 				status_code = 413;
 		}
 
@@ -198,7 +198,10 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 		body.append(to_string(*conf_response));
 		body.append("</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>");
 	}
-
+	if (request.get_body().size() > 0 && request.get_request_line().method != "POST")
+	{
+		status_code = 400;
+	}	
 	std::string response_string = create_status_line(status_code);
 	if (body != "")
 		response_string += "Content-Type: " + content_type + "\r\n";
