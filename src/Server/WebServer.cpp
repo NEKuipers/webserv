@@ -71,6 +71,7 @@ bool		WebServer::IsRequestComplete(ClientSocket *conn_socket)
 				conn_socket->get_request().get_request_line().method
 			));
 		}
+		conn_socket->check_body(); //TODO discuss with jasper
 		if (conn_socket->conf_response && conn_socket->conf_response->RequiresBody() && !conn_socket->check_body())
 			return false;
 		// We have now read the whole packet, if we want to read the body, we have also read that, send back the stuff

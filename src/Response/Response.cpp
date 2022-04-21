@@ -185,24 +185,23 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 			else if (conf_response->GetErrorReasons().GetWasBodyTooBig())//TODO dit ook niet
 				status_code = 413;
 		}
-
-		content_type = "text/html";
-		body = "<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>Default error page<br>You seem to have made a invalid request!</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>";
 	}
 	else
 	{
 		status_code = 404;
-		content_type = "text/html";
-
 		body = "<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>Unknown response type:<br>";
 		body.append(to_string(*conf_response));
 		body.append("</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>");
 	}
+
 	if (request.get_body().size() > 0 && request.get_request_line().method != "POST")
-	{
 		status_code = 400;
-	}	
 	std::string response_string = create_status_line(status_code);
+	if (status_code >= 400 && status_code < 500)
+	{
+		body = "<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>" + to_string(status_code) + " " + get_reason_phrase(status_code) +"</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>";
+		content_type = "text/html";
+	}
 	if (body != "")
 		response_string += "Content-Type: " + content_type + "\r\n";
 	response_string += "Content-Length: " + to_string(body.length()) + "\r\n";
