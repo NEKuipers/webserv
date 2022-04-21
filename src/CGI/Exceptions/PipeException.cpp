@@ -23,6 +23,6 @@ const char* PipeException::what() const throw()
 }
 std::ostream& operator<<(std::ostream& Stream, const PipeException& PipeException)
 {
-	Stream << PipeException.what(); // TODO: Better logging
+	Stream << PipeException.what();
 	return Stream;
 }

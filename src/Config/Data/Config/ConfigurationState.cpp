@@ -65,7 +65,6 @@ ConfigurationState::ValidRequestReason ConfigurationState::IsValidWithRequest(co
 
 bool ConfigurationState::EatLine(const ConfigLine& Line)
 {
-	// TODO: No if/elseif/elseif stuff, its ugly!
 	std::vector<std::string> Args = Line.GetArguments();
 	if (Args.at(0) == "root")
 	{

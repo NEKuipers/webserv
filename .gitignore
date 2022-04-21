@@ -2,3 +2,4 @@ prereq/*
 obj/*
 webserv
 .vscode/*
+upload/*

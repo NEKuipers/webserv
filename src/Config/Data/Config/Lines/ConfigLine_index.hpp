@@ -26,8 +26,6 @@ class ConfigLine_index : public ConfigListBase {
 
 		// Class variables
 
-		// TODO: Option to have it list all the files in this directory when no block is given
-
 		// Class functions
 };
 

@@ -32,9 +32,6 @@ class ConfigLine_location : public ConfigListBase {
 		// Class variables
 		std::string Location;
 
-		// TODO: Option to remove location part from PATH
-		// TODO: Option to have it not error if nothing was found inside, and continue like it did not match
-
 		// Class functions
 };
 

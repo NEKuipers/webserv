@@ -30,3 +30,6 @@ POST http://localhost:80/upload/test2
 
 file thingy woot woot
 ###
+
+GET http://localhost:80/redirect/File1
+###
