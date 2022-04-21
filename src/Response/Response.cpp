@@ -1,25 +1,26 @@
-#include "Response.hpp"
+#include "CGIResponse.hpp"
+#include "CGIRunner.hpp"
 #include "ClientSocket.hpp"
-#include "ConfigFileResponse.hpp"
-#include "ConfigErrorResponse.hpp"
 #include "ConfigCgiResponse.hpp"
 #include "ConfigDeleteResponse.hpp"
-#include "ConfigUploadFileResponse.hpp"
 #include "ConfigDirectoryResponse.hpp"
+#include "ConfigErrorResponse.hpp"
+#include "ConfigFileResponse.hpp"
 #include "ConfigRedirectResponse.hpp"
-#include "CGIResponse.hpp"
-#include "SimpleResponse.hpp"
+#include "ConfigUploadFileResponse.hpp"
 #include "PathUtils.hpp"
-#include <map>
-#include "CGIRunner.hpp"
+#include "Response.hpp"
+#include "SimpleResponse.hpp"
 #include "ToString.hpp"
-#include <cstdlib>
-#include <sys/time.h>
-#include <fstream>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <fstream>
 #include <cassert>	// linux assert()
+#include <cstdlib>
+#include <dirent.h>
+#include <fstream>
+#include <map>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #define BUFFER_SIZE 1024
 
@@ -132,7 +133,7 @@ int	Response::delete_method(const std::string& fullpath)
 
 int	Response::create_method(const std::string& fullpath, const std::string& contents)
 {
-	//status code here is 200 if file is appended and 201 if file is created
+	// Note: status code here is 200 if file is appended and 201 if file is created
 	int return_value = PathUtils::pathType(fullpath);
 	return_value = (return_value == PathUtils::FILE) ? 200 : 201;
 	std::ofstream file;
@@ -143,13 +144,33 @@ int	Response::create_method(const std::string& fullpath, const std::string& cont
 	return return_value;
 }
 
-std::string	Response::create_directory_listing(const std::string& directory_path)
-{
-	std::string dir_listing = "<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>Directory response not implemented yet!</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>";
+// static std::string replace(std::string source, std::string to_replace, std::string new_value) {
+// 	size_t start_pos = 0;
+// 	while((start_pos = source.find(to_replace, start_pos)) != std::string::npos) {
+// 		source.replace(start_pos, to_replace.length(), new_value);
+// 		start_pos += new_value.length();
+// 	}
+// 	return (source);
+// }
 
-	std::ofstream file;//TODO Nick: maak hier een correcte directory listing van
-	file.open(directory_path);
-	return dir_listing;
+std::string	Response::create_directory_listing(const std::string& directory_path, const std::string& target, Request &request)
+{
+	//TODO Atm the allowed methods for requesting a directory are GET POST DELETE, is this correct? 
+	// std::string dir_listing = "<!DOCTYPE html><head><title>Listing of $1</title></head> \
+	// 							<body><h1>Listing of <span>";
+	// dir_listing += target;
+	// dir_listing +="</span></h1><ul>$2</ul></body></html>";
+	// DIR *dr;
+	// std::string link_base, listing;
+	// struct dirent *en;
+	// dr = opendir(directory_path.c_str());
+	// link_base += request.get_request_line().path;
+	// while ((en = readdir(dr)) != 0)
+	// 	listing += "<li><a href=\"" + link_base + std::string(en->d_name) +  "\">" + std::string(en->d_name) + "</a></li>";
+	// closedir(dr);
+	// dir_listing = replace(dir_listing, "$2", listing);
+	// return (dir_listing);
+	(void)directory_path, (void)target, (void)request; return("");
 }
 
 Response	*Response::generate_response(ConfigResponse *conf_response, Request &request)
@@ -174,8 +195,8 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 		status_code = 400;
 	else if (ConfigDirectoryResponse* DirectoryResponsePtr = dynamic_cast<ConfigDirectoryResponse*>(conf_response))
 	{
-		status_code = 501;
-		body = create_directory_listing(DirectoryResponsePtr->GetDirectory());
+		status_code = 200;
+		body = create_directory_listing(DirectoryResponsePtr->GetDirectory(), request.get_request_line().path, request);
 	}
 	else if (ConfigRedirectResponse* RedirectResponsePtr = dynamic_cast<ConfigRedirectResponse*>(conf_response))
 		status_code = RedirectResponsePtr->GetCode();
