@@ -66,22 +66,18 @@ bool		WebServer::IsRequestComplete(ClientSocket *conn_socket)
 				conn_socket->get_address().sin_addr.s_addr,
 				conn_socket->get_address().sin_port,
 				"Unknown",	// TODO: Probabily in a header field
-				conn_socket->get_request().get_request_line().path,	// TODO: This is the URI, but we want just the path part
+				conn_socket->get_request().get_request_line().path,
 				atoi(conn_socket->get_request().get_header_value("Content-Length").c_str()), //TODO make c++
 				conn_socket->get_request().get_request_line().method
 			));
 		}
-		conn_socket->check_body(); //TODO discuss with jasper
-		if (conn_socket->conf_response && conn_socket->conf_response->RequiresBody() && !conn_socket->check_body())
+
+		if (!conn_socket->check_body())
 			return false;
 		// We have now read the whole packet, if we want to read the body, we have also read that, send back the stuff
 	}
 
-	// std::cout << "======START OF REQUEST======="<<std::endl;
 	Request new_request = conn_socket->get_request();
-	// std::cout << new_request << std::endl;
-	// std::cout << "======END OF REQUEST======"<<std::endl;
-
 	return (true);
 }
 
