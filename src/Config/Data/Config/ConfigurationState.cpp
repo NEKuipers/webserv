@@ -2,6 +2,8 @@
 #include "ConvertException.hpp"
 #include "ConfigBase.hpp"
 #include "ConfigErrorResponse.hpp"
+#include "ConfigDirectoryResponse.hpp"
+#include "PathUtils.hpp"
 
 #include <stdlib.h>	// realpath
 #include <iostream>
@@ -10,8 +12,8 @@
 #include <cassert>	// linux assert()
 #include <limits.h>	// Linux PATH_MAX
 
-ConfigurationState::ConfigurationState() : AcceptedMethods(), ErrorPath(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), Root(""), LocationRoot(""), RedirectBase(NULL) { UpdateCombinedRoot(); }
-ConfigurationState::ConfigurationState(ConfigBase* RedirectBase) : AcceptedMethods(), ErrorPath(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), Root(""), LocationRoot(""), RedirectBase(RedirectBase) { UpdateCombinedRoot(); }
+ConfigurationState::ConfigurationState() : AcceptedMethods(), ErrorPath(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), Root(""), LocationRoot(""), DirectoryListing(false), RedirectBase(NULL) { UpdateCombinedRoot(); }
+ConfigurationState::ConfigurationState(ConfigBase* RedirectBase) : AcceptedMethods(), ErrorPath(""), MaxBodySize(DEFAULT_MAX_BODY_SIZE), Root(""), LocationRoot(""), DirectoryListing(false), RedirectBase(RedirectBase) { UpdateCombinedRoot(); }
 
 ConfigurationState::ConfigurationState(const ConfigurationState& From)
 {
@@ -33,6 +35,7 @@ ConfigurationState& ConfigurationState::operator = (const ConfigurationState& Fr
 	MaxBodySize = From.MaxBodySize;
 	RedirectBase = From.RedirectBase;
 	AcceptedMethods = From.AcceptedMethods;
+	DirectoryListing = From.DirectoryListing;
 
 	// return the existing object so we can chain this operator
 	return *this;
@@ -118,6 +121,18 @@ bool ConfigurationState::EatLine(const ConfigLine& Line)
 		AcceptedMethods.insert(AcceptedMethods.end(), Args.begin() + 1, Args.end());
 		return true;
 	}
+	else if (Args.at(0) == "directory_listing")
+	{
+		if (Args.size() != 2)
+			throw ConvertException("ConfigLine", "directory_listing", "too manny arguments");
+		const std::string& Arg = Args.at(1);
+
+		if (Arg != "on" && Arg != "off")
+			throw ConvertException("ConfigLine", "directory_listing", "argument was not 'on' or 'off'");
+		
+		DirectoryListing = Arg == "on";
+		return true;
+	}
 
 	return false;
 }
@@ -144,8 +159,28 @@ ConfigResponse* ConfigurationState::Redirect(const ConfigRequest& Request, std::
 	return Response;
 }
 
+ConfigResponse* ConfigurationState::GetDirectoryResponse(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const
+{
+	if (Request.GetPath().size() > 0 && Request.GetPath().at(Request.GetPath().length()-1) != '/')
+		return NULL;	// Quick return
+
+	std::string NewDirectory = PathUtils::combine(GetCombinedRoot(), RemoveLocationRoot(Request.GetPath()));
+	if (IsPathValid(NewDirectory, Request, NULL) != PathType_ValidFile || PathUtils::pathType(NewDirectory) != PathUtils::DIRECTORY)
+		return NULL;
+	
+	ErrorReasons.AddAllowedMethod("GET");
+	return new ConfigDirectoryResponse(NewDirectory, ErrorReasons);
+}
+
 ConfigResponse* ConfigurationState::Error(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const
 {
+	if (DirectoryListing)
+	{
+		ConfigResponse* Response = GetDirectoryResponse(Request, ErrorReasons);
+		if (Response)
+			return Response;
+	}
+
 	ErrorReasons.Err_ErrorPage();
 	
 	if (ErrorPath != "")
@@ -196,7 +231,6 @@ ConfigurationState::PathType ConfigurationState::IsPathValid(const std::string& 
 		if (ErrorPath) *ErrorPath = std::string(buff);	// Note: This may override the value of Path
 		Ret = (ConfigurationState::PathType)(Ret | PathType_ExactFileNonExistent);	// Why can't i 'Ret |= PathType_ExactFileNonExistent', Why must it be casted, why C++, WHY!?
 	}
-	//std::cout << "Path " << Path << " => " << std::string(buff) << std::endl;
 
 	if (strncmp(buff, CombinedRoot.c_str(), CombinedRoot.length()))
 	{
@@ -233,12 +267,12 @@ std::string ConfigurationState::InterperetEnvVariable(const std::string& String)
 	return Copy;
 }
 
-std::string ConfigurationState::InterperetEnvVariableUserVariables(const std::string& String, const ConfigRequest* Request, bool& MustValidate) const
+std::string ConfigurationState::InterperetEnvVariableUserVariables(const std::string& String, const ConfigRequest& Request, bool& MustValidate) const
 {
 	std::string Copy = InterperetEnvVariable(String);
 
-	MustValidate |= ReplaceAll(Copy, "$apath", Request->GetPath());
-	MustValidate |= ReplaceAll(Copy, "$path", RemoveLocationRoot(Request->GetPath()));
+	MustValidate |= ReplaceAll(Copy, "$apath", Request.GetPath());
+	MustValidate |= ReplaceAll(Copy, "$path", RemoveLocationRoot(Request.GetPath()));
 
 	return Copy;
 }

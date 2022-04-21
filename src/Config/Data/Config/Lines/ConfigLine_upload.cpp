@@ -60,7 +60,7 @@ ConfigLine_upload* ConfigLine_upload::TryParse(const ConfigLine& Line, const Con
 ConfigResponse* ConfigLine_upload::GetBaseResponse(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const
 {
 	bool MustValidate = false;
-	std::string File = PathUtils::combine(Configuration.GetCombinedRoot(), Configuration.InterperetEnvVariableUserVariables(TargetLocation, &Request, MustValidate));
+	std::string File = PathUtils::combine(Configuration.GetCombinedRoot(), Configuration.InterperetEnvVariableUserVariables(TargetLocation, Request, MustValidate));
 	if (!PathUtils::IsFile(File))
 		return NULL;
 	

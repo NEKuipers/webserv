@@ -5,6 +5,7 @@
 #include "ConfigCgiResponse.hpp"
 #include "ConfigDeleteResponse.hpp"
 #include "ConfigUploadFileResponse.hpp"
+#include "ConfigDirectoryResponse.hpp"
 #include "CGIResponse.hpp"
 #include "SimpleResponse.hpp"
 #include "PathUtils.hpp"
@@ -167,6 +168,11 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	}
 	else if (request.get_body().size() > 0 && request.get_request_line().method != "POST")
 		status_code = 400;
+	else if (ConfigDirectoryResponse* DirectoryResponsePtr = dynamic_cast<ConfigDirectoryResponse*>(conf_response))
+	{
+		status_code = 501;
+		body = "<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>Directory response not implemented yet!</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>";
+	}
 	else if (ConfigUploadFileResponse* UploadFileResponsePtr = dynamic_cast<ConfigUploadFileResponse*>(conf_response))
 		status_code = create_method(UploadFileResponsePtr->GetFileName(), request.get_body());
 	else if (ConfigDeleteResponse* DeleteResponsePtr = dynamic_cast<ConfigDeleteResponse*>(conf_response))
