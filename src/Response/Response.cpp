@@ -212,11 +212,13 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 		content_type = "text/html";
 	}
 	if (body != "")
+	{
 		response_string += "Content-Type: " + content_type + "\r\n";
-	response_string += "Content-Length: " + to_string(body.length()) + "\r\n";
+		response_string += "Content-Length: " + to_string(body.length()) + "\r\n";
+	}
 	response_string += create_headers(conf_response, request, status_code);//TODO add headers here
 	response_string += "\r\n" + body;
-
+	std::cerr << response_string << std::endl;
 	std::cout << "Response: " << to_string(*conf_response) << std::endl;
 	return new SimpleResponse(response_string);
 }
