@@ -3,7 +3,7 @@
 
 #include "ConfigLine_try_file.hpp"
 #include "ConfigLine_try_cgi.hpp"
-#include "ConfigLine_redirect.hpp"
+#include "ConfigLine_internal_redirect.hpp"
 #include "ConfigLine_server.hpp"
 #include "ConfigLine_location.hpp"
 #include "ConfigLine_index.hpp"
@@ -14,14 +14,14 @@
 
 // Yeah yeah, function pointer casting, should be fine, args are the same and return value is a derrived class pointer casted to the base class pointer
 ConfigListBase::TryParseLineFunc ConfigListBase::BaseLines[] = {
-	(ConfigListBase::TryParseLineFunc) ConfigLine_try_file  ::TryParse,
-	(ConfigListBase::TryParseLineFunc) ConfigLine_redirect  ::TryParse,
-	(ConfigListBase::TryParseLineFunc) ConfigLine_server    ::TryParse,
-	(ConfigListBase::TryParseLineFunc) ConfigLine_location  ::TryParse,
-	(ConfigListBase::TryParseLineFunc) ConfigLine_index     ::TryParse,
-	(ConfigListBase::TryParseLineFunc) ConfigLine_try_cgi   ::TryParse,
-	(ConfigListBase::TryParseLineFunc) ConfigLine_try_delete::TryParse,
-	(ConfigListBase::TryParseLineFunc) ConfigLine_upload    ::TryParse,
+	(ConfigListBase::TryParseLineFunc) ConfigLine_try_file			::TryParse,
+	(ConfigListBase::TryParseLineFunc) ConfigLine_internal_redirect	::TryParse,
+	(ConfigListBase::TryParseLineFunc) ConfigLine_server			::TryParse,
+	(ConfigListBase::TryParseLineFunc) ConfigLine_location			::TryParse,
+	(ConfigListBase::TryParseLineFunc) ConfigLine_index				::TryParse,
+	(ConfigListBase::TryParseLineFunc) ConfigLine_try_cgi			::TryParse,
+	(ConfigListBase::TryParseLineFunc) ConfigLine_try_delete		::TryParse,
+	(ConfigListBase::TryParseLineFunc) ConfigLine_upload			::TryParse,
 	NULL
 };
 
