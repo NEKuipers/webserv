@@ -204,7 +204,7 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	else if (ConfigCgiResponse* CgiResponsePtr = dynamic_cast<ConfigCgiResponse*>(conf_response))
 	{
 		std::map<std::string, std::string> map;
-		CgiResponsePtr->MakeEnvMap(map, request, );
+		CgiResponsePtr->MakeEnvMap(map, request);
 		return new CGIResponse(new CGIRunner(CgiResponsePtr->GetCgiFile(), map));
 	}
 	else

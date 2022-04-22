@@ -58,7 +58,7 @@ CGIRunner::CGIRunner(const std::string& PathName, const std::map<std::string, st
 		// TODO: Make it be a 500 response
 		std::string Message = "Content-Type: text/html\n\n<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>500 Internal Server Error<br>CGI failed to run!</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>";
 		std::cout << Message << std::endl;
-		exit(1);
+		exit(50);
 	}
 
 	close(pipes_stdin[0]);

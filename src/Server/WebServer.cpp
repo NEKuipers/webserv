@@ -181,15 +181,21 @@ bool	WebServer::onRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead,
 
 	throw "Unreachable";
 }
+
 bool	WebServer::onCgiRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead, const std::string& Read)
 {
 	WebServer* Server = Arg->first;
 	ClientSocket* Client = Arg->second;
 
+	if (LastRead)
+	{
+		int status;
+		if (waitpid(static_cast<CGIResponse*>(Client->get_http_response())->get_cgi_runner()->CGIPid, &status, WNOHANG) == -1)
+			;//500 Internal Server Errr
+	}
 	//std::cout << "Read from CGI: " << Read << std::endl;
 	//if (LastRead)
 	//	std::cout << "Last!" << std::endl;
-	(void)LastRead;
 	(void)Read;
 
 

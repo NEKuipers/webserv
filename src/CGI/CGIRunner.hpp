@@ -9,7 +9,7 @@ class CGIRunner;	// For include loops
 class CGIRunner {
 	public:
 		CGIRunner(const std::string& PathName, const std::map<std::string, std::string>& ExtraEnv);
-
+		
 		~CGIRunner();
 
 		// Public functions

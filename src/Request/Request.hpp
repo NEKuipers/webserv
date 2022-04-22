@@ -4,6 +4,8 @@
 # include <vector>
 # include <map>
 # include <cstring>
+# include <sys/socket.h>
+# include <netinet/in.h>
 
 class Request
 {
@@ -23,9 +25,11 @@ class Request
 		std::string							plain_request;
 		std::vector<std::string>			content_to_lines(std::string req);
 		int									parse_header_fields(const std::vector<std::string> &lines);
+		struct sockaddr_in					remote_address;
+		Request();
 
 	public:
-		Request();
+		Request(struct sockaddr_in address);
 		~Request();
 		Request(const Request &src);
 		Request										&operator=(const Request &rhs);
@@ -39,6 +43,7 @@ class Request
 		void										parse_requestline(std::string line);
 		bool										parse_single_header_field(const std::string& line);
 		int											validate_request();
+		const struct sockaddr_in					&get_address() const;
 
 };
 

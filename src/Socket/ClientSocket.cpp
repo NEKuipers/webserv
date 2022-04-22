@@ -14,7 +14,7 @@
 #include "CGIRunner.hpp"
 
 // Constructor
-ClientSocket::ClientSocket(struct sockaddr_in address, int sock, struct sockaddr_in sock_adr) : SimpleSocket(address, sock), headers_complete(false), http_response(), conf_response(NULL)
+ClientSocket::ClientSocket(struct sockaddr_in address, int sock, struct sockaddr_in sock_adr) : SimpleSocket(address, sock), request(sock_adr), headers_complete(false), http_response(),  conf_response(NULL)
 {
 	socket_address = sock_adr;
 }
@@ -63,7 +63,7 @@ bool					ClientSocket::check_body()
 	}
 
 	std::string content_length = request.get_header_value("Content-Length");
-	if (content_length == "" || buffer.size() >= std::strtoul(content_length.c_str(), NULL, 10))	// NOTE: std::stoi() is C++11
+	if (content_length == "" || buffer.size() >= std::strtoul(content_length.c_str(), NULL, 10))
 	{
 		request.set_request_body(buffer);
 		return true;

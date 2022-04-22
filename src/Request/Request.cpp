@@ -113,7 +113,10 @@ void	Request::set_request_body(const std::string &buffer)
 	body = buffer;
 }
 
-Request::Request() {}
+Request::Request(struct sockaddr_in address) : remote_address(address)
+{
+	
+}
 
 Request::Request(const Request &src)
 {
@@ -175,4 +178,9 @@ std::ostream                                &operator<<(std::ostream &Stream, co
 const std::string							&Request::get_body() const
 {
 	return body;
+}
+
+const struct sockaddr_in					&Request::get_address() const
+{
+	return remote_address;
 }
