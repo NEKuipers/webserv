@@ -23,6 +23,7 @@ class Response
 		static int			delete_method(const std::string& fullpath);
 		static int			create_method(const std::string& fullpath, const std::string& contents);
 		static std::string	create_directory_listing(const std::string& directory_path, const std::string& target);
+		static std::string	make_error_page(int status_code);
 };
 
 #endif

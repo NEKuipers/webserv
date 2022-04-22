@@ -11,8 +11,23 @@
 			</fieldset>
 			<button>Add</button>
 		</form>
-		<form action="cgi/wait.cgi" method="POST"></form>
+		<br>
+		<br>
+		Run a CGI script with a infinite loop
+		<form action="cgi/wait.cgi" method="POST">
 			<button>Wait</button>
+		</form>
+		<br>
+		<br>
+		Run a CGI script that crashes
+		<form action="cgi/crash.cgi" method="POST">
+			<button>Crash</button>
+		</form>
+		<br>
+		<br>
+		Run a CGI script that is not executable
+		<form action="cgi/NonExecutable.cgi" method="POST">
+			<button>NonExecutable</button>
 		</form>
 	</p>
 </html>
