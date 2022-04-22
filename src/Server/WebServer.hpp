@@ -15,6 +15,15 @@
 class WebServer
 {
 	private:
+		struct CgiReadData
+		{
+			WebServer* Server;
+			ClientSocket* Socket;
+			std::string Read;
+
+			CgiReadData(WebServer* Server, ClientSocket* Socket);
+		};
+		
 		Selector					selector;
 
 		std::vector<ServerSocket *>	server_sockets;
@@ -22,14 +31,13 @@ class WebServer
 
 		Config*						configuration;
 
-		ClientSocket*				connectionAccepter(ServerSocket *conn_socket);
 		bool						IsRequestComplete(ClientSocket *conn_socket);
 		bool						connectionResponder(ClientSocket *conn_socket);
 
 
 		static bool					onAccept(std::pair<WebServer*, ServerSocket*>* Arg, int ClientFD, const struct sockaddr& Address, socklen_t AddressLen);
 		static bool					onRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead, const std::string& Read);
-		static bool					onCgiRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead, const std::string& Read);
+		static bool					onCgiRead(struct CgiReadData* Arg, bool LastRead, const std::string& Read);
 		static bool					onWriteCloseAfterComplete(ClientSocket* Arg, bool LastWrite, int StartByte, int NumBytes);
 
 		WebServer(const WebServer &src);

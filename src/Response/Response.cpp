@@ -161,6 +161,11 @@ std::string	Response::create_directory_listing(const std::string& directory_path
 	return (dir_listing);
 }
 
+std::string	Response::make_error_page(int status_code)
+{
+	return "<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>" + to_string(status_code) + " " + get_reason_phrase(status_code) +"</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>";
+}
+
 Response	*Response::generate_response(ConfigResponse *conf_response, Request &request)
 {
 	assert(g_response_code_to_reason_phrase.size() != 0);
@@ -218,7 +223,7 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	std::string response_string = create_status_line(status_code);
 	if (status_code >= 400 && status_code < 500)
 	{
-		body = "<!DOCTYPE html><html><p style=\"text-align:center;font-size:200%;\"><a href=\"/\">Webserv</a><br><br><b>" + to_string(status_code) + " " + get_reason_phrase(status_code) +"</b><br><p style=\"line-height: 5000em;text-align:right\"><b>h</b></div></p></html>";
+		body = make_error_page(status_code);
 		content_type = "text/html";
 	}
 	if (body != "")

@@ -11,6 +11,8 @@
 #include "CGIResponse.hpp"
 #include <cassert>	// linux assert()
 
+WebServer::CgiReadData::CgiReadData(WebServer* Server, ClientSocket* Socket) : Server(Server), Socket(Socket), Read() {}
+
 WebServer::WebServer(int domain, int service, int protocol, int port, u_long interface, int bklg) : selector(), configuration(NULL)
 {
 	ServerSocket *newsocket = new ServerSocket(domain, service, protocol, port, interface, bklg);
@@ -39,17 +41,6 @@ WebServer::WebServer(Config &config) : selector(), configuration(&config)
 }
 
 WebServer::~WebServer(){}
-
-ClientSocket*	WebServer::connectionAccepter(ServerSocket *conn_socket)
-{
-	int client;
-	struct sockaddr_in address;// = conn_socket->get_address();
-	int addrlen = sizeof(address);
-	if ((client = accept(conn_socket->get_sock(), (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
-		throw ConnectionErrorException();
-	ClientSocket *socket = new ClientSocket(conn_socket->get_address(), client, address);
-	return (socket);
-}
 
 bool		WebServer::IsRequestComplete(ClientSocket *conn_socket)
 {
@@ -86,15 +77,6 @@ static void	sigintHandler(int signum)
 	std::cerr << "\b\bServer interrupted. Exiting." << std::endl;
 	SimpleSocket::close_all();
 	exit(signum);
-}
-
-template <typename T>
-static void	clear_socket(std::vector<T*> &sockets, fd_set &save_read_fds, fd_set &save_write_fds, size_t &count)
-{
-	FD_CLR(sockets[count]->get_sock(), &save_read_fds);
-	FD_CLR(sockets[count]->get_sock(), &save_write_fds);
-	delete sockets[count];
-	sockets.erase(sockets.begin() + count--);
 }
 
 
@@ -155,7 +137,12 @@ bool	WebServer::onRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead,
 		// Write the body to the CGI program
 		//std::cout << "Writing body: " << Client->get_request().get_body() << std::endl;
 		Server->selector.Write(CgiResponsePtr->get_cgi_runner()->InputFD, Client->get_request().get_body(), (void*)CgiResponsePtr->get_cgi_runner(), (Selector::OnWriteFunction)CloseInput);
+		
+		Server->selector.OnRead(CgiResponsePtr->get_cgi_runner()->OutputFD, new CgiReadData(Server, Client), (Selector::OnReadFunction)onCgiRead);
 
+		delete Arg;
+		return true;
+		/*
 		// The CGI Programs output does not write most of the headers, so write it here
 		const int status_code = 200;
 		std::string BaseResponse = Response::create_status_line(status_code);
@@ -167,6 +154,7 @@ bool	WebServer::onRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead,
 
 		// Do not delete arg, it is used as a new Arg in OnRead, and that will delete if after
 		return true;
+		*/
 	}
 	else if (SimpleResponse* SimpleResponsePtr = dynamic_cast<SimpleResponse*>(Response))
 	{
@@ -182,34 +170,44 @@ bool	WebServer::onRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead,
 	throw "Unreachable";
 }
 
-bool	WebServer::onCgiRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead, const std::string& Read)
+bool	WebServer::onCgiRead(struct CgiReadData* Arg, bool LastRead, const std::string& Read)
 {
-	WebServer* Server = Arg->first;
-	ClientSocket* Client = Arg->second;
+	Arg->Read += Read;
 
-	// if (LastRead)
-	// {
-	// 	int status;
-	// 	if (waitpid(static_cast<CGIResponse*>(Client->get_http_response())->get_cgi_runner()->CGIPid, &status, WNOHANG) == -1)
-	// 		;//500 Internal Server Errr
-	// }
-	//std::cout << "Read from CGI: " << Read << std::endl;
-	//if (LastRead)
-	//	std::cout << "Last!" << std::endl;
-	(void)Read;
+	if (!LastRead)
+		return false;
+	// Okay, We have read everything the CGI program has send
+	
+	WebServer* Server = Arg->Server;
+	ClientSocket* Client = Arg->Socket;
 
+	int status_code = 200;
 
-	Server->selector.Write(Client->get_sock(), Read, Client, LastRead ? (Selector::OnWriteFunction)onWriteCloseAfterComplete : NULL);
+	// Check if it has actually exited
+	int status;
+	bool CgiHasExited = waitpid(static_cast<CGIResponse*>(Client->get_http_response())->get_cgi_runner()->CGIPid, &status, WNOHANG) != -1;
 
 	// TODO: read the "Content-Length" header if it exists, and then make sure we do not read more than that
 	// Actually, what happens if it EOF's and we have read less than the content length?
 
-	if (LastRead)
-	{
-		//std::cout << "Closing!" << std::endl;
-		close(static_cast<CGIResponse*>(Client->get_http_response())->get_cgi_runner()->OutputFD);
-		delete Arg;
+	if (CgiHasExited && Arg->Read.length() == 0 && (
+		(WIFEXITED(status) && WEXITSTATUS(status))
+		|| WIFSIGNALED(status)
+	)) {
+		status = 500;
+		std::string body = Response::make_error_page(status);
+		Arg->Read =  "Content-Type: text/html\r\n";
+		Arg->Read += "Content-Length: " + to_string(body.length()) + "\r\n\r\n";
+		Arg->Read += body;
 	}
+	
+	std::string BaseResponse = Response::create_status_line(status_code);
+	BaseResponse += Response::create_headers(Client->conf_response, Client->get_request(), status_code);
+	Server->selector.Write(Client->get_sock(), BaseResponse, NULL, NULL);
+	Server->selector.Write(Client->get_sock(), Arg->Read, Client, (Selector::OnWriteFunction)onWriteCloseAfterComplete);
+
+	close(static_cast<CGIResponse*>(Client->get_http_response())->get_cgi_runner()->OutputFD);
+	delete Arg;
 	return LastRead;
 }
 bool	WebServer::onWriteCloseAfterComplete(ClientSocket* Arg, bool LastWrite, int StartByte, int NumBytes)
