@@ -144,33 +144,22 @@ int	Response::create_method(const std::string& fullpath, const std::string& cont
 	return return_value;
 }
 
-// static std::string replace(std::string source, std::string to_replace, std::string new_value) {
-// 	size_t start_pos = 0;
-// 	while((start_pos = source.find(to_replace, start_pos)) != std::string::npos) {
-// 		source.replace(start_pos, to_replace.length(), new_value);
-// 		start_pos += new_value.length();
-// 	}
-// 	return (source);
-// }
-
-std::string	Response::create_directory_listing(const std::string& directory_path, const std::string& target, Request &request)
+std::string	Response::create_directory_listing(const std::string& directory_path, const std::string& target)
 {
-	//TODO Atm the allowed methods for requesting a directory are GET POST DELETE, is this correct? 
-	// std::string dir_listing = "<!DOCTYPE html><head><title>Listing of $1</title></head> \
-	// 							<body><h1>Listing of <span>";
-	// dir_listing += target;
-	// dir_listing +="</span></h1><ul>$2</ul></body></html>";
-	// DIR *dr;
-	// std::string link_base, listing;
-	// struct dirent *en;
-	// dr = opendir(directory_path.c_str());
-	// link_base += request.get_request_line().path;
-	// while ((en = readdir(dr)) != 0)
-	// 	listing += "<li><a href=\"" + link_base + std::string(en->d_name) +  "\">" + std::string(en->d_name) + "</a></li>";
-	// closedir(dr);
-	// dir_listing = replace(dir_listing, "$2", listing);
-	// return (dir_listing);
-	(void)directory_path, (void)target, (void)request; return("");
+	//Hier gaat nog het een en ander fout, straks even bekijken waarom
+	std::string dir_listing = "<!DOCTYPE html><head><title>Listing of " + target+"</title></head> \
+								<body><h1>Listing of <span>";
+	dir_listing += target;
+	dir_listing +="</span></h1><ul>";
+	DIR *dr;
+	std::string listing = "";
+	struct dirent *en;
+	dr = opendir(directory_path.c_str());
+	while ((en = readdir(dr)) != 0)
+		listing += "<li><a href=\"" + target + std::string(en->d_name) +  "\">" + std::string(en->d_name) + "</a></li>";
+	closedir(dr);
+	dir_listing += listing + "</ul></body></html>";
+	return (dir_listing);
 }
 
 Response	*Response::generate_response(ConfigResponse *conf_response, Request &request)
@@ -195,8 +184,9 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 		status_code = 400;
 	else if (ConfigDirectoryResponse* DirectoryResponsePtr = dynamic_cast<ConfigDirectoryResponse*>(conf_response))
 	{
+		std::cerr << "CHECKING\n";
 		status_code = 200;
-		body = create_directory_listing(DirectoryResponsePtr->GetDirectory(), request.get_request_line().path, request);
+		body = create_directory_listing(DirectoryResponsePtr->GetDirectory(), request.get_request_line().path);
 	}
 	else if (ConfigRedirectResponse* RedirectResponsePtr = dynamic_cast<ConfigRedirectResponse*>(conf_response))
 		status_code = RedirectResponsePtr->GetCode();
