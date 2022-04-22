@@ -66,7 +66,7 @@ void Response::InitStatusCodes()
 	g_response_code_to_reason_phrase[416] = "Range Not Satisfiable";  //-
 	g_response_code_to_reason_phrase[417] = "Expectation Failed";  //-
 	g_response_code_to_reason_phrase[426] = "Upgrade Required";  //-
-	g_response_code_to_reason_phrase[500] = "Internal Server Error"; // Werkt (denk ik?) --- TODO als CGI
+	g_response_code_to_reason_phrase[500] = "Internal Server Error";
 	g_response_code_to_reason_phrase[501] = "Not Implemented";  //-
 	g_response_code_to_reason_phrase[502] = "Bad Gateway";  //-
 	g_response_code_to_reason_phrase[503] = "Service Unavailable";  //-

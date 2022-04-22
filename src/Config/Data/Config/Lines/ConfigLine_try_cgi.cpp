@@ -59,10 +59,10 @@ bool ConfigLine_try_cgi::AcceptsPartialPath() const
 
 ConfigResponse* ConfigLine_try_cgi::GetResponseForFile(const ConfigRequest& Request, const std::string& FullPath,const ConfigErrorReasons &ErrorReasons) const
 {
-	// TODO: Better way to find where the path stops and where the PATH_INFO starts
+	// TODOOO: Better way to find where the path stops and where the PATH_INFO starts
 	size_t loc = FullPath.find(".cgi");
-	if (loc == std::string::npos)
-		return NULL;
+	if (loc == std::string::npos) loc = FullPath.find(".py");
+	if (loc == std::string::npos) return NULL;
 	std::string PartialPath = FullPath.substr(0, loc + 4);
 	return new ConfigCgiResponse(PartialPath, FullPath, Request.GetPath(), ErrorReasons);
 }

@@ -48,7 +48,7 @@ void ConfigCgiResponse::MakeEnvMap(std::map<std::string, std::string>& Map, cons
 	Map["SCRIPT_NAME"] = ScriptName;
 	Map["QUERY_STRING"] = QUERY_STRING;
 	//Map["REMOTE_HOST"] = ?
-	Map["REMOTE_ADDR"] = inet_ntoa(Request.get_address().sin_addr); // TODO: Get adress from ClientSocket
+	Map["REMOTE_ADDR"] = inet_ntoa(Request.get_address().sin_addr); 
 
 	const std::string& ContentType = Request.get_header_value("Content-Type");
 	if (ContentType != "")

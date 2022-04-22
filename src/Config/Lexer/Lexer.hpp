@@ -15,7 +15,7 @@ enum Token
 	EndOfFile
 };
 
-// TODO: Nice error messages using Stream.tellg();
+// TODO: Nice error messages using Stream.tellg(); zoals [filename]:line:columm
 class Lexer {
 	public:
 		Lexer(std::istream& Stream);
