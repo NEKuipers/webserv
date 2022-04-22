@@ -43,7 +43,7 @@ WebServer::~WebServer(){}
 ClientSocket*	WebServer::connectionAccepter(ServerSocket *conn_socket)
 {
 	int client;
-	struct sockaddr_in address = conn_socket->get_address();
+	struct sockaddr_in address;// = conn_socket->get_address();
 	int addrlen = sizeof(address);
 	if ((client = accept(conn_socket->get_sock(), (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
 		throw ConnectionErrorException();

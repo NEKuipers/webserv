@@ -146,7 +146,6 @@ int	Response::create_method(const std::string& fullpath, const std::string& cont
 
 std::string	Response::create_directory_listing(const std::string& directory_path, const std::string& target)
 {
-	//Hier gaat nog het een en ander fout, straks even bekijken waarom
 	std::string dir_listing = "<!DOCTYPE html><head><title>Listing of " + target+"</title></head> \
 								<body><h1>Listing of <span>";
 	dir_listing += target;
@@ -171,7 +170,7 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	std::string content_type = "text/html";
 	int status_code = 400;
 
-	std::cout << conf_response->GetErrorReasons() << std::endl;
+	// std::cout << conf_response->GetErrorReasons() << std::endl;
 	if (dynamic_cast<ConfigErrorResponse*>(conf_response))
 	{
 		status_code = 404;
@@ -184,7 +183,6 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 		status_code = 400;
 	else if (ConfigDirectoryResponse* DirectoryResponsePtr = dynamic_cast<ConfigDirectoryResponse*>(conf_response))
 	{
-		std::cerr << "CHECKING\n";
 		status_code = 200;
 		body = create_directory_listing(DirectoryResponsePtr->GetDirectory(), request.get_request_line().path);
 	}
@@ -229,8 +227,8 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	}
 	response_string += create_headers(conf_response, request, status_code);
 	response_string += "\r\n" + body;
-	std::cerr << response_string << std::endl;
-	std::cout << "Response: " << to_string(*conf_response) << std::endl;
+	// std::cerr << response_string << std::endl;
+	// std::cout << "Response: " << to_string(*conf_response) << std::endl;
 	return new SimpleResponse(response_string);
 }
 
