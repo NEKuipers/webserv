@@ -217,7 +217,7 @@ void ConfigurationState::UpdateCombinedRoot()
 	//std::cout << "CombinedRoot '" << CombinedRoot << "' = '" << Root << "' + '" << LocationRoot << "'" << std::endl;
 }
 
-ConfigurationState::PathType ConfigurationState::IsPathValid(const std::string& Path, const ConfigRequest& Request, std::string* ErrorPath) const
+ConfigurationState::PathType ConfigurationState::RawIsPathValid(const std::string& Path, const ConfigRequest& Request, std::string* ErrorPath) const
 {
 	ConfigurationState::PathType Ret = PathType_ValidFile;
 
@@ -238,6 +238,14 @@ ConfigurationState::PathType ConfigurationState::IsPathValid(const std::string& 
 	}
 
 	return Ret;
+}
+
+ConfigurationState::PathType ConfigurationState::IsPathValid(const std::string& Path, const ConfigRequest& Request, std::string* ErrorPath) const
+{
+	(void)Path;
+	(void)Request;
+	(void)ErrorPath;
+	return PathType_ValidFile;
 }
 
 static bool ReplaceAll(std::string& Str, const std::string& Find, const std::string& Replace)

@@ -61,7 +61,9 @@ class ConfigurationState {
 		std::string ErrorPath;
 		size_t MaxBodySize;
 
+		PathType RawIsPathValid(const std::string& Path, const ConfigRequest& Request, std::string* ErrorPath) const;
 		PathType IsPathValid(const std::string& Path, const ConfigRequest& Request, std::string* ErrorPath) const;
+		
 
 		std::string InterperetEnvVariable(const std::string& String) const;
 		std::string InterperetEnvVariableUserVariables(const std::string& String, const ConfigRequest& Request, bool& MustValidate) const;

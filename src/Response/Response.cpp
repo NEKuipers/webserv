@@ -170,7 +170,7 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 {
 	assert(g_response_code_to_reason_phrase.size() != 0);
 
-	std::cout << request << std::endl;
+	//std::cout << request << std::endl;
 	(void)request;
 	std::string body = "";
 	std::string content_type = "text/html";
@@ -234,7 +234,7 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	response_string += create_headers(conf_response, request, status_code);
 	response_string += "\r\n" + body;
 	//std::cerr << response_string << std::endl;
-	std::cout << "Response: " << to_string(*conf_response) << std::endl;
+	//std::cout << "Response: " << to_string(*conf_response) << std::endl;
 	return new SimpleResponse(response_string);
 }
 
