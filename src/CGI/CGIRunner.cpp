@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <iostream>
+#include "Response.hpp"
 
 #define BUFFER_SIZE 10
 
