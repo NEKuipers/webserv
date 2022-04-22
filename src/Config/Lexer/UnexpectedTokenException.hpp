@@ -9,8 +9,9 @@ struct UnexpectedTokenException : public std::exception
 {
 	Token Expected;
 	Token Actual;
-
-	UnexpectedTokenException(Token Expected, Token Actual);
+	std::string error_location;
+	UnexpectedTokenException(Token Expected, Token Actual, std::string error_location);
+	~UnexpectedTokenException() throw();
 
 	const char* what () const throw ();
 

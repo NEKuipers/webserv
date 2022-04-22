@@ -19,7 +19,6 @@ enum Token
 class Lexer {
 	public:
 		Lexer(std::istream& Stream);
-
 		~Lexer();
 
 		// Public functions

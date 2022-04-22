@@ -19,9 +19,10 @@ Token Lexer::Peek()
 
 std::string Lexer::Read(Token Expected)
 {
+	int pos = Stream.tellg();
+	std::string error_location = to_string(pos);
 	if (NextToken != Expected)
-		throw UnexpectedTokenException(Expected, NextToken);
-
+		throw UnexpectedTokenException(Expected, NextToken, error_location);
 	std::string Value = NextString;
 	Step();
 	return Value;
