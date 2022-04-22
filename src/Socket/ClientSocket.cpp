@@ -9,6 +9,7 @@
 #include <map>
 #include "ReadFromSocketException.hpp"
 #include "SendResponseException.hpp"
+#include <string>
 
 #include "CGIRunner.hpp"
 
@@ -42,6 +43,10 @@ void					ClientSocket::read(const std::string& read)
 bool					ClientSocket::check_body()
 {
 	std::string content_length = request.get_header_value("Content-Length");
+	// if (request.get_header_value("Transfer-Encoding").find("chunked") != std::string::npos)
+	// {
+	// 	request.set_request_body()
+	// }
 	if (content_length == "" || buffer.size() >= std::strtoul(content_length.c_str(), NULL, 10))	// NOTE: std::stoi() is C++11
 	{
 		request.set_request_body(buffer);
@@ -70,8 +75,8 @@ bool					ClientSocket::check_headers()
 			request.parse_requestline(line);
 		else if (request.parse_single_header_field(line))
 		{
-			request.validate_request();
 			headers_complete = true;
+			request.validate_request();
 			return true;
 		}
 	}

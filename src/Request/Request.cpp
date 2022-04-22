@@ -1,6 +1,5 @@
 #include "Request.hpp"
 #include "ParseRequestException.hpp"
-//#include <algorithm>	// linux std::find()
 
 std::vector<std::string> Request::content_to_lines(std::string req)
 {
