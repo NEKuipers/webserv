@@ -42,11 +42,27 @@ void					ClientSocket::read(const std::string& read)
 
 bool					ClientSocket::check_body()
 {
+	if (request.get_header_value("Transfer-Encoding").find("chunked") != std::string::npos)
+	{
+		while (true)
+		{
+			// Find \r\n to length
+			size_t found = buffer.find("\r\n");
+			if (found == std::string::npos) return false;
+
+			size_t size = std::strtoul(buffer.c_str(), NULL, 16);
+			if (buffer.length() < found + 2 + size + 2) return false;
+			
+			std::string Append = buffer.substr(found + 2, size);
+			buffer.erase(0, found + 2 + size + 2);
+			request.set_request_body(request.get_body() + Append);
+
+			if (size == 0)
+				return true;
+		}
+	}
+
 	std::string content_length = request.get_header_value("Content-Length");
-	// if (request.get_header_value("Transfer-Encoding").find("chunked") != std::string::npos)
-	// {
-	// 	request.set_request_body()
-	// }
 	if (content_length == "" || buffer.size() >= std::strtoul(content_length.c_str(), NULL, 10))	// NOTE: std::stoi() is C++11
 	{
 		request.set_request_body(buffer);
