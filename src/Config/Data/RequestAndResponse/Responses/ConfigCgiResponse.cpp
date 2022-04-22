@@ -32,7 +32,7 @@ bool ConfigCgiResponse::RequiresBody() const
 void ConfigCgiResponse::MakeEnvMap(std::map<std::string, std::string>& Map, const Request& Request)
 {
 	Map["SERVER_SOFTWARE"] = "webserv";
-	Map["SERVER_NAME"] = "127.0.0.1";	// TODO: This is wrong, Its the server's hostname, DNS alias, or IP address as it appears in self-referencing URLs. Make it a config option?
+	Map["SERVER_NAME"] = Request.get_header_value("Host");	
 	Map["GATEWAY_INTERFACE"] = "CGI/1.1";
 
 	Map["SERVER_PROTOCOL"] = "HTTP/1.1";
@@ -46,7 +46,7 @@ void ConfigCgiResponse::MakeEnvMap(std::map<std::string, std::string>& Map, cons
 	Map["SCRIPT_NAME"] = ScriptName;
 	Map["QUERY_STRING"] = QUERY_STRING;
 	//Map["REMOTE_HOST"] = ?
-	Map["REMOTE_ADDR"] = "127.0.0.1";	// TODO: Get adress from Request
+	Map["REMOTE_ADDR"] = "127.0.0.1"; // TODO: Get adress from ClientSocket
 
 	const std::string& ContentType = Request.get_header_value("Content-Type");
 	if (ContentType != "")
