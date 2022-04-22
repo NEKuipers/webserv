@@ -3,9 +3,9 @@
 	<p style="text-align:center;font-size:200%;"> <a href="/">Webserv</a> </p>
 
 	<p style="color:white;font-family:Verdana, Geneva, Tahoma, sans-serif;text-align:center;font-size:200%;">
-		<form action="/upload/upload">
-			<input type="file" id="File" name="filename">
-			<input type="submit">
-		</form>
+		<form enctype="multipart/form-data" method="post" action="/upload/upload">
+			<input id="fileupload" name="file" type="file" />
+			<input type="submit" value="submit" id="submit" />
+		 </form>
 	</p>
 </html>
