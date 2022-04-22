@@ -65,7 +65,7 @@ bool		WebServer::IsRequestComplete(ClientSocket *conn_socket)
 			conn_socket->conf_response = configuration->GetResponse(ConfigRequest(
 				conn_socket->get_address().sin_addr.s_addr,
 				conn_socket->get_address().sin_port,
-				"Unknown",	// TODO: Probabily in a header field
+				conn_socket->get_request().get_header_value("Host"),
 				conn_socket->get_request().get_request_line().path,
 				atoi(conn_socket->get_request().get_header_value("Content-Length").c_str()), //TODO make c++
 				conn_socket->get_request().get_request_line().method
