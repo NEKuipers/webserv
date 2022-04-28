@@ -130,6 +130,7 @@ bool ConfigLine_server::EatLine(const ConfigLine& Line)
 			{
 				char* End;
 				unsigned long PortUL = std::strtoul(&AddrStr.c_str()[split + 1], &End, 10);
+				
 				Port = (in_port_t)PortUL;
 
 				if (Port != PortUL) // Out of bounds checking
@@ -145,6 +146,11 @@ bool ConfigLine_server::EatLine(const ConfigLine& Line)
 			if (inet_aton(AddrStr.c_str(), &Addr) == 0)
 				throw ConvertException("ConfigLine", "Listen Adress", "Malformed Adress");
 
+
+			for (std::vector<std::pair<in_addr_t, in_port_t> >::const_iterator It = Listens.begin(); It != Listens.end(); It++)
+				if (Addr.s_addr == It->first && Port == It->second)
+					throw ConvertException("ConfigLine", "Listen", "Duplicate listen address & port");
+					
 			Listens.push_back(std::make_pair(Addr.s_addr, Port));
 		}
 	}

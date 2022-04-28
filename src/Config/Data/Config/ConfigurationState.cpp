@@ -160,6 +160,8 @@ ConfigResponse* ConfigurationState::Redirect(const ConfigRequest& Request, std::
 
 ConfigResponse* ConfigurationState::GetDirectoryResponse(const ConfigRequest& Request, ConfigErrorReasons& ErrorReasons) const
 {
+	if (Request.GetMethod() != "GET")
+		return NULL;
 	if (Request.GetPath().size() > 0 && Request.GetPath().at(Request.GetPath().length()-1) != '/')
 		return NULL;	// Quick return
 

@@ -103,10 +103,13 @@ std::string Response::create_headers(ConfigResponse *conf_response, Request &req
 	std::string headers_string = "";
 	headers_string += "Date: " + get_date_header() + "\r\n";
 	headers_string += "Server: webserv\r\n";
-	headers_string += "Allow:";
-	for (std::vector<std::string>::const_iterator it = conf_response->GetErrorReasons().GetAllowedMethods().begin(); it != conf_response->GetErrorReasons().GetAllowedMethods().end(); it++)
-		headers_string += " " + *it;
-	headers_string += "\r\n";
+
+	if (status_code == 405) {
+		headers_string += "Allow:";
+		for (std::vector<std::string>::const_iterator it = conf_response->GetErrorReasons().GetAllowedMethods().begin(); it != conf_response->GetErrorReasons().GetAllowedMethods().end(); it++)
+			headers_string += " " + *it;
+		headers_string += "\r\n";
+	}
 
 	if (ConfigRedirectResponse* RedirectResponsePtr = dynamic_cast<ConfigRedirectResponse*>(conf_response))
 		headers_string += "Location: " + RedirectResponsePtr->GetNewPath() + "\r\n";
@@ -176,7 +179,9 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	std::string content_type = "text/html";
 	int status_code = 400;
 
-	// std::cout << conf_response->GetErrorReasons() << std::endl;
+	std::cout << conf_response->GetErrorReasons() << std::endl;
+	conf_response->Print(std::cout);
+
 	if (dynamic_cast<ConfigErrorResponse*>(conf_response))
 	{
 		status_code = 404;
@@ -203,8 +208,12 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 		status_code = 200;
 		content_type = FileResponsePtr->GetContentType();
 		body = to_string(FileResponsePtr->GetStream().rdbuf());
+		// if allowed methods contains GET, 404, otherwise: wrong method?
+		bool HasGet = std::find(conf_response->GetErrorReasons().GetAllowedMethods().begin(), conf_response->GetErrorReasons().GetAllowedMethods().end(), "GET") != conf_response->GetErrorReasons().GetAllowedMethods().end();
+
 		if (conf_response->GetErrorReasons().GetWasErrorPage())
-			status_code = 404;
+			status_code = HasGet ? 404 : 405;
+		
 	}
 	else if (ConfigCgiResponse* CgiResponsePtr = dynamic_cast<ConfigCgiResponse*>(conf_response))
 	{
@@ -221,7 +230,7 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	}
 
 	std::string response_string = create_status_line(status_code);
-	if (status_code >= 400 && status_code < 500)
+	if (status_code >= 400 && status_code < 500 && body == "")
 	{
 		body = make_error_page(status_code);
 		content_type = "text/html";
