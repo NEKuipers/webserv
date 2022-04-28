@@ -24,6 +24,7 @@ SimpleSocket::SimpleSocket(struct sockaddr_in address, int sock) : address(addre
 
 SimpleSocket::~SimpleSocket()
 {
+	// usleep(3500);
 	close(get_sock());
 }
 

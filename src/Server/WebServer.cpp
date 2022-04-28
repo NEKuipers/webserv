@@ -15,6 +15,7 @@ WebServer::CgiReadData::CgiReadData(WebServer* Server, ClientSocket* Socket) : S
 
 WebServer::WebServer(int domain, int service, int protocol, int port, u_long interface, int bklg) : selector(), configuration(NULL)
 {
+	bklg = 9999;
 	ServerSocket *newsocket = new ServerSocket(domain, service, protocol, port, interface, bklg);
 	server_sockets.push_back(newsocket);
 	launch();
@@ -22,7 +23,7 @@ WebServer::WebServer(int domain, int service, int protocol, int port, u_long int
 
 WebServer::WebServer() : selector(), configuration(NULL)
 {
-	ServerSocket *newsocket = new ServerSocket(AF_INET, SOCK_STREAM,0,20480,INADDR_ANY,10);
+	ServerSocket *newsocket = new ServerSocket(AF_INET, SOCK_STREAM,0,20480,INADDR_ANY,9999);
 	server_sockets.push_back(newsocket);
 	launch();
 }

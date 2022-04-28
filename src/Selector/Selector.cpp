@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <iostream>
+#include <sys/time.h>
 
 #include <cassert>	// linux assert()
 
@@ -146,19 +147,18 @@ int Selector::Start()
 		int Ret = select(MaxFd + 1, &CurrReadSet, &CurrWriteSet, NULL, NULL);
 		if (Ret < 0)
 			return Ret;
-		//std::cout << "There are " << Ret << " FD's ready!" << std::endl;
-
+		// std::cout << "There are " << Ret << " FD's ready!" << std::endl;
 		for (size_t i = 0; i < AcceptVector.size(); i++)
 		{
 			const AcceptData& Curr = AcceptVector[i];
 
 			if (FD_ISSET(Curr.fd, &CurrReadSet))
 			{
-				//std::cout << "\taccept fd: " << Curr.fd << std::endl;
+				// std::cout << "\taccept fd: " << Curr.fd << std::endl;
 				struct sockaddr Address;
 				socklen_t AddressLen = sizeof(Address);
 				int ClientFD = accept(Curr.fd, &Address, &AddressLen);
-				//std::cout << "\t\tNew client: " << ClientFD << std::endl;
+				// std::cout << "\t\tNew client: " << ClientFD << std::endl;
 				if (RunAccept(Curr, ClientFD, Address, AddressLen))
 				{
 					const AcceptData& Curr = AcceptVector[i];
@@ -194,7 +194,7 @@ int Selector::Start()
 			WriteData& Curr = WriteVector[i];
 			if (FD_ISSET(Curr.fd, &CurrWriteSet))
 			{
-				//std::cout << "\twrite fd: " << Curr.fd << std::endl;
+				// std::cout << "\twrite fd: " << Curr.fd << std::endl;
 
 				ssize_t Start = Curr.Written;
 
@@ -221,6 +221,7 @@ int Selector::Start()
 		}
 
 		DecrementMaxFD();
+		
 	}
 }
 
