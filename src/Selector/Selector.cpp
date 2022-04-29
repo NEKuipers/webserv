@@ -136,7 +136,7 @@ bool Selector::RunWrite(const WriteData& WriteData, bool LastWrite, int StartByt
 	return true;
 }
 
-int Selector::Start()
+int Selector::Start(void* Arg, OnTickFunction OnTick, struct timeval *timeout)
 {
 	char Buffer[BUFFER_SIZE];
 
@@ -144,10 +144,14 @@ int Selector::Start()
 	{
 		fd_set CurrReadSet = ReadSet;
 		fd_set CurrWriteSet = WriteSet;
-		int Ret = select(MaxFd + 1, &CurrReadSet, &CurrWriteSet, NULL, NULL);
+		int Ret = select(MaxFd + 1, &CurrReadSet, &CurrWriteSet, NULL, timeout);
 		if (Ret < 0)
 			return Ret;
 		// std::cout << "There are " << Ret << " FD's ready!" << std::endl;
+		
+		if (OnTick) OnTick(Arg);
+		if (Ret == 0) continue;
+		
 		for (size_t i = 0; i < AcceptVector.size(); i++)
 		{
 			const AcceptData& Curr = AcceptVector[i];
@@ -161,6 +165,7 @@ int Selector::Start()
 				// std::cout << "\t\tNew client: " << ClientFD << std::endl;
 				if (RunAccept(Curr, ClientFD, Address, AddressLen))
 				{
+					// std::cout << "\t\tclose!" << std::endl;
 					const AcceptData& Curr = AcceptVector[i];
 
 					FD_CLR(Curr.fd, &ReadSet);
@@ -175,11 +180,12 @@ int Selector::Start()
 			const ReadData& Curr = ReadVector[i];
 			if (FD_ISSET(Curr.fd, &CurrReadSet))
 			{
-				//std::cout << "\tread fd: " << Curr.fd << std::endl;
+				// std::cout << "\tread fd: " << Curr.fd << std::endl;
 				ssize_t ReadChars = read(Curr.fd, Buffer, BUFFER_SIZE);
 				bool End = ReadChars <= 0;
 				if (RunRead(Curr, ReadChars <= 0, std::string(Buffer, End ? 0 : ReadChars)) || End)
 				{
+					// std::cout << "\t\tclose!" << End << std::endl;
 					const ReadData& Curr = ReadVector[i];
 
 					FD_CLR(Curr.fd, &ReadSet);
@@ -206,6 +212,7 @@ int Selector::Start()
 				{
 					WriteData& Curr = WriteVector[i];
 
+					// std::cout << "\t\tclose!" << End << std::endl;
 					WriteData* Next = Curr.Next;
 					if (!Next)
 					{
@@ -221,7 +228,6 @@ int Selector::Start()
 		}
 
 		DecrementMaxFD();
-		
 	}
 }
 

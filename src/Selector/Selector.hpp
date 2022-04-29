@@ -13,6 +13,7 @@ class Selector {
 		typedef bool (*OnAcceptFunction)(void* Arg, int ClientFD, const struct sockaddr& Address, socklen_t AddressLen);
 		typedef bool (*OnReadFunction)(void* Arg, bool LastRead, const std::string& Read);
 		typedef bool (*OnWriteFunction)(void* Arg, bool LastWrite, int StartByte, int NumBytes);
+		typedef void (*OnTickFunction)(void* Arg);
 
 		Selector();
 		~Selector();
@@ -24,7 +25,7 @@ class Selector {
 		// Public functions
 		friend std::ostream& operator<<(std::ostream& Stream, const Selector& Selector);
 		
-		int Start();
+		int Start(void* Arg, OnTickFunction OnTick, struct timeval *timeout);
 	private:
 
 		Selector(const Selector& From);

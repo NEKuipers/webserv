@@ -113,6 +113,8 @@ bool	WebServer::onRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead,
 	WebServer* Server = Arg->first;
 	ClientSocket* Client = Arg->second;
 
+	//std::cout << "Read: " << Read << std::endl;
+
 	Client->read(Read);
 
 	if (!Server->IsRequestComplete(Client))
@@ -164,6 +166,7 @@ bool	WebServer::onRead(std::pair<WebServer*, ClientSocket*>* Arg, bool LastRead,
 		Server->selector.Write(Client->get_sock(), Message, Client, (Selector::OnWriteFunction)onWriteCloseAfterComplete);
 
 		// Last time we read from the client
+		//std::cout << "No longer reading because response was queued" << std::endl;
 		delete Arg;
 		return true;
 	}
@@ -211,13 +214,18 @@ bool	WebServer::onCgiRead(struct CgiReadData* Arg, bool LastRead, const std::str
 	delete Arg;
 	return LastRead;
 }
+
 bool	WebServer::onWriteCloseAfterComplete(ClientSocket* Arg, bool LastWrite, int StartByte, int NumBytes)
 {
 	(void)StartByte;
 	(void)NumBytes;
 
 	if (LastWrite)
+	{
+		//usleep(5000);
+		//std::cout << "close(" << Arg->get_sock() << ");" << std::endl;
 		delete Arg;
+	}
 	return false;
 }
 
@@ -227,7 +235,7 @@ int	WebServer::launch()
 	for (std::vector<ServerSocket*>::iterator it = server_sockets.begin(); it != server_sockets.end(); it++)
 	 	selector.OnAccept((*it)->get_sock(), new std::pair<WebServer*, ServerSocket*>(this, *it), (Selector::OnAcceptFunction)onAccept);	// NOTE: These pairs are leaked when selector ends, only possible if select() returns -1
 
-	return selector.Start();
+	return selector.Start(NULL, NULL, NULL);
 }
 
 std::vector<ServerSocket *>		WebServer::get_sockets()

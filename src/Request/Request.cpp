@@ -58,8 +58,8 @@ bool   Request::parse_single_header_field(const std::string &line)
 	pos++;
 	if (line[pos] == ' ')
 		pos++;
-	std::string header_value;
-	header_value = line.substr(pos, line.find_first_of("\r\n ", pos) - pos);
+	std::string header_value = line.substr(pos, line.find_first_of("\r\n", pos) - pos);
+	//std::cout << "Setting key " << header_key << " to " << header_value << " from line: " << line << std::endl;
 	this->header_fields.insert(std::make_pair(header_key, header_value));
 	return (false);
 }

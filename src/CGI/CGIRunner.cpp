@@ -48,7 +48,11 @@ CGIRunner::CGIRunner(const std::string& PathName, const std::map<std::string, st
 		// Close every fd other than stdin/stdout/stderr
 		for (int i = 3; i < FD_SETSIZE; i++)	// NOTE: Non terrible way to do this
 			close(i);
-
+		
+		// Make sure we are executing in the right directory
+		std::string TilSlash = PathName.substr(0, PathName.rfind('/'));
+		if (chdir(TilSlash.c_str()) != 0)
+			exit(1);
 
 		const char* Args[2];
 		Args[0] = PathName.c_str();

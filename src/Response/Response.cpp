@@ -179,8 +179,8 @@ Response	*Response::generate_response(ConfigResponse *conf_response, Request &re
 	std::string content_type = "text/html";
 	int status_code = 400;
 
-	std::cout << conf_response->GetErrorReasons() << std::endl;
-	conf_response->Print(std::cout);
+	//std::cout << conf_response->GetErrorReasons() << std::endl;
+	//conf_response->Print(std::cout);
 
 	if (dynamic_cast<ConfigErrorResponse*>(conf_response))
 	{
